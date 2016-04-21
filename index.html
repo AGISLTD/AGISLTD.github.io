@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet Layers Control Example</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
+    <link rel="stylesheet" href="css/easy-button.css" />
+    <link rel="stylesheet" href="css/site.css" />
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <script src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script>
+    <script src="js/easy-button.js"></script>
+    <script src="js/custom-markers.js"></script>
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+</head>
+<body>
+    <script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '619432824875705',
+      xfbml      : true,
+      version    : 'v2.6'
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
+    <script>
+        var rootRef = new Firebase("https://scorching-fire-915.firebaseio.com/");
+        var userRef = null;
+        function addUser(){
+            var newUser = document.getElementById("NewUser").value;
+            if (newUser == "") {
+                alert("Name please!");
+            }
+            rootRef.child('users').push({name: newUser})
+            var newUser = document.getElementById("NewUser").value = "";
+        }
+        
+        rootRef.child("users").on("child_added", function(snapshot) {
+            var userList = document.getElementById("userDropdown");
+            var option = document.createElement("option");
+            var data = snapshot.val();
+            option.text = data.name;
+            option.value = snapshot.key();
+            userList.add(option);
+        });
+    </script>
+	<div id="map" style="width: 1000px; height: 700px; float: left"></div>
+    <textarea id="JSONBox" style="width: 300px; height 700px" cols="25" ></textarea>
+    <input type="text" id="NewUser" />
+    <button onclick="addUser()">Add New User</button>
+    <select id="userDropdown" onchange="userSwitch(this.value)">
+<!--
+        <option value="666">Farmer John</option>
+        <option value="420">Dave</option>
+        <option value="fit">Fit 2 Bounds</option>
+-->
+    </select>
+    
+    <input id="userEmail" type="text" />
+    <input id="userPW" type="password" />
+    <button onclick="authUser()">Login</button>
+    <script>
+    // Create a callback to handle the result of the authentication
+    function authHandler(error, authData) {
+      if (error) {
+        console.log("Login Failed!", error);
+      } else {
+        console.log("Authenticated successfully with payload:", authData);
+          userSwitch(authData.uid)
+      }
+    }
+        
+    // Login
+    function authUser(){
+        rootRef.authWithPassword({
+            email: userEmail.value,
+            password: userPW.value
+        }, authHandler);
+    }
+        
+    function userSwitch(val) {
+        userRef = new Firebase("https://scorching-fire-915.firebaseio.com/geoJsons/"+val);
+        userRef.once("value", function(data) {
+            //Refresh the drawnItems Featuregroup to clear any existing features
+            map.removeLayer(drawnItems);
+            drawnItems = new L.FeatureGroup();
+            map.addLayer(drawnItems);
+
+            // load geojson into drawnItems
+            var geojson = data.val();
+            if (undefined != geojson){
+                L.geoJson(geojson, {
+                  onEachFeature: function (feature, layer) {
+                      layer.properties = feature.properties;
+                      //layer.options = {};
+                      switch (feature.properties.type) {
+                          case "trough":
+                              layer.options.icon = troughIcon;
+                              break;
+                          case "gate":
+                              layer.options.icon = gateicon;
+                              break;
+                      }
+                    drawnItems.addLayer(layer);
+                  }
+                });
+            } else {
+                alert("No map saved for you yet");
+            }
+        });
+        if (val === "420"){
+            map.setView([-36.8485, 174.7633], 15, {animate: true});
+            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token= pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw', {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                maxZoom: 18,
+                id: 'reubencm.028vblnt',
+                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'
+            }).addTo(map);
+        } else if (val === "666") {
+            map.setView([-36.8485, 174.7533], 18, {animate: true});
+        } else if (val === "fit") {
+            map.setMaxBounds([
+                [40.712, -74.227],
+                [40.774, -74.125]
+            ]);
+            map.options.maxZoom = 19;
+            map.options.minZoom = 10;
+        }
+    }
+    
+    </script>
+
+	<script>
+//		var cities = new L.LayerGroup();
+//
+//		L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.').addTo(cities),
+//		L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.').addTo(cities),
+//		L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.').addTo(cities),
+//		L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.').addTo(cities);
+//
+//        
+
+	    var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw',
+            linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/layer=1872/EPSG:3857/{z}/{x}/{y}.png';
+
+	    var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
+		    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr}),
+            linz = L.tileLayer(linzUrl, {attribution: "LINZ Mapz"});
+
+		var map = L.map('map', {
+			center: [-36.8485, 174.7633],
+			zoom: 10,
+            drawcontrol: true,
+			layers: [grayscale, linz]
+		});
+
+		var baseLayers = {
+			"Grayscale": grayscale,
+			"Streets": streets
+		};
+
+		var overlays = {
+            "LINZ": linz
+		};
+        
+        var GeoJSONControl = L.control();
+        GeoJSONControl.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'customC'); // Creates our div with class "customC"
+            this._div.innerHTML = '<button onclick="saveGeoJson()">Save GeoJSON</button>';
+            return this._div;
+        };
+        GeoJSONControl.addTo(map);
+        
+        // http://bl.ocks.org/d3noob/7730264
+        var drawnItems = new L.FeatureGroup();
+		map.addLayer(drawnItems);
+		var drawControl = new L.Control.Draw({
+			position: 'topright',
+			draw: {
+				polygon: {
+					shapeOptions: {
+						color: 'purple'
+					},
+					allowIntersection: false,
+					drawError: {
+						color: 'orange',
+                        message: 'You can\'t draw that!',
+						timeout: 1000
+					},
+					showArea: true,
+					metric: false,
+					repeatMode: true
+				},
+				polyline: {
+					shapeOptions: {
+						color: 'red'
+					},
+				},
+				rect: {
+					shapeOptions: {
+						color: 'green'
+					},
+				},
+				circle: {
+					shapeOptions: {
+						color: 'steelblue'
+					},
+				},
+			},
+			edit: {
+				featureGroup: drawnItems
+			}
+		});
+		map.addControl(drawControl);
+        
+        L.easyButton("<div class='big-button trough' />",function(btn, map){
+            trough();
+        }).addTo(map);
+        
+        L.easyButton("<div class='big-button gate' />",function(btn, map){
+            gate();
+        }).addTo(map);
+
+        L.easyButton("<div class='big-button field'>FIELD</div>",function(btn, map){
+            field();
+        }).addTo(map);
+
+		map.on('draw:created', function (e) {
+			var type = e.layerType,
+				layer = e.layer;
+            
+            e.layer.properties = {};
+            
+			if (type === 'marker') {
+                e.layer.properties.type = layer.options.icon.options.type; // all polygons are fields
+			}
+
+			if (type === 'polygon') {
+                e.layer.properties.type = "field"; // all polygons are fields
+                var idIW = L.popup();
+                var content = '<span><b>Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Field Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+                 idIW.setContent(content);
+                 idIW.setLatLng(e.layer._latlngs[0]); //calculated based on the e.layertype
+                 idIW.openOn(map);
+			}
+            
+            if (e.layer.options.test) {
+                alert('test suceesss');
+            }
+
+			drawnItems.addLayer(layer);
+		});
+        // End http://bl.ocks.org/d3noob/7730264var idIW = L.popup();
+
+    function saveIdIW() {
+         var sName = document.getElementById("shapeName").value;
+         var sDetails = document.getElementById("shapeDesc").value;
+
+         var drawings = drawnItems.getLayers();  //drawnItems is a container for the drawn objects
+         drawings[drawings.length - 1].properties.name = sName;
+         drawings[drawings.length - 1].properties.details = sDetails;
+            map.closePopup();
+    }
+        
+
+		L.control.layers(baseLayers, overlays).addTo(map);
+	</script>
+</body>
+</html>
