@@ -15,6 +15,7 @@
     <script src="js/easy-button.js"></script>
     <script src="js/custom-markers.js"></script>
     <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
 </head>
 <body>
     <script>
@@ -36,66 +37,74 @@
 </script>
     <script>
         var rootRef = new Firebase("https://scorching-fire-915.firebaseio.com/");
-        var userRef = null;
-        function addUser(){
-            var newUser = document.getElementById("NewUser").value;
-            if (newUser == "") {
-                alert("Name please!");
-            }
-            rootRef.child('users').push({name: newUser})
-            var newUser = document.getElementById("NewUser").value = "";
-        }
-        
-        rootRef.child("users").on("child_added", function(snapshot) {
-            var userList = document.getElementById("userDropdown");
-            var option = document.createElement("option");
-            var data = snapshot.val();
-            option.text = data.name;
-            option.value = snapshot.key();
-            userList.add(option);
-        });
     </script>
-	<div id="map" style="width: 1000px; height: 700px; float: left"></div>
-    <textarea id="JSONBox" style="width: 300px; height 700px" cols="25" ></textarea>
-    <input type="text" id="NewUser" />
-    <button onclick="addUser()">Add New User</button>
-    <select id="userDropdown" onchange="userSwitch(this.value)">
-<!--
-        <option value="666">Farmer John</option>
-        <option value="420">Dave</option>
-        <option value="fit">Fit 2 Bounds</option>
--->
-    </select>
-    
-    <input id="userEmail" type="text" />
-    <input id="userPW" type="password" />
-    <button onclick="authUser()">Login</button>
+	<div id="map" style="width: 70%; height: 700px; float: left"></div>
+    <div style="padding: 1em;float: right;width: 25%;">
+        <div>
+            <button id="fbloginbtn" onclick="facebookAuth()">Login with Facebook</button>
+            <div id="logindeetz" style="display: none;">
+                <h2>You are logged in as <b><span id="fbName"></span></b></h2>
+                <button id="logoutButton" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <br />
+        <h4>GeoJSON:</h4>
+        <textarea id="JSONBox" style="width: 300px; height 700px" rows="30" cols="30" ></textarea>
+    </div>
     <script>
-    // Create a callback to handle the result of the authentication
-    function authHandler(error, authData) {
-      if (error) {
-        console.log("Login Failed!", error);
-      } else {
-        console.log("Authenticated successfully with payload:", authData);
-          userSwitch(authData.uid)
-      }
+        
+    function loadMapboxTiles(){
+            var tileLayer = L.tileLayer('https://{s}.tiles.mapbox.com/v4/{mapId}/{z}/{x}/{y}.png?access_token={token}', {
+        attribution: 'AGIS',
+        zIndex: 150,
+        subdomains: ['a','b','c','d'],
+        mapId: "reubencm.028vblnt",
+        token: "pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q"
+    });
+        tileLayer.addTo(map);
     }
         
-    // Login
-    function authUser(){
-        rootRef.authWithPassword({
-            email: userEmail.value,
-            password: userPW.value
-        }, authHandler);
+    //FB login
+    function facebookAuth(){
+        rootRef.authWithOAuthPopup("facebook", function(error, authData) {
+          if (error) {
+            console.log("Login Failed!", error);
+          } else {
+            console.log("Authenticated successfully with payload:", authData);
+              userSwitch(authData.uid);
+              $('#logindeetz').show();
+              $('#fbName').text(authData.facebook.displayName);
+              $('#fbloginbtn').hide();
+          }
+        });
+    }
+        
+    function logout(){
+        rootRef.unauth();
+        $('#logindeetz').hide();
+      $('#fbName').text("");
+      $('#fbloginbtn').show();
+        userSwitch(-1);
     }
         
     function userSwitch(val) {
+        map.removeLayer(drawnItems); // Always remove geojson straight away
+        //Refresh the drawnItems Featuregroup to clear any existing features
+        drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+        
+        // switch user
         userRef = new Firebase("https://scorching-fire-915.firebaseio.com/geoJsons/"+val);
         userRef.once("value", function(data) {
-            //Refresh the drawnItems Featuregroup to clear any existing features
-            map.removeLayer(drawnItems);
-            drawnItems = new L.FeatureGroup();
-            map.addLayer(drawnItems);
+            loadMapboxTiles();
+            var latlongBounds = [
+                [-36.94893148458695, 175.12945175170898],
+                [-36.92577767819879, 175.15494346618652]
+            ];
+            //map.options.maxZoom = 19;
+            map.options.minZoom = 15;
+            map.setMaxBounds(latlongBounds);
+            map.panTo(latlongBounds[0], {aniamte: true});
 
             // load geojson into drawnItems
             var geojson = data.val();
@@ -155,7 +164,7 @@
 				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 			mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw',
-            linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/layer=1872/EPSG:3857/{z}/{x}/{y}.png';
+            linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
 
 	    var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
 		    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr}),
