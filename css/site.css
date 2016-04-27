@@ -1,3 +1,7 @@
+body {
+    background-color:beige;
+}
+
 .leaflet-bar .big-button {
     background-repeat: no-repeat;
     background-position: center; 
@@ -5,12 +9,16 @@
     height: 100%;
 }
 
+.easy-button-button {
+    padding: 0px;
+}
+
 .leaflet-bar .trough {
-    background-image: url('/images/trough-icon.png');
+    background-image: url('/images/trough-icon-50.png');
 }
 
 .leaflet-bar .gate {
-    background-image: url('/images/gate-icon.png');
+    background-image: url('/images/gate-icon-50.png');
 }
 
 .leaflet-bar button,

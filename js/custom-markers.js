@@ -1,8 +1,8 @@
 var gateicon = L.icon({
     type: 'gate',
     iconUrl: './images/gate-icon.png',
-    iconSize:     [30, 30], // size of the icon
-    iconAnchor:   [15, 15], // point of the icon which will correspond to marker's location
+    iconSize:     [32, 18], // size of the icon
+    iconAnchor:   [16, 9], // point of the icon which will correspond to marker's location
     popupAnchor:  [-3, -76], // point from which the popup should open relative to the iconAnchor
 });
 
@@ -22,16 +22,15 @@ function gate() {
 var troughIcon = L.icon({
     type: 'trough',
     iconUrl: './images/trough-icon.png',
-    iconSize:     [30, 30], // size of the icon
-    iconAnchor:   [15, 15], // point of the icon which will correspond to marker's location
+    iconSize:     [32, 15], // size of the icon
+    iconAnchor:   [16, 7], // point of the icon which will correspond to marker's location
     popupAnchor:  [-3, -76], // point from which the popup should open relative to the iconAnchor
 });
 
 
 TroughMarker = L.Draw.Marker.extend({
     options: {
-        icon: troughIcon,
-        test: true
+        icon: troughIcon
     }
 });
 function trough() {
@@ -41,11 +40,15 @@ function trough() {
 
 PaddockPoly = L.Draw.Polygon.extend({
     options: {
-        allowIntersections: false
+        allowIntersection: false,
+        showArea: true,
+        stroke: false,
+        fillColor: 'green'
     }
 });
+
 function field() {
-    var fieldPolygon = new PaddockPoly(map);
+    var fieldPolygon = new PaddockPoly(map, { shapeOptions:{color:'brown',fillColor:'green'}});
     fieldPolygon.enable();
 }
 

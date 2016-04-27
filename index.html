@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Leaflet Layers Control Example</title>
+	<title>AGIS Map Editor</title>
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
     <link rel="stylesheet" href="css/easy-button.css" />
     <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="css/w3.css" />
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <script src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script>
     <script src="js/easy-button.js"></script>
@@ -18,6 +19,23 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
 </head>
 <body>
+    
+    <div class="w3-container">
+    <h1>AGIS Map Editor Preview</h1>
+	<div id="map" style="width: 70%; height: 700px; float: left"></div>
+    <div style="padding: 1em;float: right;width: 25%;">
+        <div>
+            <button id="fbloginbtn" onclick="facebookAuth()">Login with Facebook</button>
+            <div id="logindeetz" style="display: none;">
+                <h2>You are logged in as <b><span id="fbName"></span></b></h2>
+                <button id="logoutButton" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <br />
+        <h4>GeoJSON:</h4>
+        <textarea id="JSONBox" style="width: 300px; height 700px" rows="30" cols="30" ></textarea>
+    </div>
+    </div>
     <script>
   window.fbAsyncInit = function() {
     FB.init({
@@ -38,19 +56,6 @@
     <script>
         var rootRef = new Firebase("https://scorching-fire-915.firebaseio.com/");
     </script>
-	<div id="map" style="width: 70%; height: 700px; float: left"></div>
-    <div style="padding: 1em;float: right;width: 25%;">
-        <div>
-            <button id="fbloginbtn" onclick="facebookAuth()">Login with Facebook</button>
-            <div id="logindeetz" style="display: none;">
-                <h2>You are logged in as <b><span id="fbName"></span></b></h2>
-                <button id="logoutButton" onclick="logout()">Logout</button>
-            </div>
-        </div>
-        <br />
-        <h4>GeoJSON:</h4>
-        <textarea id="JSONBox" style="width: 300px; height 700px" rows="30" cols="30" ></textarea>
-    </div>
     <script>
         
     function loadMapboxTiles(){
@@ -118,7 +123,7 @@
                               layer.options.icon = troughIcon;
                               break;
                           case "gate":
-                              layer.options.icon = gateicon;
+                              layer.options.b = gateicon;
                               break;
                       }
                     drawnItems.addLayer(layer);
@@ -197,44 +202,44 @@
         // http://bl.ocks.org/d3noob/7730264
         var drawnItems = new L.FeatureGroup();
 		map.addLayer(drawnItems);
-		var drawControl = new L.Control.Draw({
-			position: 'topright',
-			draw: {
-				polygon: {
-					shapeOptions: {
-						color: 'purple'
-					},
-					allowIntersection: false,
-					drawError: {
-						color: 'orange',
-                        message: 'You can\'t draw that!',
-						timeout: 1000
-					},
-					showArea: true,
-					metric: false,
-					repeatMode: true
-				},
-				polyline: {
-					shapeOptions: {
-						color: 'red'
-					},
-				},
-				rect: {
-					shapeOptions: {
-						color: 'green'
-					},
-				},
-				circle: {
-					shapeOptions: {
-						color: 'steelblue'
-					},
-				},
-			},
-			edit: {
-				featureGroup: drawnItems
-			}
-		});
-		map.addControl(drawControl);
+//		var drawControl = new L.Control.Draw({
+//			position: 'topright',
+////			draw: {
+////				polygon: {
+////					shapeOptions: {
+////						color: 'green'
+////					},
+////					allowIntersection: false,
+////					drawError: {
+////						color: 'orange',
+////                        message: 'You can\'t draw that!',
+////						timeout: 1000
+////					},
+////					showArea: true,
+////					metric: false,
+////					repeatMode: true
+////				},
+////				polyline: {
+////					shapeOptions: {
+////						color: 'red'
+////					},
+////				},
+////				rect: {
+////					shapeOptions: {
+////						color: 'green'
+////					},
+////				},
+////				circle: {
+////					shapeOptions: {
+////						color: 'steelblue'
+////					},
+////				},
+////			},
+//			edit: {
+//				featureGroup: drawnItems
+//			}
+//		});
+//		map.addControl(drawControl);
         
         L.easyButton("<div class='big-button trough' />",function(btn, map){
             trough();
@@ -244,7 +249,7 @@
             gate();
         }).addTo(map);
 
-        L.easyButton("<div class='big-button field'>FIELD</div>",function(btn, map){
+        L.easyButton("<div class='big-button field'>Field</div>",function(btn, map){
             field();
         }).addTo(map);
 
@@ -255,7 +260,7 @@
             e.layer.properties = {};
             
 			if (type === 'marker') {
-                e.layer.properties.type = layer.options.icon.options.type; // all polygons are fields
+                e.layer.properties.type = layer.options.icon.options.type;
 			}
 
 			if (type === 'polygon') {
