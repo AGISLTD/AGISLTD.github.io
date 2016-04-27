@@ -123,7 +123,11 @@
                               layer.options.icon = troughIcon;
                               break;
                           case "gate":
-                              layer.options.b = gateicon;
+                              layer.options.icon = gateicon;
+                              break;
+                          case "field":
+                              layer.options.color = 'brown';
+                              layer.options.fillColor = 'green';
                               break;
                       }
                     drawnItems.addLayer(layer);
