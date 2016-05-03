@@ -9,8 +9,74 @@ body {
     height: 100%;
 }
 
+
 .easy-button-button {
     padding: 0px;
+}
+
+.controlbuttons td {
+    padding: 5px;
+}
+
+.controlbuttons button {
+    font-variant: small-caps;
+}
+
+.buttontable div {
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+    cursor: pointer;
+}
+.buttontable div:hover {
+    border: 2px solid black;
+}
+
+.buttontable .trough {
+    background-image: url('/images/trough-icon-50.png');
+    width: 50px;
+    height: 50px;
+    
+}
+.buttontable .gate {
+    background-image: url('/images/gate-icon-50.png');
+    width: 50px;
+    height: 50px;
+}
+.buttontable .fire {
+    background-image: url('/images/fire-icon.svg');
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+}
+.buttontable .fuel {
+    background-image: url('/images/fuel-icon.svg');
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+}
+.buttontable .health {
+    background-image: url('/images/health-icon.svg');
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+}
+.buttontable .info {
+    background-image: url('/images/info-icon.svg');
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+}
+.buttontable .safety {
+    background-image: url('/images/safety-icon.svg');
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+}
+.buttontable .spill {
+    background-image: url('/images/spill-icon.svg');
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
 }
 
 .leaflet-bar .trough {
@@ -19,6 +85,36 @@ body {
 
 .leaflet-bar .gate {
     background-image: url('/images/gate-icon-50.png');
+}
+
+.leaflet-bar .fire {
+    background-image: url('/images/fire-icon.svg');
+    background-size: 50px 50px;
+}
+
+.leaflet-bar .fuel {
+    background-image: url('/images/fuel-icon.svg');
+    background-size: 50px 50px;
+}
+
+.leaflet-bar .health {
+    background-image: url('/images/health-icon.svg');
+    background-size: 50px 50px;
+}
+
+.leaflet-bar .info {
+    background-image: url('/images/info-icon.svg');
+    background-size: 50px 50px;
+}
+
+.leaflet-bar .safety {
+    background-image: url('/images/safety-icon.svg');
+    background-size: 50px 50px;
+}
+
+.leaflet-bar .spill {
+    background-image: url('/images/spill-icon.svg');
+    background-size: 50px 50px;
 }
 
 .leaflet-bar button,

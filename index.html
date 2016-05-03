@@ -32,8 +32,70 @@
             </div>
         </div>
         <br />
-        <h4>GeoJSON:</h4>
-        <textarea id="JSONBox" style="width: 300px; height 700px" rows="30" cols="30" ></textarea>
+        <br />
+        <h4>Click buttons below to add features to the map</h4>
+        <div class="controlbuttons">
+        <table class="buttontable" style="width:100px">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="trough" onclick="trough()"></div>
+                    </td>
+                    <td>
+                        <div class="gate" onclick="gate()"></div>
+                    </td>
+                    <td>
+                        <div class="fire" onclick="fire()"></div>
+                    </td>
+                    <td>
+                        <div class="fuel" onclick="fuel()"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="spill" onclick="spill()"></div>
+                    </td>
+                    <td>
+                        <div class="health" onclick="health()"></div>
+                    </td>
+                    <td>
+                        <div class="info" onclick="info()"></div>
+                    </td>
+                    <td>
+                        <div class="safety" onclick="safety()"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+        <tbody>
+                <tr>
+                    <td>
+                    <button onclick="field()">Paddock</button>
+                    </td>
+                    <td>
+                    <button onclick="nogozone()">No-Go Zone</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+            <tr>
+                <td>
+                <button onclick="water()">Water Line</button>
+                </td>
+                <td>
+                <button onclick="quad()">Quad Track</button>
+                </td>
+                <td>
+                <button onclick="power()">Power Line</button>
+                </td>
+            </tr>
+        </table>
+            </div>
+        <br>
+        <br>
+        <textarea id="JSONBox" style="width: 5px; height 5px" rows="1" cols="1" ></textarea>
     </div>
     </div>
     <script>
@@ -97,6 +159,7 @@
         //Refresh the drawnItems Featuregroup to clear any existing features
         drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
+        registerDrawControl(drawnItems);
         
         // switch user
         userRef = new Firebase("https://scorching-fire-915.firebaseio.com/geoJsons/"+val);
@@ -109,7 +172,7 @@
             //map.options.maxZoom = 19;
             map.options.minZoom = 15;
             map.setMaxBounds(latlongBounds);
-            map.panTo(latlongBounds[0], {aniamte: true});
+            map.panTo(latlongBounds[0], {animate: true});
 
             // load geojson into drawnItems
             var geojson = data.val();
@@ -125,9 +188,47 @@
                           case "gate":
                               layer.options.icon = gateicon;
                               break;
+                          case "spill":
+                              layer.options.icon = spillIcon;
+                              break;
+                          case "fire":
+                              layer.options.icon = fireIcon;
+                              break;
+                          case "fuel":
+                              layer.options.icon = fuelIcon;
+                              break;
+                          case "health":
+                              layer.options.icon = healthIcon;
+                              break;
+                          case "safety":
+                              layer.options.icon = safetyIcon;
+                              break;
+                          case "info":
+                              layer.options.icon = infoIcon;
+                              break;
+                              
                           case "field":
                               layer.options.color = 'brown';
                               layer.options.fillColor = 'green';
+                              layer.options.opacity = 0.2;
+                              break;
+                          case "nogozone":
+                              layer.options.color = 'red';
+                              layer.options.fillColor = 'red';
+                              layer.options.opacity = 0.2;
+                              break;
+                              
+                          case "water":
+                              layer.options.color = 'lightblue';
+                              layer.options.weight = 7;
+                              break;
+                          case "quad":
+                              layer.options.color = 'green';
+                              layer.options.weight = 3;
+                              break;
+                          case "power":
+                              layer.options.color = 'red';
+                              layer.options.weight = 4;
                               break;
                       }
                     drawnItems.addLayer(layer);
@@ -198,64 +299,10 @@
         var GeoJSONControl = L.control();
         GeoJSONControl.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'customC'); // Creates our div with class "customC"
-            this._div.innerHTML = '<button onclick="saveGeoJson()">Save GeoJSON</button>';
+            this._div.innerHTML = '<button onclick="saveGeoJson()">Save</button>';
             return this._div;
         };
         GeoJSONControl.addTo(map);
-        
-        // http://bl.ocks.org/d3noob/7730264
-        var drawnItems = new L.FeatureGroup();
-		map.addLayer(drawnItems);
-//		var drawControl = new L.Control.Draw({
-//			position: 'topright',
-////			draw: {
-////				polygon: {
-////					shapeOptions: {
-////						color: 'green'
-////					},
-////					allowIntersection: false,
-////					drawError: {
-////						color: 'orange',
-////                        message: 'You can\'t draw that!',
-////						timeout: 1000
-////					},
-////					showArea: true,
-////					metric: false,
-////					repeatMode: true
-////				},
-////				polyline: {
-////					shapeOptions: {
-////						color: 'red'
-////					},
-////				},
-////				rect: {
-////					shapeOptions: {
-////						color: 'green'
-////					},
-////				},
-////				circle: {
-////					shapeOptions: {
-////						color: 'steelblue'
-////					},
-////				},
-////			},
-//			edit: {
-//				featureGroup: drawnItems
-//			}
-//		});
-//		map.addControl(drawControl);
-        
-        L.easyButton("<div class='big-button trough' />",function(btn, map){
-            trough();
-        }).addTo(map);
-        
-        L.easyButton("<div class='big-button gate' />",function(btn, map){
-            gate();
-        }).addTo(map);
-
-        L.easyButton("<div class='big-button field'>Field</div>",function(btn, map){
-            field();
-        }).addTo(map);
 
 		map.on('draw:created', function (e) {
 			var type = e.layerType,
@@ -268,13 +315,17 @@
 			}
 
 			if (type === 'polygon') {
-                e.layer.properties.type = "field"; // all polygons are fields
+                e.layer.properties.type = layer.options.polyType; // all polygons are fields
                 var idIW = L.popup();
-                var content = '<span><b>Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Field Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+                var content = '<span><b>Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
                  idIW.setContent(content);
                  idIW.setLatLng(e.layer._latlngs[0]); //calculated based on the e.layertype
                  idIW.openOn(map);
 			}
+            
+            if (type === 'polyline') {
+                e.layer.properties.type = layer.options.lineType; // !!!!
+            }
             
             if (e.layer.options.test) {
                 alert('test suceesss');
@@ -294,8 +345,29 @@
             map.closePopup();
     }
         
+        function registerDrawControl(fGroup){
+            var drawControl = new L.Control.Draw({
+                position: 'topright',
+                draw: {
+                    polygon: false,
+                    polyline: false,
+                    rectangle: false,
+                    circle: false,
+                    marker: false,
+                    square: false
+                },
+                edit: {
+                    featureGroup: fGroup
+                }
+            });
+            map.addControl(drawControl);
+        }
+        
+        var drawnItems = new L.FeatureGroup();
+        
 
 		L.control.layers(baseLayers, overlays).addTo(map);
 	</script>
+
 </body>
 </html>
