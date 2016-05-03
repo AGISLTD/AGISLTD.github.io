@@ -120,35 +120,30 @@
     </script>
     <script>
         
+        var drawControl; // Edit/Delete controls
+        
     function loadMapboxTiles(){
-            var tileLayer = L.tileLayer('https://{s}.tiles.mapbox.com/v4/{mapId}/{z}/{x}/{y}.png?access_token={token}', {
-        attribution: 'AGIS',
-        zIndex: 150,
-        subdomains: ['a','b','c','d'],
-        mapId: "reubencm.028vblnt",
-        token: "pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q"
-    });
         //tileLayer.addTo(map);
-        LayersControl.addOverlay(tileLayer, "Waitawa Regional Park");
-        LayersControl.addOverlay(newLayer, "Hungry Creek");
+        LayersControl.addOverlay(waitawaTiles, "Waitawa Regional Park");
+        LayersControl.addOverlay(hungryCreekTiles, "Hungry Creek");
         LayersControl.addOverlay(quadDangerLayer, "Quad No-Go Zone");
         
-        map.on("overlayadd", function(e) {
-            if (e.layer == tileLayer) {
-                var latlongBounds = [
-                    [-36.94893148458695, 175.12945175170898],
-                    [-36.92577767819879, 175.15494346618652]
-                ];
-                map.setMaxBounds(latlongBounds);
-            } else if (e.layer == newLayer) {
-                var latlongBounds = [
-                    [-36.531915750839985, 174.6809434890747],
-                    [-36.50704910158377, 174.72617626190186]
-                ];
-                map.setMaxBounds(latlongBounds);
-            }
-            map.options.minZoom = 14;
-            map.panTo(latlongBounds[0], {animate: true});
+        map.on("overlayadd", function(e) { // Remove this functionality - unnecessary for now
+//            if (e.layer == waitawaTiles) {
+//                var latlongBounds = [
+//                    [-36.94893148458695, 175.12945175170898],
+//                    [-36.92577767819879, 175.15494346618652]
+//                ];
+//                map.setMaxBounds(latlongBounds);
+//            } else if (e.layer == hungryCreekTiles) {
+//                var latlongBounds = [
+//                    [-36.531915750839985, 174.6809434890747],
+//                    [-36.50704910158377, 174.72617626190186]
+//                ];
+//                map.setMaxBounds(latlongBounds);
+//            }
+//            map.options.minZoom = 14;
+//            map.panTo(latlongBounds[0], {animate: true});
         });
         
     }
@@ -169,6 +164,7 @@
     }
         
     function logout(){
+        map.removeControl(drawControl);
         rootRef.unauth();
         $('#logindeetz').hide();
       $('#fbName').text("");
@@ -181,12 +177,12 @@
         //Refresh the drawnItems Featuregroup to clear any existing features
         drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
-        registerDrawControl(drawnItems);
         
         // switch user
         userRef = new Firebase("https://scorching-fire-915.firebaseio.com/geoJsons/"+val);
         userRef.once("value", function(data) {
             loadMapboxTiles();
+            registerDrawControl(drawnItems);
 
             // load geojson into drawnItems
             var geojson = data.val();
@@ -249,27 +245,9 @@
                   }
                 });
             } else {
-                alert("No map saved for you yet");
+                //alert("No map saved for you yet");
             }
         });
-        if (val === "420"){
-            map.setView([-36.8485, 174.7633], 15, {animate: true});
-            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token= pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw', {
-                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-                maxZoom: 18,
-                id: 'reubencm.028vblnt',
-                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'
-            }).addTo(map);
-        } else if (val === "666") {
-            map.setView([-36.8485, 174.7533], 18, {animate: true});
-        } else if (val === "fit") {
-            map.setMaxBounds([
-                [40.712, -74.227],
-                [40.774, -74.125]
-            ]);
-            map.options.maxZoom = 19;
-            map.options.minZoom = 10;
-        }
     }
     
     </script>
@@ -290,22 +268,30 @@
 			mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw',
             linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
             quadsUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw';
+        
 
 
 
 	    var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
 		    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr}),
-            linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography"});
-            newLayer = L.tileLayer(quadsUrl, {id: 'reubencm.a8s085tw', attribution: "AGIS", 
-                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'});
+            linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography"}),
+            hungryCreekTiles = L.tileLayer(quadsUrl, {id: 'reubencm.a8s085tw', attribution: "AGIS", 
+                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'}),
             quadDangerLayer = L.tileLayer(quadsUrl, {id: 'reubencm.4654v47r', attribution: "AGIS", 
-                opacity: 0.3,
-                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'});
+                opacity: 0.7,
+                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'}),
+            waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/{mapId}/{z}/{x}/{y}.png?access_token={token}', {
+                attribution: 'AGIS',
+                zIndex: 150,
+                subdomains: ['a','b','c','d'],
+                mapId: "reubencm.028vblnt",
+                token: "pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q"
+            });
 
 		var map = L.map('map', {
 			center: [-36.8485, 174.7633],
 			zoom: 10,
-            drawcontrol: true,
+            //drawcontrol: true,
 			layers: [grayscale, linz]
 		});
 
@@ -368,7 +354,7 @@
     }
         
         function registerDrawControl(fGroup){
-            var drawControl = new L.Control.Draw({
+            drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
                     polygon: false,
