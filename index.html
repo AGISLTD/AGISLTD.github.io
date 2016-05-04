@@ -198,8 +198,12 @@
         drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
         
-        // switch user
-        if (val == -1) return;
+        if (val == -1) {//logout
+            userRef = null;
+            return;
+        }
+        
+        // set ref to geojson
         userRef = new Firebase("https://scorching-fire-915.firebaseio.com/geoJsons/"+val);
         userRef.once("value", function(data) {
             loadMapboxTiles();
@@ -328,7 +332,7 @@
         var GeoJSONControl = L.control();
         GeoJSONControl.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'customC'); // Creates our div with class "customC"
-            this._div.innerHTML = '<button onclick="saveGeoJson()">Save</button>';
+            this._div.innerHTML = '<button id="savebutton" onclick="saveGeoJson()">Save</button>';
             return this._div;
         };
         GeoJSONControl.addTo(map);
