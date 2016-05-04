@@ -25,9 +25,13 @@
 	<div id="map" style="width: 70%; height: 700px; float: left"></div>
     <div style="padding: 1em;float: right;width: 25%;">
         <div>
-            <button id="fbloginbtn" onclick="facebookAuth()">Login with Facebook</button>
+            <div id="userLoginContainer">
+                <input type='text' id="Username">
+                <button id="userLogin" onclick="userLogin()">Log in</button>
+                <label style="cursor:pointer;" onclick="facebookAuth()"><a target="_blank">Or login with Facebook</a></label>
+            </div>
             <div id="logindeetz" style="display: none;">
-                <h2>You are logged in as <b><span id="fbName"></span></b></h2>
+                <h4>You are logged in as <b><span id="fbName"></span></b></h4>
                 <button id="logoutButton" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -38,11 +42,16 @@
         <table class="buttontable" style="width:100px">
             <tbody>
                 <tr>
+<!--
                     <td>
                         <div class="trough" onclick="trough()"></div>
                     </td>
                     <td>
                         <div class="gate" onclick="gate()"></div>
+                    </td>
+-->
+                    <td>
+                        <div class="info" onclick="info()"></div>
                     </td>
                     <td>
                         <div class="fire" onclick="fire()"></div>
@@ -59,36 +68,33 @@
                         <div class="health" onclick="health()"></div>
                     </td>
                     <td>
-                        <div class="info" onclick="info()"></div>
-                    </td>
-                    <td>
                         <div class="safety" onclick="safety()"></div>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <table>
+        <table style="width:200px;">
         <tbody>
                 <tr>
                     <td>
-                    <button onclick="field()">Paddock</button>
+                    <button onclick="field()" style="background:green;color:white;height:40px;">Paddock</button>
                     </td>
                     <td>
-                    <button onclick="nogozone()">No-Go Zone</button>
+                    <button onclick="nogozone()" style="background:red;color:white;height:40px;">No-Go Zone</button>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <table>
+        <table style="width:160px">
             <tr>
                 <td>
-                <button onclick="water()">Water Line</button>
+                <button onclick="water()" style="background:lightblue;height:40px;">Water Line</button>
                 </td>
                 <td>
-                <button onclick="quad()">Quad Track</button>
+                <button onclick="quad()" style="background:green;color:white;height:40px;">Quad Track</button>
                 </td>
                 <td>
-                <button onclick="power()">Power Line</button>
+                <button onclick="power()" style="background:red;color:white;height:40px;">Power Line</button>
                 </td>
             </tr>
         </table>
@@ -119,6 +125,12 @@
         var rootRef = new Firebase("https://scorching-fire-915.firebaseio.com/");
     </script>
     <script>
+        $(document).ready(function(){
+            $('#Username').keypress(function(e){
+              if(e.keyCode==13)
+              $('#userLogin').click();
+            });
+        });
         
         var drawControl; // Edit/Delete controls
         
@@ -158,18 +170,26 @@
               userSwitch(authData.uid);
               $('#logindeetz').show();
               $('#fbName').text(authData.facebook.displayName);
-              $('#fbloginbtn').hide();
+              $('#userLoginContainer').hide();
           }
         });
     }
         
     function logout(){
         map.removeControl(drawControl);
-        rootRef.unauth();
-        $('#logindeetz').hide();
-      $('#fbName').text("");
-      $('#fbloginbtn').show();
+            $('#logindeetz').hide();
+          $('#fbName').text("");
+          $('#userLoginContainer').show();
         userSwitch(-1);
+        rootRef.unauth();
+    }
+        
+    function userLogin() {
+        var name = $("#Username").val();
+        userSwitch(name);
+        $('#userLoginContainer').hide();
+        $('#fbName').text(name);
+        $('#logindeetz').show();
     }
         
     function userSwitch(val) {
@@ -179,6 +199,7 @@
         map.addLayer(drawnItems);
         
         // switch user
+        if (val == -1) return;
         userRef = new Firebase("https://scorching-fire-915.firebaseio.com/geoJsons/"+val);
         userRef.once("value", function(data) {
             loadMapboxTiles();
