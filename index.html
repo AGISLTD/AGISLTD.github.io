@@ -10,29 +10,61 @@
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
     <link rel="stylesheet" href="css/easy-button.css" />
     <link rel="stylesheet" href="css/site.css" />
-    <link rel="stylesheet" href="css/w3.css" />
-	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-    <script src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script>
-    <script src="js/easy-button.js"></script>
-    <script src="js/custom-markers.js"></script>
-    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+<!--    <link rel="stylesheet" href="css/w3.css" />-->
+    <link rel="stylesheet" href="/css/leaflet.css" />
+    <link rel="stylesheet" href="/css/leaflet.label.css" />
+    
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
+    <script src="/js/leaflet-src.js"></script> <!-- use leaflet.js in production -->
+    <script src="/js/leaflet.label.js"></script> <!-- use leaflet.js in production -->
+    <script src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script> <!-- self-host this -->
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.4/leaflet-image.js'></script>
+    <script src="/js/easy-button.js"></script>
+    <script src="/js/leaflet-print.js"></script>
+    <script src="/js/locations.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyB95jRLaAAIC2_9wACuK_R6kTN04xj2vyo",
+        authDomain: "agis-map-editor.firebaseapp.com",
+        databaseURL: "https://agis-map-editor.firebaseio.com",
+        storageBucket: "agis-map-editor.appspot.com",
+      };
+      firebase.initializeApp(config);
+    </script>
 </head>
 <body>
     
-    <div class="w3-container">
-    <h1>AGIS Map Editor Preview</h1>
-	<div id="map" style="width: 70%; height: 700px; float: left"></div>
-    <div style="padding: 1em;float: right;width: 25%;">
+<div class="box">
+  <div class="row header">
+    <p><b>AGIS Map Editor</b>
+  </div>
+  <div class="row content">
+    <div id="map" style="height:100%"></div>
+  </div>
+  <div id="panel"><div>
         <div>
             <div id="userLoginContainer">
-                <input type='text' id="Username">
-                <button id="userLogin" onclick="userLogin()">Log in</button>
-                <label style="cursor:pointer;" onclick="facebookAuth()"><a target="_blank">Or login with Facebook</a></label>
+                <label for="email">Email</label>
+                <input type="text" id="email"><br>
+                <label for="password">Password</label>
+                <input type="password" id="password">
+            <br>
+            <button onclick="userLogin()">Login</button>
+                <a href="/register.html">Sign up</a>
             </div>
             <div id="logindeetz" style="display: none;">
                 <h4>You are logged in as <b><span id="fbName"></span></b></h4>
                 <button id="logoutButton" onclick="logout()">Logout</button>
+                <div id="locationContainer">
+                    <select id="location" onchange="locationSwitch(this)">
+                        <option value="" disabled selected>Select Location</option>
+                        <option value="0">Waipara</option>
+                        <option value="-1">Null</option>
+                    </select>
+                </div>
             </div>
         </div>
         <br />
@@ -42,33 +74,31 @@
         <table class="buttontable" style="width:100px">
             <tbody>
                 <tr>
-<!--
                     <td>
-                        <div class="trough" onclick="trough()"></div>
+                        <div class="trough" onclick="addMarker(MarkerEnum.TROUGH)"></div>
                     </td>
                     <td>
-                        <div class="gate" onclick="gate()"></div>
-                    </td>
--->
-                    <td>
-                        <div class="info" onclick="info()"></div>
+                        <div class="gate" onclick="addMarker(MarkerEnum.GATE)"></div>
                     </td>
                     <td>
-                        <div class="fire" onclick="fire()"></div>
+                        <div class="info" onclick="addMarker(MarkerEnum.INFO)"></div>
                     </td>
                     <td>
-                        <div class="fuel" onclick="fuel()"></div>
+                        <div class="fire" onclick="addMarker(MarkerEnum.FIRE)"></div>
+                    </td>
+                    <td>
+                        <div class="fuel" onclick="addMarker(MarkerEnum.FUEL)"></div>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <div class="spill" onclick="spill()"></div>
+                        <div class="spill" onclick="addMarker(MarkerEnum.SPILL)"></div>
                     </td>
                     <td>
-                        <div class="health" onclick="health()"></div>
+                        <div class="health" onclick="addMarker(MarkerEnum.HEALTH)"></div>
                     </td>
                     <td>
-                        <div class="safety" onclick="safety()"></div>
+                        <div class="safety" onclick="addMarker(MarkerEnum.SAFETY)"></div>
                     </td>
                 </tr>
             </tbody>
@@ -77,10 +107,10 @@
         <tbody>
                 <tr>
                     <td>
-                    <button onclick="field()" style="background:green;color:white;height:40px;">Paddock</button>
+                    <button onclick="addPolygon(PolygonEnum.PADDOCK)" style="background:green;color:white;height:40px;">Paddock</button>
                     </td>
                     <td>
-                    <button onclick="nogozone()" style="background:red;color:white;height:40px;">No-Go Zone</button>
+                    <button onclick="addPolygon(PolygonEnum.NOGOZONE)" style="background:red;color:white;height:40px;">No-Go Zone</button>
                     </td>
                 </tr>
             </tbody>
@@ -88,13 +118,13 @@
         <table style="width:160px">
             <tr>
                 <td>
-                <button onclick="water()" style="background:lightblue;height:40px;">Water Line</button>
+                <button onclick="addPolyline(LineEnum.WATERWAY)" style="background:lightblue;height:40px;">Water Line</button>
                 </td>
                 <td>
-                <button onclick="quad()" style="background:green;color:white;height:40px;">Quad Track</button>
+                <button onclick="addPolyline(LineEnum.QUADTRACK)" style="background:green;color:white;height:40px;">Quad Track</button>
                 </td>
                 <td>
-                <button onclick="power()" style="background:red;color:white;height:40px;">Power Line</button>
+                <button onclick="addPolyline(LineEnum.POWERLINE)" style="background:red;color:white;height:40px;">Power Line</button>
                 </td>
             </tr>
         </table>
@@ -103,7 +133,9 @@
         <br>
         <textarea id="JSONBox" style="width: 5px; height 5px" rows="1" cols="1" ></textarea>
     </div>
-    </div>
+  </div>
+</div>
+    
     <script>
   window.fbAsyncInit = function() {
     FB.init({
@@ -121,286 +153,16 @@
      fjs.parentNode.insertBefore(js, fjs);
    }(document, 'script', 'facebook-jssdk'));
 </script>
-    <script>
-        var rootRef = new Firebase("https://scorching-fire-915.firebaseio.com/");
-    </script>
-    <script>
-        $(document).ready(function(){
-            $('#Username').keypress(function(e){
-              if(e.keyCode==13)
-              $('#userLogin').click();
-            });
-        });
-        
-        var drawControl; // Edit/Delete controls
-        
-    function loadMapboxTiles(){
-        //tileLayer.addTo(map);
-        LayersControl.addOverlay(waitawaTiles, "Waitawa Regional Park");
-        LayersControl.addOverlay(hungryCreekTiles, "Hungry Creek");
-        LayersControl.addOverlay(quadDangerLayer, "Quad No-Go Zone");
-        
-        map.on("overlayadd", function(e) { // Remove this functionality - unnecessary for now
-//            if (e.layer == waitawaTiles) {
-//                var latlongBounds = [
-//                    [-36.94893148458695, 175.12945175170898],
-//                    [-36.92577767819879, 175.15494346618652]
-//                ];
-//                map.setMaxBounds(latlongBounds);
-//            } else if (e.layer == hungryCreekTiles) {
-//                var latlongBounds = [
-//                    [-36.531915750839985, 174.6809434890747],
-//                    [-36.50704910158377, 174.72617626190186]
-//                ];
-//                map.setMaxBounds(latlongBounds);
-//            }
-//            map.options.minZoom = 14;
-//            map.panTo(latlongBounds[0], {animate: true});
-        });
-        
-    }
-        
-    //FB login
-    function facebookAuth(){
-        rootRef.authWithOAuthPopup("facebook", function(error, authData) {
-          if (error) {
-            console.log("Login Failed!", error);
-          } else {
-            console.log("Authenticated successfully with payload:", authData);
-              userSwitch(authData.uid);
-              $('#logindeetz').show();
-              $('#fbName').text(authData.facebook.displayName);
-              $('#userLoginContainer').hide();
-          }
-        });
-    }
-        
-    function logout(){
-        map.removeControl(drawControl);
-            $('#logindeetz').hide();
-          $('#fbName').text("");
-          $('#userLoginContainer').show();
-        userSwitch(-1);
-        rootRef.unauth();
-    }
-        
-    function userLogin() {
-        var name = $("#Username").val();
-        userSwitch(name);
-        $('#userLoginContainer').hide();
-        $('#fbName').text(name);
-        $('#logindeetz').show();
-    }
-        
-    function userSwitch(val) {
-        map.removeLayer(drawnItems); // Always remove geojson straight away
-        //Refresh the drawnItems Featuregroup to clear any existing features
-        drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
-        
-        if (val == -1) {//logout
-            userRef = null;
-            return;
-        }
-        
-        // set ref to geojson
-        userRef = new Firebase("https://scorching-fire-915.firebaseio.com/geoJsons/"+val);
-        userRef.once("value", function(data) {
-            loadMapboxTiles();
-            registerDrawControl(drawnItems);
-
-            // load geojson into drawnItems
-            var geojson = data.val();
-            if (undefined != geojson){
-                L.geoJson(geojson, {
-                  onEachFeature: function (feature, layer) {
-                      layer.properties = feature.properties;
-                      //layer.options = {};
-                      switch (feature.properties.type) {
-                          case "trough":
-                              layer.options.icon = troughIcon;
-                              break;
-                          case "gate":
-                              layer.options.icon = gateicon;
-                              break;
-                          case "spill":
-                              layer.options.icon = spillIcon;
-                              break;
-                          case "fire":
-                              layer.options.icon = fireIcon;
-                              break;
-                          case "fuel":
-                              layer.options.icon = fuelIcon;
-                              break;
-                          case "health":
-                              layer.options.icon = healthIcon;
-                              break;
-                          case "safety":
-                              layer.options.icon = safetyIcon;
-                              break;
-                          case "info":
-                              layer.options.icon = infoIcon;
-                              break;
-                              
-                          case "field":
-                              layer.options.color = 'brown';
-                              layer.options.fillColor = 'green';
-                              layer.options.opacity = 0.2;
-                              break;
-                          case "nogozone":
-                              layer.options.color = 'red';
-                              layer.options.fillColor = 'red';
-                              layer.options.opacity = 0.2;
-                              break;
-                              
-                          case "water":
-                              layer.options.color = 'lightblue';
-                              layer.options.weight = 7;
-                              break;
-                          case "quad":
-                              layer.options.color = 'green';
-                              layer.options.weight = 3;
-                              break;
-                          case "power":
-                              layer.options.color = 'red';
-                              layer.options.weight = 4;
-                              break;
-                      }
-                    drawnItems.addLayer(layer);
-                  }
-                });
-            } else {
-                //alert("No map saved for you yet");
-            }
-        });
-    }
     
+    <script>
+        var rootRef = firebase.database();
     </script>
-
-	<script>
-//		var cities = new L.LayerGroup();
-//
-//		L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.').addTo(cities),
-//		L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.').addTo(cities),
-//		L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.').addTo(cities),
-//		L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.').addTo(cities);
-//
-//        
-
-	    var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-			mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw',
-            linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
-            quadsUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw';
-        
-
-
-
-	    var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
-		    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr}),
-            linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography"}),
-            hungryCreekTiles = L.tileLayer(quadsUrl, {id: 'reubencm.a8s085tw', attribution: "AGIS", 
-                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'}),
-            quadDangerLayer = L.tileLayer(quadsUrl, {id: 'reubencm.4654v47r', attribution: "AGIS", 
-                opacity: 0.7,
-                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'}),
-            waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/{mapId}/{z}/{x}/{y}.png?access_token={token}', {
-                attribution: 'AGIS',
-                zIndex: 150,
-                subdomains: ['a','b','c','d'],
-                mapId: "reubencm.028vblnt",
-                token: "pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q"
-            });
-
-		var map = L.map('map', {
-			center: [-36.8485, 174.7633],
-			zoom: 10,
-            //drawcontrol: true,
-			layers: [grayscale, linz]
-		});
-
-		var baseLayers = {
-			"Grayscale": grayscale,
-			"Streets": streets
-		};
-
-		var overlays = {
-            "LINZ": linz
-		};
-        
-        var GeoJSONControl = L.control();
-        GeoJSONControl.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'customC'); // Creates our div with class "customC"
-            this._div.innerHTML = '<button id="savebutton" onclick="saveGeoJson()">Save</button>';
-            return this._div;
-        };
-        GeoJSONControl.addTo(map);
-
-		map.on('draw:created', function (e) {
-			var type = e.layerType,
-				layer = e.layer;
-            
-            e.layer.properties = {};
-            
-			if (type === 'marker') {
-                e.layer.properties.type = layer.options.icon.options.type;
-			}
-
-			if (type === 'polygon') {
-                e.layer.properties.type = layer.options.polyType; // all polygons are fields
-                var idIW = L.popup();
-                var content = '<span><b>Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
-                 idIW.setContent(content);
-                 idIW.setLatLng(e.layer._latlngs[0]); //calculated based on the e.layertype
-                 idIW.openOn(map);
-			}
-            
-            if (type === 'polyline') {
-                e.layer.properties.type = layer.options.lineType; // !!!!
-            }
-            
-            if (e.layer.options.test) {
-                alert('test suceesss');
-            }
-
-			drawnItems.addLayer(layer);
-		});
-        // End http://bl.ocks.org/d3noob/7730264var idIW = L.popup();
-
-    function saveIdIW() {
-         var sName = document.getElementById("shapeName").value;
-         var sDetails = document.getElementById("shapeDesc").value;
-
-         var drawings = drawnItems.getLayers();  //drawnItems is a container for the drawn objects
-         drawings[drawings.length - 1].properties.name = sName;
-         drawings[drawings.length - 1].properties.details = sDetails;
-            map.closePopup();
-    }
-        
-        function registerDrawControl(fGroup){
-            drawControl = new L.Control.Draw({
-                position: 'topright',
-                draw: {
-                    polygon: false,
-                    polyline: false,
-                    rectangle: false,
-                    circle: false,
-                    marker: false,
-                    square: false
-                },
-                edit: {
-                    featureGroup: fGroup
-                }
-            });
-            map.addControl(drawControl);
-        }
-        
-        var drawnItems = new L.FeatureGroup();
-        
-        var LayersControl = L.control.layers(baseLayers, overlays);
-		LayersControl.addTo(map);
-	</script>
-
+    
+    <div id="images"></div>
+    
+    <script src="/js/custom-map.js"></script>
+    <script src="/js/custom-markers.js"></script>
+    <script src="/js/data-access.js"></script>
 </body>
+    
 </html>
