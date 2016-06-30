@@ -13,22 +13,58 @@
       firebase.initializeApp(config);
         
     function registerUser(){
-        firebase.auth().createUserWithEmailAndPassword($('#email').val(), $('#password').val()).catch(function(error) {
-            // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            alert("Failed to register: "+errorMessage);
-        });
+        var validEmail = "gmail.com";
+        var email = $('#email').val();
+        if (email.endsWith(validEmail)){
+            firebase.auth().createUserWithEmailAndPassword(email, generateTempPW()).then(function(){
+                firebase.auth().sendPasswordResetEmail(email).then(function() {
+                  $('#message').text("An email has been sent to "+email+" to confirm the email address.");
+                  $('#email').val("");
+                }, function(error) {
+                  $('#message').text("Failed to send confirmation email to "+email+" ("+error.message+")");
+                });
+            }, function(error) {
+                // Handle Errors here.
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                $('#message').text("Failed to register "+email+" -- "+errorMessage);
+            });
+        } else {
+            $('#message').text("You must register with an email address from "+validEmail);
+        }
     }
+        
+    function generateTempPW() {
+        var possibleChars = ['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?_-'];
+         var password = '';
+         for(var i = 0; i < 16; i += 1) {
+           password += possibleChars[Math.floor(Math.random() * possibleChars.length)];
+         }
+         return password;
+   }
+        
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in.
+      } else {
+        // No user is signed in.
+      }
+    });
     </script>
 </head>
         <body>
             <h2>Register for AGIS Map editor</h2>
-            <label for="email">Email</label>
-            <input type="text" id="email"><br>
-            <label for="password">Password</label>
-            <input type="password" id="password">
+            <div id="registerform">
+                <label for="email">Email</label>
+                <input type="text" id="email"><br>
+    <!--
+                <label for="password">Password</label>
+                <input type="password" id="password">
+    -->
+                <br>
+                <button onclick="registerUser()">Register</button>
+            </div>
             <br>
-            <button onclick="registerUser()">Register</button>
+            <label id='message'></label>
         </body>
 </html>
