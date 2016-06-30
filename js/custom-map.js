@@ -23,35 +23,31 @@ $(document).ready(function(){
 			var type = e.layerType,
 				layer = e.layer;
             
-            layer.properties = {};
-            
+            // Set the relevant symbology based on featureType
 			if (type === 'marker') {
-                // Set the relevant icon
-                layer.properties.type = layer.options.icon.options.type;
-                askForFeatureDetails(e.layer);
+                featuretype = layer.options.icon.options.type;
 			}
-
 			if (type === 'polygon') {
-                layer.properties.type = layer.options.polyType; // all polygons are fields
-                askForFeatureDetails(e.layer);
+                featuretype = layer.options.polyType
 			}
-            
             if (type === 'polyline') {
-                layer.properties.type = layer.options.lineType; // !!!!
-                askForFeatureDetails(e.layer);
+                featuretype = layer.options.lineType
             }
-            
+        
             // Add to our feature  group
-			drawnItems.addLayer(layer);
+			featureGroups[featuretype].addLayer(layer);
+        
+            layer.properties = {};
+            layer.properties.type = featuretype;
+            askForFeatureDetails(layer);
 		});
-    
     LayersControl.addTo(map);
 });
 
 // Asks user for details about the Feature they just added
 function askForFeatureDetails(layer) {
     var detailsPopup = L.popup();
-    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.type.toUpperCase()+'\'"/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails()"/>';
+    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.type.toUpperCase()+'\'"/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.type+'\','+layer._leaflet_id+')"/>';
     detailsPopup.setContent(content);
     detailsPopup.setLatLng(getLatLng(layer)); //calculated based on the e.layertype
     detailsPopup.openOn(map);
@@ -68,14 +64,16 @@ function getLatLng(feature) {
 }
 
 // Save name/details for the current feature. 
-function saveFeatureDetails() {
-    var sName = document.getElementById("shapeName").value;
-    var sDetails = document.getElementById("shapeDesc").value;
-
-    var feature = drawnItems.getLayers()[drawnItems.getLayers().length - 1];  //drawnItems is a container for the drawn objects
-    feature.properties.name = sName;
-    feature.properties.details = sDetails;
-    addLabelsToFeature(feature, sName, sDetails);
+function saveFeatureDetails(featureType, featureID) {
+    if (featureGroups[featureType]){
+        feature = featureGroups[featureType].getLayer(featureID);
+        var sName = document.getElementById("shapeName").value;
+        var sDetails = document.getElementById("shapeDesc").value;
+     //drawnItems is a container for the drawn objects
+        feature.properties.name = sName;
+        feature.properties.details = sDetails;
+        addLabelsToFeature(feature, sName, sDetails);
+    }
     map.closePopup();
 }
 
@@ -94,7 +92,7 @@ function addLabelsToFeature(feature, labeltext, details){
             var marker = new L.marker(feature.getBounds().getNorthWest(), { opacity: 0.01 });
             marker.bindLabel(labeltext, {noHide: true, className: "my-label", offset: [0, 0] });
             labels.addLayer(marker);
-            labels.addTo(map);
+            labels.addTo(labels);
             marker.showLabel();
         }
     }
@@ -218,7 +216,7 @@ var baseLayers = {
     "LINZ": linz
 };
 var overlays = {};
-        
+var featureGroups = {};
 var drawnItems = new L.FeatureGroup();
 var labels = new L.LayerGroup();
 var LayersControl = L.control.layers(baseLayers, overlays, {
@@ -240,22 +238,7 @@ function registerDrawControl(fGroup){
             }
         });
         map.addControl(drawControl);
-    }    
-
-//FB login
-function facebookAuth(){
-    rootRef.authWithOAuthPopup("facebook", function(error, authData) {
-      if (error) {
-        console.log("Login Failed!", error);
-      } else {
-        console.log("Authenticated successfully with payload:", authData);
-          userSwitch(authData.uid);
-          $('#logindeetz').show();
-          $('#fbName').text(authData.facebook.displayName);
-          $('#userLoginContainer').hide();
-      }
-    });
-}
+    }
 
 function logout(){
     if (drawControl) {
@@ -266,10 +249,46 @@ function logout(){
           $('#fbName').text("");
           $('#userLoginContainer').show();
         userSwitch(-1);
+        $('#featuregrid').removeData(); // clear the contents
+        $('#featuregrid').html(""); // clear the contents
     }, function(error) {
       alert("Failed to sign out..");
     });
 }
+
+//Retrieves features from db and populates the view
+function populateFeatureGrid(){
+    $('#featuregrid').html(""); // clear the contents
+    featureRef = rootRef.ref("/features/");
+    featureRef.on('child_added', function (featureSnapshot) {
+        // Will be called with a featureSnapshot for each child under the /messages/ node
+        var div = $('#featuregrid').append('<div id='+Math.random()+'>');
+        div.append('<h1>'+featureSnapshot.key +'</h1>');
+        $.each(featureSnapshot.val(), function(index, element){
+            featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
+            drawnItems.addLayer(featureGroups[element.name]); // add the layer to the parent layergroup
+            div.append('<p>'+element.description+'<input featuretype='+element.name+' class="showLayer" type="checkbox"></p>');
+        });
+        
+    }, function (err) {
+      // code to handle read error
+    });
+    
+    // add show/hide functionality to the checkbox
+    $('input[type=checkbox].showLayer').change(
+    function(){
+        //event.preventDefault();
+        layer = featureGroups[$(this).attr('featuretype')];
+        if(this.checked) {
+            if (map.hasLayer(layer)){
+                map.removeLayer(layer);
+            }
+        } else {
+            map.addLayer(layer);     
+       }
+    });
+}
+
 
 function userLogin() {
     firebase.auth().signInWithEmailAndPassword($("#email").val(), $("#password").val()).catch(function(error) {
@@ -286,6 +305,7 @@ function userLogin() {
         $('#userLoginContainer').hide();
         $('#fbName').text(user.email);
         $('#logindeetz').show();
+        populateFeatureGrid();
       } else {
         $('#userLoginContainer').show();
         $('#logindeetz').hide();
@@ -293,10 +313,24 @@ function userLogin() {
     });
 }
 
+function removeFeatureGroups(){
+    map.removeLayer(drawnItems);
+//    $.each(featureGroups, function(index, fgroup){
+//            map.removeLayer(fgroup); // Always remove geojson straight away
+//        });
+}
+
+function addFeatureGroups(){
+    map.addLayer(drawnItems);
+//    $.each(featureGroups, function(index, fgroup){
+//            map.addLayer(fgroup); // Always remove geojson straight away
+//        });
+}
+
 function userSwitch(val) {      
     
     if (val == -1) {//logout
-        map.removeLayer(drawnItems); // Always remove geojson straight away
+        removeFeatureGroups();
         map.removeLayer(labels);
         userRef = null;
         return;

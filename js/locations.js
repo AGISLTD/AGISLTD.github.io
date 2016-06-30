@@ -42,12 +42,10 @@ var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vbln
         
 
     function locationSwitch(sel){
-        map.removeLayer(drawnItems); // Always remove geojson straight away
-        map.removeLayer(labels);
+        removeFeatureGroups();
         //Refresh the drawnItems Featuregroup to clear any existing features
-        drawnItems = new L.FeatureGroup();
+        addFeatureGroups();
         labels = new L.LayerGroup();
-        map.addLayer(drawnItems);
         map.addLayer(labels);
         
         locationID = sel.value;
@@ -56,62 +54,68 @@ var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vbln
             loadMapboxTiles();
             registerDrawControl(drawnItems);
 
-            // load geojson into drawnItems
+            // load geojson into featureGroups
             var editID = data.val();
             if (undefined != editID){
                 rootRef.ref("edit/"+locationID+"/"+editID+"/geojsonid/").once('value', function(data) {
                     rootRef.ref("geojson/"+data.val()).once('value', function(json){
-                        geojson = json.val();
-                        L.geoJson(geojson, {
-                        onEachFeature: function (feature, layer) {
-                          layer.properties = feature.properties;
-                          //layer.options = {};
-                          switch (feature.properties.type) {
-                              case "trough":
-                              case "gate":
-                              case "spill":
-                              case "fire":
-                              case "fuel":
-                              case "health":
-                              case "safety":
-                              case "info":
-                                  layer.options.icon = L.icon({
-                                        type: feature.properties.type,
-                                        iconUrl: './images/'+feature.properties.type+'-icon.svg',
-                                        iconSize:     [32, 18], // size of the icon
-                                        iconAnchor:   [16, 9], // point of the icon which will correspond to marker's location
-                                        popupAnchor:  [0, -5], // point from which the popup should open relative to the iconAnchor
-                                    })
-                                  break;
+                        geojsons = json.val();
+                        $.each(geojsons.features, function(index, geojson){
+                            if (geojson.geometry.features){ // don't perform on empty (thus malformed) feature groups
+                                L.geoJson(geojson.geometry, {
+                                    onEachFeature: function (feature, layer) {
+                                  layer.properties = feature.properties;
+                                  //layer.options = {};
+                                  switch (feature.properties.type) {
+                                      case "trough":
+                                      case "gate":
+                                      case "spill":
+                                      case "fire":
+                                      case "fuel":
+                                      case "health":
+                                      case "safety":
+                                      case "info":
+                                          layer.options.icon = L.icon({
+                                                type: feature.properties.type,
+                                                iconUrl: './images/'+feature.properties.type+'-icon.svg',
+                                                iconSize:     [32, 18], // size of the icon
+                                                iconAnchor:   [16, 9], // point of the icon which will correspond to marker's location
+                                                popupAnchor:  [0, -5], // point from which the popup should open relative to the iconAnchor
+                                            })
+                                          break;
 
-                              case "field":
-                                  $.extend(layer.options, PolygonEnum.PADDOCK.shapeOptions); // add paddock styles to the feature
-    //                              layer.options.color = 'brown';
-    //                              layer.options.fillColor = 'green';
-    //                              layer.options.opacity = 0.2;
-                                  break;
-                              case "nogozone":
-                                  layer.options.color = 'red';
-                                  layer.options.fillColor = 'red';
-                                  layer.options.opacity = 0.2;
-                                  break;
+                                      case "field":
+                                          $.extend(layer.options, PolygonEnum.PADDOCK.shapeOptions); // add paddock styles to the feature
+            //                              layer.options.color = 'brown';
+            //                              layer.options.fillColor = 'green';
+            //                              layer.options.opacity = 0.2;
+                                          break;
+                                      case "nogozone":
+                                          layer.options.color = 'red';
+                                          layer.options.fillColor = 'red';
+                                          layer.options.opacity = 0.2;
+                                          break;
 
-                              case "water":
-                                  layer.options.color = 'lightblue';
-                                  layer.options.weight = 7;
-                                  break;
-                              case "quad":
-                                  layer.options.color = 'green';
-                                  layer.options.weight = 3;
-                                  break;
-                              case "power":
-                                  layer.options.color = 'red';
-                                  layer.options.weight = 4;
-                                  break;
-                          }
-                        drawnItems.addLayer(layer);
-                        addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
-                      }
+                                      case "water":
+                                          layer.options.color = 'lightblue';
+                                          layer.options.weight = 7;
+                                          break;
+                                      case "quad":
+                                          layer.options.color = 'green';
+                                          layer.options.weight = 3;
+                                          break;
+                                      case "power":
+                                          layer.options.color = 'red';
+                                          layer.options.weight = 4;
+                                          break;
+                                  }
+                                if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
+                                    featureGroups[feature.properties.type].addLayer(layer);
+                                }
+                                addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
+                              }
+                                });
+                            }
                         });
                   });
                 });

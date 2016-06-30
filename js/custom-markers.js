@@ -86,8 +86,11 @@ function buildGeoJSONFromFeatureLayer(features){
     // Iterate through each layer and add the custom properties 
     // to the JSON which were not added by the toGeoJSON method.
     var i = 0;
-    features.eachLayer(function(layer){
-        drawnFeaturesJSON.features[i].properties = layer.properties;
+    features.eachLayer(function(category){
+        var j = 0;
+        category.eachLayer(function(layer){
+                drawnFeaturesJSON.features[i].geometry.features[j].properties = layer.properties;
+            });
         i++;
     });
     return drawnFeaturesJSON;
@@ -95,13 +98,17 @@ function buildGeoJSONFromFeatureLayer(features){
 
 // sets the json into the text box and into the Firebase dataref
 function saveGeoJson(){
-    var json = buildGeoJSONFromFeatureLayer(drawnItems);
+//    var json = {};
+//    $.each(featureGroups, function(index, element){
+//        $.extend(json, buildGeoJSONFromFeatureLayer(element));
+//    })
+    json = buildGeoJSONFromFeatureLayer(drawnItems);
     
     document.getElementById("JSONBox").value = JSON.stringify(json);
     jsonid = rootRef.ref('/geojson/').push(json).key;
     var edit = {};
     edit.geojsonid = jsonid;
-    edit.user = 'anon';
+    edit.user = firebase.auth().currentUser.uid;
     edit.datetime = Date.now();
     editID = rootRef.ref('/edit/'+locationID).push(edit).key;
     locRef.update({'currentEdit': editID});
