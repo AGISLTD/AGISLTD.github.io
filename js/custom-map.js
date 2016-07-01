@@ -12,7 +12,7 @@ $(document).ready(function(){
 			center: [-36.8485, 174.7633],
 			zoom: 10,
             //drawcontrol: true,
-			layers: [grayscale, linz]
+			layers: [grayscale]
 		});
     
     GeoJSONControl.addTo(map);
@@ -66,7 +66,7 @@ function getLatLng(feature) {
 // Save name/details for the current feature. 
 function saveFeatureDetails(featureType, featureID) {
     if (featureGroups[featureType]){
-        feature = featureGroups[featureType].getLayer(featureID);
+        feature = featureGroups[featureType].getLayer(featureID); // retrieve the layer just created
         var sName = document.getElementById("shapeName").value;
         var sDetails = document.getElementById("shapeDesc").value;
      //drawnItems is a container for the drawn objects
@@ -198,52 +198,159 @@ var printControl = L.control.print({
    provider: printProvider
 });
 
-// Map layer details
 
+// Base Maps
 var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
         'Imagery © <a href="http://mapbox.com">Mapbox</a>',
     mbUrl = 'https://api.tiles.mapbox.com/v4/mapbox.light/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw',
     linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
-
-var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
-    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr}),
-    linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography"});
-
+var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr, base:true}),
+    linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography", base:true});
 var baseLayers = {
     "Grayscale": grayscale,
-    "Streets": streets,
     "LINZ": linz
 };
-var overlays = {};
-var featureGroups = {};
-var drawnItems = new L.FeatureGroup();
-var labels = new L.LayerGroup();
-var LayersControl = L.control.layers(baseLayers, overlays, {
+
+var LayersControl = L.control.layers(baseLayers, {}, {
             position: 'topleft'});
 
 function registerDrawControl(fGroup){
-        drawControl = new L.Control.Draw({
-            position: 'topleft',
-            draw: {
-                polygon: false,
-                polyline: false,
-                rectangle: false,
-                circle: false,
-                marker: false,
-                square: false
-            },
-            edit: {
-                featureGroup: fGroup
-            }
+    drawControl = new L.Control.Draw({
+        position: 'topleft',
+        draw: {
+            polygon: false,
+            polyline: false,
+            rectangle: false,
+            circle: false,
+            marker: false,
+            square: false
+        },
+        edit: {
+            featureGroup: fGroup
+        }
+    });
+    map.addControl(drawControl);
+}
+
+
+// Populates the Location selector
+function populateLocations(){
+    // clear the contents and add placeholder
+    $('#location').html(""); 
+    $('#location').append('<option value="" disabled="" selected="">Select Location</option>');
+    
+    // add option for each location
+    locationsRef = rootRef.ref("/location/");
+    locationsRef.once('value', function (locationSnapshot) {
+        locations = locationSnapshot.val();
+        $.each(locations, function(index, element){
+            $('#location').append('<option value='+index+'>'+element.name+'</option>');
         });
-        map.addControl(drawControl);
+    });
+}
+
+// Feature Layers
+var featureGroups = {}; 
+var drawnItems = new L.FeatureGroup(); // parent feature group used to generate the geojson
+var labels = new L.LayerGroup(); // display layer only - of labels for polylines and polygons
+
+// Resets all feature information. Called on login/logout location switch.
+function resetLayers(){
+    // Clear all layers off the map
+//    map.eachLayer(function(layer){
+//        if (!(layer.options && layer.options.base)){
+//            map.removeLayer(layer);
+//        }
+//    });
+    drawnItems.clearLayers();
+    clearOverlays();
+    // Reset feature groups to empty groups
+    labels = new L.LayerGroup();
+    $.each(featureGroups, function(index, element){ // Create a FeatureGroup for each type of Feature
+        featureGroups[index] = new L.FeatureGroup();
+    });
+    // Add the FeatureGroups to parent FeatureGroup (drawnItems)
+    addFeatureGroupsToParentGroup();
+    // Add back to map
+    map.addLayer(drawnItems);
+    map.addLayer(labels);
+}
+
+function addFeatureGroupsToParentGroup(){
+    drawnItems.clearLayers();
+    $.each(featureGroups, function(index, element){
+        drawnItems.addLayer(element); // add the layer to the parent layergroup
+    });
+}
+
+//Retrieves features from db and populates the view
+function populateFeatureGrid(){
+    $('#featuregrid').html(""); // clear the contents
+    featureRef = rootRef.ref("/features/");
+    featureRef.on('child_added', function (featureSnapshot) {
+        // Will be called with a featureSnapshot for each child under the /messages/ node
+        var div = $('#featuregrid').append('<div>');
+        div.append('<h1>'+featureSnapshot.key +'</h1>');
+        $.each(featureSnapshot.val(), function(index, element){
+            featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
+            div.append('<p>'+element.description+'<input featuretype='+element.name+' class="showLayer" type="checkbox" checked></p>');
+        });
+        addFeatureGroupsToParentGroup();
+        
+        // add show/hide functionality to the checkboxes we added
+        $('input[type=checkbox].showLayer').change(
+        function(){
+            //event.preventDefault();
+            layer = featureGroups[$(this).attr('featuretype')];
+            if(this.checked) {
+                map.addLayer(layer);
+            } else {
+                if (map.hasLayer(layer)){
+                    map.removeLayer(layer);
+                }
+           }
+        });
+    }, function (err) {
+      // code to handle read error
+    });
+    
+    
+}
+
+
+function userLogin() {
+    firebase.auth().signInWithEmailAndPassword($("#email").val(), $("#password").val()).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      alert("Failed to log in: "+errorMessage)
+      return;
+    }).then(function(user){
+        userSwitch(user.uid);
+        populateFeatureGrid();
+        populateLocations();
+        registerDrawControl(drawnItems);
+    });
+    
+    firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        $('#userLoginContainer').hide();
+        $('#fbName').text(user.email);
+        $('#logindeetz').show();
+    } else {
+        $('#userLoginContainer').show();
+        $('#logindeetz').hide();
+        resetLayers();
     }
+    });
+}
 
 function logout(){
-    if (drawControl) {
+    if (drawControl._map) { // http://stackoverflow.com/questions/33146809/find-out-if-a-leaflet-control-has-already-been-added-to-the-map
         map.removeControl(drawControl);
     }
+    resetLayers();
     firebase.auth().signOut().then(function() {
         $('#logindeetz').hide();
           $('#fbName').text("");
@@ -256,82 +363,11 @@ function logout(){
     });
 }
 
-//Retrieves features from db and populates the view
-function populateFeatureGrid(){
-    $('#featuregrid').html(""); // clear the contents
-    featureRef = rootRef.ref("/features/");
-    featureRef.on('child_added', function (featureSnapshot) {
-        // Will be called with a featureSnapshot for each child under the /messages/ node
-        var div = $('#featuregrid').append('<div id='+Math.random()+'>');
-        div.append('<h1>'+featureSnapshot.key +'</h1>');
-        $.each(featureSnapshot.val(), function(index, element){
-            featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
-            drawnItems.addLayer(featureGroups[element.name]); // add the layer to the parent layergroup
-            div.append('<p>'+element.description+'<input featuretype='+element.name+' class="showLayer" type="checkbox"></p>');
-        });
-        
-    }, function (err) {
-      // code to handle read error
-    });
-    
-    // add show/hide functionality to the checkbox
-    $('input[type=checkbox].showLayer').change(
-    function(){
-        //event.preventDefault();
-        layer = featureGroups[$(this).attr('featuretype')];
-        if(this.checked) {
-            if (map.hasLayer(layer)){
-                map.removeLayer(layer);
-            }
-        } else {
-            map.addLayer(layer);     
-       }
-    });
-}
-
-
-function userLogin() {
-    firebase.auth().signInWithEmailAndPassword($("#email").val(), $("#password").val()).catch(function(error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      alert("Failed to log in: "+errorMessage)
-      return;
-    });
-    
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        userSwitch(user.uid);
-        $('#userLoginContainer').hide();
-        $('#fbName').text(user.email);
-        $('#logindeetz').show();
-        populateFeatureGrid();
-      } else {
-        $('#userLoginContainer').show();
-        $('#logindeetz').hide();
-      }
-    });
-}
-
-function removeFeatureGroups(){
-    map.removeLayer(drawnItems);
-//    $.each(featureGroups, function(index, fgroup){
-//            map.removeLayer(fgroup); // Always remove geojson straight away
-//        });
-}
-
-function addFeatureGroups(){
-    map.addLayer(drawnItems);
-//    $.each(featureGroups, function(index, fgroup){
-//            map.addLayer(fgroup); // Always remove geojson straight away
-//        });
-}
 
 function userSwitch(val) {      
     
     if (val == -1) {//logout
-        removeFeatureGroups();
-        map.removeLayer(labels);
+        resetLayers();
         userRef = null;
         return;
     }

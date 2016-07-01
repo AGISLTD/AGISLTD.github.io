@@ -18,7 +18,7 @@
         if (email.endsWith(validEmail)){
             firebase.auth().createUserWithEmailAndPassword(email, generateTempPW()).then(function(){
                 firebase.auth().sendPasswordResetEmail(email).then(function() {
-                  $('#message').text("An email has been sent to "+email+" to confirm the email address.");
+                  $('#message').text("An email has been sent to "+email+" to confirm the email address and to set password.");
                   $('#email').val("");
                 }, function(error) {
                   $('#message').text("Failed to send confirmation email to "+email+" ("+error.message+")");
@@ -36,12 +36,12 @@
         
     function generateTempPW() {
         var possibleChars = ['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?_-'];
-         var password = '';
-         for(var i = 0; i < 16; i += 1) {
-           password += possibleChars[Math.floor(Math.random() * possibleChars.length)];
-         }
-         return password;
-   }
+        var password = '';
+        for(var i = 0; i < 16; i += 1) {
+        password += possibleChars[Math.floor(Math.random() * possibleChars.length)];
+        }
+        return password;
+    }
         
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {

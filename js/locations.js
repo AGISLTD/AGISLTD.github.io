@@ -5,20 +5,47 @@ var hungryCreekTiles = L.tileLayer(quadsUrl, {id: 'reubencm.a8s085tw', attributi
 var quadDangerLayer = L.tileLayer(quadsUrl, {id: 'reubencm.4654v47r', attribution: "AGIS", 
                 opacity: 0.7,
                 accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'});
-var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vblnt/{z}/{x}/{y}.png?access_token={token}', {
-                attribution: 'AGIS',
-                zIndex: 150,
-                subdomains: ['a','b','c','d'],
-                mapId: "reubencm.028vblnt",
-                token: "pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q"});
+//var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vblnt/{z}/{x}/{y}.png?access_token={token}', {
+//                attribution: 'AGIS',
+//                zIndex: 150,
+//                subdomains: ['a','b','c','d'],
+//                mapId: "reubencm.028vblnt",
+//                token: "pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q"});
+var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vblnt/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q');
             
-
+// remove all overlays from LayersControl (keeping basemaps);
+function clearOverlays(){
+    $.each(LayersControl._layers, function(index, layerEntry){
+        if (layerEntry.overlay){
+            map.removeLayer(layerEntry.layer); // remove from map, if displayed
+            LayersControl.removeLayer(layerEntry.layer); // remove from LayersControl
+        }
+    });
+}
+function loadOverlays(overlayRef){
+    clearOverlays();
+    newOverlays = overlayRef.val();
+    if (undefined == overlayRef.val()){
+        alert("No overlays found for this location");
+        return;
+    }
+    // add overlay to LayersControl
+    $.each(newOverlays, function(index, overlay){
+        LayersControl.addOverlay(L.tileLayer(overlay.tilesURL), overlay.name);
+    });
+}
 
     function loadMapboxTiles(){
         //tileLayer.addTo(map);
-        LayersControl.addOverlay(waitawaTiles, "Waitawa Regional Park");
-        LayersControl.addOverlay(hungryCreekTiles, "Hungry Creek");
-        LayersControl.addOverlay(quadDangerLayer, "Quad No-Go Zone");
+        overlays = {
+            "Waitawa": waitawaTiles,
+            "Hungry Creek": hungryCreekTiles,
+            "Quad No-Go Zone": quadDangerLayer
+        };
+//        LayersControl.addOverlay(waitawaTiles, "Waitawa Regional Park");
+//        LayersControl.addOverlay(hungryCreekTiles, "Hungry Creek");
+//        LayersControl.addOverlay(quadDangerLayer, "Quad No-Go Zone");
+        LayersControl.addOverlay(overlays);
         
         map.on("overlayadd", function(e) { // Remove this functionality - unnecessary for now
 //            if (e.layer == waitawaTiles) {
@@ -42,18 +69,13 @@ var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vbln
         
 
     function locationSwitch(sel){
-        removeFeatureGroups();
-        //Refresh the drawnItems Featuregroup to clear any existing features
-        addFeatureGroups();
+        resetLayers();
         labels = new L.LayerGroup();
         map.addLayer(labels);
         
         locationID = sel.value;
         locRef = rootRef.ref("/location/"+locationID);
         locRef.child('currentEdit').once("value", function(data) {
-            loadMapboxTiles();
-            registerDrawControl(drawnItems);
-
             // load geojson into featureGroups
             var editID = data.val();
             if (undefined != editID){
@@ -120,7 +142,10 @@ var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vbln
                   });
                 });
             } else {
-                alert("No map saved for you yet");
+                alert("No data found for this location");
             }
+        });
+        locRef.child('overlays').once("value", function(data){
+            loadOverlays(data);
         });
     }
