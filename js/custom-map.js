@@ -1,6 +1,7 @@
 var map;
 var drawControl; // Edit/Delete controls
 var location;
+var AucklandLatLng = [-36.8485, 174.7633];
 
 $(document).ready(function(){
     $('#Username').keypress(function(e){
@@ -9,9 +10,8 @@ $(document).ready(function(){
             });
     
     map = L.map('map', {
-			center: [-36.8485, 174.7633],
+			center: AucklandLatLng,
 			zoom: 10,
-            //drawcontrol: true,
 			layers: [grayscale]
 		});
     
@@ -41,8 +41,19 @@ $(document).ready(function(){
             layer.properties.type = featuretype;
             askForFeatureDetails(layer);
 		});
+    
+    // Delete removes layers from drawnItems - we need to remove them from their featureGroup as well
+    map.on('draw:deleted', function(e){
+        e.layers.eachLayer(function(layer){
+            featureGroups[layer.properties.type].removeLayer(layer);
+        });
+    });
+    
     LayersControl.addTo(map);
 });
+
+// Bind UI
+$('.accordion').accordion();
 
 // Asks user for details about the Feature they just added
 function askForFeatureDetails(layer) {
@@ -92,7 +103,7 @@ function addLabelsToFeature(feature, labeltext, details){
             var marker = new L.marker(feature.getBounds().getNorthWest(), { opacity: 0.01 });
             marker.bindLabel(labeltext, {noHide: true, className: "my-label", offset: [0, 0] });
             labels.addLayer(marker);
-            labels.addTo(labels);
+            //labels.addTo(map);
             marker.showLabel();
         }
     }
@@ -264,6 +275,7 @@ function resetLayers(){
 //        }
 //    });
     drawnItems.clearLayers();
+    labels.clearLayers();
     clearOverlays();
     // Reset feature groups to empty groups
     labels = new L.LayerGroup();
@@ -289,13 +301,15 @@ function populateFeatureGrid(){
     $('#featuregrid').html(""); // clear the contents
     featureRef = rootRef.ref("/features/");
     featureRef.on('child_added', function (featureSnapshot) {
-        // Will be called with a featureSnapshot for each child under the /messages/ node
-        var div = $('#featuregrid').append('<div>');
-        div.append('<h1>'+featureSnapshot.key +'</h1>');
+        // Will be called with a featureSnapshot for each child under the /features/ node
+        var div = document.createElement("div");
+        $('#featuregrid').append('<h3>'+featureSnapshot.key +'</h3>');
         $.each(featureSnapshot.val(), function(index, element){
             featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
-            div.append('<p>'+element.description+'<input featuretype='+element.name+' class="showLayer" type="checkbox" checked></p>');
+            $(div).append('<p onclick="addFeature(\''+element.name+'\')">'+element.description+'<input featuretype='+element.name+' class="showLayer" type="checkbox" checked></p>');
+            Feature[element.name] = element; // save symbology for this feature type
         });
+        $('#featuregrid').append(div);
         addFeatureGroupsToParentGroup();
         
         // add show/hide functionality to the checkboxes we added
@@ -311,11 +325,13 @@ function populateFeatureGrid(){
                 }
            }
         });
+        
+        //accordionise our new feature menu grid thing
+    $('#featuregrid').accordion("refresh" );
+        
     }, function (err) {
       // code to handle read error
     });
-    
-    
 }
 
 

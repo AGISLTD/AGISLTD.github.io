@@ -13,6 +13,7 @@
 <!--    <link rel="stylesheet" href="css/w3.css" />-->
     <link rel="stylesheet" href="/css/leaflet.css" />
     <link rel="stylesheet" href="/css/leaflet.label.css" />
+    <link rel="stylesheet" href="/css/jquery-ui.min.css">
     
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
     <script src="/js/leaflet-src.js"></script> <!-- use leaflet.js in production -->
@@ -23,7 +24,7 @@
     <script src="/js/easy-button.js"></script>
     <script src="/js/leaflet-print.js"></script>
     <script src="/js/locations.js"></script>
-    <script src="/js/map-objects.js"></script>
+    <script src="/js/jquery-ui.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
     <script>
       // Initialize Firebase
@@ -67,7 +68,7 @@
             </div>
         </div>
         <br />
-      <div id='featuregrid'></div>
+      <div id='featuregrid' class="accordion"></div>
         <br />
         <h4>Click buttons below to add features to the map</h4>
         <div class="controlbuttons">

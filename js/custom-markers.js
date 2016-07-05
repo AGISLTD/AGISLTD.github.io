@@ -1,61 +1,40 @@
-var marker, polygon, line; // define markers once -- prevents a new marker created each time we select a type
-
-var MarkerEnum = {
-    GATE: {type: "gate", img: "png"},
-    TROUGH: {type: "trough", img: "png"},
-    HEALTH: {type: "health", img: "svg"},
-    FUEL: {type: "fuel", img: "svg"},
-    FIRE: {type: "fire", img: "svg"},
-    SPILL: {type: "spill", img: "svg"},
-    SAFETY: {type: "safety", img: "svg"},
-    INFO: {type: "info", img: "svg"},
-    HAZARD: {type: "hazard", img: "svg"},
-};
-
-var PolygonEnum = {
-    PADDOCK: {shapeOptions:{color:'brown',fillColor:'green', polyType: "field"}},
-    NOGOZONE: {shapeOptions:{color:'red',fillColor:'red', polyType: "nogozone"}},
-};
-
-var LineEnum = {
-    WATERWAY: {shapeOptions:{color:'lightblue', weight: 7, lineType: "water"}},
-    QUADTRACK: {shapeOptions:{color:'green', weight: 3, lineType: "quad"}},
-    POWERLINE: {shapeOptions:{color:'red', weight: 4, lineType: "power"}},
-};
-
-if (Object.freeze) { // lock the enums
-    Object.freeze(MarkerEnum);
-    Object.freeze(PolygonEnum);
-    Object.freeze(LineEnum);
-};
+var drawFeature; // define markers once -- prevents a new marker created each time we select a type
+var Feature = {};
 
 // 'Disables' (cancels) the drawing of any currently selected marker/poly/line
 function disableExistingDraw() {
-    if (marker) { // check a 'previous' marker exists
-        marker.disable(); // disable any previous marker
-    }
-    if (polygon) { 
-        polygon.disable(); 
-    }
-    if (line) { 
-        line.disable(); 
+    if (drawFeature) { // check an existing feature-draw exists
+        drawFeature.disable(); // disable it
     }
 }
 
-function addMarker(markertype) {
+function addFeature(type){
     disableExistingDraw();
-    marker = new L.Draw.Marker(map);
-    marker.options.icon = L.icon({
-        type: markertype.type,
-        iconUrl: './images/'+markertype.type+'-icon.'+markertype.img,
-        iconSize:     [32, 18], // size of the icon
-        iconAnchor:   [16, 9], // point of the icon which will correspond to marker's location
-        popupAnchor:  [0, -5], // point from which the popup should open relative to the iconAnchor
-    })
-    marker.enable();
+    var feat = Feature[type];
+    if (feat) {
+        switch (feat.family) {
+            case "marker":
+                drawFeature = new L.Draw.Marker(map);
+                drawFeature.options.icon = L.icon(feat.options.icon);
+                break;
+            case "polygon":
+                drawFeature = new CustomPoly(map, {shapeOptions: feat.options});
+                break;
+            case "polyline":
+                drawFeature = new CustomLine(map, {shapeOptions: feat.options});
+                break;
+        }
+        drawFeature.enable();
+    }
 }
 
-// Creating this as an extension of Draw.Polygon fixed an issue where overwriting options was wiping out the default Icon for vertexes
+// Defining Extensions of Draw objects solves some issues which arose around overwriting options/icons
+CustomMarker = L.Draw.Marker.extend({
+    options: {}
+});
+CustomLine = L.Draw.Polyline.extend({
+    options: {}
+});
 CustomPoly = L.Draw.Polygon.extend({
     options: {
         allowIntersection: false,
@@ -63,22 +42,6 @@ CustomPoly = L.Draw.Polygon.extend({
         stroke: false
     }
 });
-
-function addPolygon(polytype) {
-    disableExistingDraw();
-    polygon = new CustomPoly(map, polytype);
-    polygon.enable();
-}
-
-CustomLine = L.Draw.Polyline.extend({
-    options: {}
-});
-
-function addPolyline(linetype) {
-    disableExistingDraw();
-    line = new CustomLine(map, linetype);
-    line.enable();
-}
 
 // Returns JSON for the given features
 function buildGeoJSONFromFeatureLayer(features){
@@ -89,19 +52,16 @@ function buildGeoJSONFromFeatureLayer(features){
     features.eachLayer(function(category){
         var j = 0;
         category.eachLayer(function(layer){
-                drawnFeaturesJSON.features[i].geometry.features[j].properties = layer.properties;
-            });
+            drawnFeaturesJSON.features[i].geometry.features[j].properties = layer.properties;
+            j++;
+        });
         i++;
     });
     return drawnFeaturesJSON;
 }
 
-// sets the json into the text box and into the Firebase dataref
+// Saves GeoJSON for the current location
 function saveGeoJson(){
-//    var json = {};
-//    $.each(featureGroups, function(index, element){
-//        $.extend(json, buildGeoJSONFromFeatureLayer(element));
-//    })
     json = buildGeoJSONFromFeatureLayer(drawnItems);
     
     document.getElementById("JSONBox").value = JSON.stringify(json);

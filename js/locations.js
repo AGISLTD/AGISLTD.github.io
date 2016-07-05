@@ -1,18 +1,3 @@
-var quadsUrl = 'https://api.tiles.mapbox.com/v4/reubencm.a8s085tw/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw';
-
-var hungryCreekTiles = L.tileLayer(quadsUrl, {id: 'reubencm.a8s085tw', attribution: "AGIS", 
-                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'});
-var quadDangerLayer = L.tileLayer(quadsUrl, {id: 'reubencm.4654v47r', attribution: "AGIS", 
-                opacity: 0.7,
-                accessToken: 'pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiZjAwNTUwYzBiNWJmNTI5MGI0MWVlNjQxMGY2Mjc5MGIifQ.LlNHQjzO6j4arWcGxGhpZw'});
-//var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vblnt/{z}/{x}/{y}.png?access_token={token}', {
-//                attribution: 'AGIS',
-//                zIndex: 150,
-//                subdomains: ['a','b','c','d'],
-//                mapId: "reubencm.028vblnt",
-//                token: "pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q"});
-var waitawaTiles = L.tileLayer('https://{s}.tiles.mapbox.com/v4/reubencm.028vblnt/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmV1YmVuY20iLCJhIjoiY2ltenFlYTQwMDUxeXV3bTRpMnhvaWU3dCJ9.UnrbxqzwsbW0kcMO6mYD8Q');
-            
 // remove all overlays from LayersControl (keeping basemaps);
 function clearOverlays(){
     $.each(LayersControl._layers, function(index, layerEntry){
@@ -31,41 +16,38 @@ function loadOverlays(overlayRef){
     }
     // add overlay to LayersControl
     $.each(newOverlays, function(index, overlay){
-        LayersControl.addOverlay(L.tileLayer(overlay.tilesURL), overlay.name);
+        tilelayer = L.tileLayer(overlay.tilesURL, overlay.options);
+        LayersControl.addOverlay(tilelayer, overlay.name);
+        if (index == 0) { //always add the first overlay
+            map.addLayer(tilelayer);
+        }
     });
+    
 }
 
-    function loadMapboxTiles(){
-        //tileLayer.addTo(map);
-        overlays = {
-            "Waitawa": waitawaTiles,
-            "Hungry Creek": hungryCreekTiles,
-            "Quad No-Go Zone": quadDangerLayer
-        };
-//        LayersControl.addOverlay(waitawaTiles, "Waitawa Regional Park");
-//        LayersControl.addOverlay(hungryCreekTiles, "Hungry Creek");
-//        LayersControl.addOverlay(quadDangerLayer, "Quad No-Go Zone");
-        LayersControl.addOverlay(overlays);
-        
-        map.on("overlayadd", function(e) { // Remove this functionality - unnecessary for now
-//            if (e.layer == waitawaTiles) {
-//                var latlongBounds = [
-//                    [-36.94893148458695, 175.12945175170898],
-//                    [-36.92577767819879, 175.15494346618652]
-//                ];
-//                map.setMaxBounds(latlongBounds);
-//            } else if (e.layer == hungryCreekTiles) {
-//                var latlongBounds = [
-//                    [-36.531915750839985, 174.6809434890747],
-//                    [-36.50704910158377, 174.72617626190186]
-//                ];
-//                map.setMaxBounds(latlongBounds);
-//            }
-//            map.options.minZoom = 14;
-//            map.panTo(latlongBounds[0], {animate: true});
-        });
-        
+function setBounds(latlongBounds){
+    if (latlongBounds){
+        map.panTo(getCentreOfLatlngs(latlongBounds), {animate: true});
+        map.setMaxBounds(latlongBounds);
+        map.options.minZoom = 14;
+        map.setZoom(14);
+    } else { // reset all
+        map.panTo(AucklandLatLng, {animate: true});
+        map.setMaxBounds(null);
+        map.options.minZoom = null;
+        map.setZoom(9);
     }
+}
+
+function getCentreOfLatlngs(latlngs){
+    x = 0;
+    y = 0;
+    for (i = 0; i < latlngs.length; i++){
+        x += latlngs[i][0];
+        y += latlngs[i][1];
+    }
+    return [x/i, y/i];
+}
         
 
     function locationSwitch(sel){
@@ -86,56 +68,16 @@ function loadOverlays(overlayRef){
                             if (geojson.geometry.features){ // don't perform on empty (thus malformed) feature groups
                                 L.geoJson(geojson.geometry, {
                                     onEachFeature: function (feature, layer) {
-                                  layer.properties = feature.properties;
-                                  //layer.options = {};
-                                  switch (feature.properties.type) {
-                                      case "trough":
-                                      case "gate":
-                                      case "spill":
-                                      case "fire":
-                                      case "fuel":
-                                      case "health":
-                                      case "safety":
-                                      case "info":
-                                          layer.options.icon = L.icon({
-                                                type: feature.properties.type,
-                                                iconUrl: './images/'+feature.properties.type+'-icon.svg',
-                                                iconSize:     [32, 18], // size of the icon
-                                                iconAnchor:   [16, 9], // point of the icon which will correspond to marker's location
-                                                popupAnchor:  [0, -5], // point from which the popup should open relative to the iconAnchor
-                                            })
-                                          break;
-
-                                      case "field":
-                                          $.extend(layer.options, PolygonEnum.PADDOCK.shapeOptions); // add paddock styles to the feature
-            //                              layer.options.color = 'brown';
-            //                              layer.options.fillColor = 'green';
-            //                              layer.options.opacity = 0.2;
-                                          break;
-                                      case "nogozone":
-                                          layer.options.color = 'red';
-                                          layer.options.fillColor = 'red';
-                                          layer.options.opacity = 0.2;
-                                          break;
-
-                                      case "water":
-                                          layer.options.color = 'lightblue';
-                                          layer.options.weight = 7;
-                                          break;
-                                      case "quad":
-                                          layer.options.color = 'green';
-                                          layer.options.weight = 3;
-                                          break;
-                                      case "power":
-                                          layer.options.color = 'red';
-                                          layer.options.weight = 4;
-                                          break;
-                                  }
-                                if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
-                                    featureGroups[feature.properties.type].addLayer(layer);
-                                }
-                                addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
-                              }
+                                        layer.properties = feature.properties;
+                                        $.extend(layer.options, Feature[feature.properties.type].options); // Add symbology to the feature
+                                        if (layer.feature.geometry.type == "Point") {
+                                            layer.options.icon = L.icon(Feature[feature.properties.type].options.icon);
+                                        }
+                                        if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
+                                            featureGroups[feature.properties.type].addLayer(layer);
+                                        }
+                                        addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
+                                    }
                                 });
                             }
                         });
@@ -147,5 +89,8 @@ function loadOverlays(overlayRef){
         });
         locRef.child('overlays').once("value", function(data){
             loadOverlays(data);
+        });
+        locRef.child('bounds').once("value", function(data){
+            setBounds(data.val());
         });
     }
