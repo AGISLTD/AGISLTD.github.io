@@ -10,11 +10,10 @@
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
     <link rel="stylesheet" href="css/easy-button.css" />
     <link rel="stylesheet" href="css/site.css" />
-<!--    <link rel="stylesheet" href="css/w3.css" />-->
+    <link rel="stylesheet" href="css/w3.css" />
     <link rel="stylesheet" href="/css/leaflet.css" />
     <link rel="stylesheet" href="/css/leaflet.label.css" />
     <link rel="stylesheet" href="/css/jquery-ui.min.css">
-    
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
     <script src="/js/leaflet-src.js"></script> <!-- use leaflet.js in production -->
     <script src="/js/leaflet.label.js"></script> <!-- use leaflet.js in production -->
@@ -35,106 +34,51 @@
         storageBucket: "agis-map-editor.appspot.com",
       };
       firebase.initializeApp(config);
+        
     </script>
 </head>
-<body>
+<body class="w3-light-grey">
+<div class="w3-container w3-top w3-black w3-large w3-padding" style="z-index:4" id="topbar">
+  <button class="w3-btn w3-hide-large w3-padding-0 w3-hover-text-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <span class="w3-right">AGIS Map Editor</span>
+</div>
     
-<div class="box">
-  <div class="row header">
-    <p><b>AGIS Map Editor</b>
-  </div>
-  <div class="row content">
-    <div id="map" style="height:100%"></div>
-  </div>
-  <div id="panel"><div>
+<div class="w3-sidenav w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
+    <div class="w3-container">
         <div>
-            <div id="userLoginContainer">
-                <label for="email">Email</label>
-                <input type="text" id="email"><br>
-                <label for="password">Password</label>
-                <input type="password" id="password">
-            <br>
-            <button onclick="userLogin()">Login</button>
-                <a href="/register.html">Sign up</a>
-            </div>
-            <div id="logindeetz" style="display: none;">
-                <h4>You are logged in as <b><span id="fbName"></span></b></h4>
-                <button id="logoutButton" onclick="logout()">Logout</button>
-                <div id="locationContreainer">
-                    <select id="location" onchange="locationSwitch(this)">
-                        <option value="" disabled selected>Select Location</option>
-                    </select>
+            <div>
+                <div>
+                <div id="userLoginContainer">
+                    <label for="email">Email</label>
+                    <input type="text" id="email"><br>
+                    <label for="password">Password</label>
+                    <input type="password" id="password">
+                    <br>
+                    <button onclick="userLogin()">Login</button>
+                    <a href="/register.html">Sign up</a>
                 </div>
+                <div id="logindeetz" style="display: none;">
+                    <h4>You are logged in as <b><span id="fbName"></span></b></h4>
+                    <a href="/profile.html">Profile</a><br />
+                    <button id="logoutButton" onclick="logout()">Logout</button>
+                    <div id="locationContreainer">
+                        <select id="location" onchange="locationSwitch(this)">
+                            <option value="" disabled selected>Select Location</option>
+                        </select>
+                    </div>
+                </div>
+                </div>
+                <br />
+                <div id='featuregrid' class="accordion"></div>
+                <br>
+                <textarea id="JSONBox" style="width: 5px; height 5px" rows="1" cols="1" ></textarea>
             </div>
         </div>
-        <br />
-      <div id='featuregrid' class="accordion"></div>
-        <br />
-        <h4>Click buttons below to add features to the map</h4>
-        <div class="controlbuttons">
-        <table class="buttontable" style="width:100px">
-            <tbody>
-                <tr>
-                    <td>
-                        <div class="trough" onclick="addMarker(MarkerEnum.TROUGH)"></div>
-                    </td>
-                    <td>
-                        <div class="gate" onclick="addMarker(MarkerEnum.GATE)"></div>
-                    </td>
-                    <td>
-                        <div class="info" onclick="addMarker(MarkerEnum.INFO)"></div>
-                    </td>
-                    <td>
-                        <div class="fire" onclick="addMarker(MarkerEnum.FIRE)"></div>
-                    </td>
-                    <td>
-                        <div class="fuel" onclick="addMarker(MarkerEnum.FUEL)"></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="spill" onclick="addMarker(MarkerEnum.SPILL)"></div>
-                    </td>
-                    <td>
-                        <div class="health" onclick="addMarker(MarkerEnum.HEALTH)"></div>
-                    </td>
-                    <td>
-                        <div class="safety" onclick="addMarker(MarkerEnum.SAFETY)"></div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <table style="width:200px;">
-        <tbody>
-                <tr>
-                    <td>
-                    <button onclick="addPolygon(PolygonEnum.PADDOCK)" style="background:green;color:white;height:40px;">Paddock</button>
-                    </td>
-                    <td>
-                    <button onclick="addPolygon(PolygonEnum.NOGOZONE)" style="background:red;color:white;height:40px;">No-Go Zone</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <table style="width:160px">
-            <tr>
-                <td>
-                <button onclick="addPolyline(LineEnum.WATERWAY)" style="background:lightblue;height:40px;">Water Line</button>
-                </td>
-                <td>
-                <button onclick="addPolyline(LineEnum.QUADTRACK)" style="background:green;color:white;height:40px;">Quad Track</button>
-                </td>
-                <td>
-                <button onclick="addPolyline(LineEnum.POWERLINE)" style="background:red;color:white;height:40px;">Power Line</button>
-                </td>
-            </tr>
-        </table>
-            </div>
-        <br>
-        <br>
-        <textarea id="JSONBox" style="width: 5px; height 5px" rows="1" cols="1" ></textarea>
     </div>
-  </div>
+</div>
+    
+<div id='mappane' class="w3-main" style="margin-left:300px;">
+    <div id="map"></div>
 </div>
     
     <script>

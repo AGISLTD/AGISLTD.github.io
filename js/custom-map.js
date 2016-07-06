@@ -49,6 +49,15 @@ $(document).ready(function(){
         });
     });
     
+    //Resize leaflet map dynamically
+    var mapmargin = $('#topbar').outerHeight();
+    function resize(){
+        $('#map').css("height", ($(window).height() - mapmargin));    
+        $('#map').css("margin-top",mapmargin);
+    }
+    $(window).on("resize", resize);
+    resize();
+    
     LayersControl.addTo(map);
 });
 
@@ -327,6 +336,7 @@ function populateFeatureGrid(){
         });
         
         //accordionise our new feature menu grid thing
+    $('#featuregrid').accordion();
     $('#featuregrid').accordion("refresh" );
         
     }, function (err) {
