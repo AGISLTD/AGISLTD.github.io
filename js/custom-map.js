@@ -244,14 +244,27 @@ function populateFeatureGrid(){
     featureRef = rootRef.ref("/features/");
     featureRef.on('child_added', function (featureSnapshot) {
         // Will be called with a featureSnapshot for each child under the /features/ node
-        var div = document.createElement("div");
         $('#featuregrid').append('<h3>'+featureSnapshot.key +'</h3>');
+        var html = '<table><thead><tr></tr></thead><tbody>';
         $.each(featureSnapshot.val(), function(index, element){
+//            row = document.createElement("tr");
             featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
-            $(div).append('<p onclick="addFeature(\''+element.name+'\')">'+element.description+'<input featuretype='+element.name+' class="showLayer" type="checkbox" checked></p>');
+//            $(row).append('<td style="background-img:url(\''+element.options.icon.iconURL+'\')" onclick="addFeature(\''+element.name+'\')">'+element.description+'</td><td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>');
             Feature[element.name] = element; // save symbology for this feature type
+            
+                html += '<tr>';
+                if (element.options && element.options.icon){
+                    html += '<td class="buttontable" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
+                }else {
+                    html+= '<td '//no icon img for background
+                }
+                html += 'onclick="addFeature(\''+element.name+'\')">+</td>';
+                html += '<td>' + element.description + '</td>';
+                html += '<td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>';
+                html += "</tr>";
         });
-        $('#featuregrid').append(div);
+        html += '</tbody></table>';
+        $(html).appendTo('#featuregrid');
         addFeatureGroupsToParentGroup();
         
         // add show/hide functionality to the checkboxes we added
