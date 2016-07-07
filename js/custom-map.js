@@ -2,7 +2,7 @@ var map;
 var drawControl; // Edit/Delete controls
 var location;
 var AucklandLatLng = [-36.8485, 174.7633];
-
+var labelMarkerDic = {};
 $(document).ready(function(){
     $('#Username').keypress(function(e){
               if(e.keyCode==13)
@@ -16,7 +16,6 @@ $(document).ready(function(){
 		});
     
     GeoJSONControl.addTo(map);
-    map.addControl(printControl);
     
     // Add relevant data / icons / labels for new feature created
     map.on('draw:created', function (e) {
@@ -48,6 +47,20 @@ $(document).ready(function(){
             featureGroups[layer.properties.type].removeLayer(layer);
         });
     });
+    
+    // Check for corresponding labels to add/remove along with layer being add/removed
+    map.on('layeradd', function(e){
+        id = e.layer._leaflet_id
+        if (labelMarkerDic[id]){
+            map.addLayer(labelMarkerDic[id]);
+        }
+    });
+    map.on('layerremove', function(e){
+        id = e.layer._leaflet_id
+        if (labelMarkerDic[id]){
+            map.removeLayer(labelMarkerDic[id]);
+        }
+    })
     
     //Resize leaflet map dynamically
     var mapmargin = $('#topbar').outerHeight();
@@ -98,20 +111,31 @@ function saveFeatureDetails(featureType, featureID) {
 }
 
 function addLabelsToFeature(feature, labeltext, details){
-    
+    // add the details popup
     if (details) {
         feature.bindPopup(details);
     }
     
+    // add the overlay label
     if (labeltext) {
         if (feature._latlng){ // hacky way to check if it's a point marker, rather than line or poly
-            feature.bindLabel(labeltext, { noHide: true });
+            feature.bindLabel(labeltext, { noHide: true, className: 'markerLabel' });
             feature.showLabel();
         } else {
+            var latlng, classname;
+            if (feature.options.polyType) {
+                latlng = getLatLng(feature);
+                classname = "polyLabel";
+            }
+            if (feature.options.lineType)  {
+                latlng = feature._latlngs[0];
+                classname = "lineLabel";
+            }
             // create a 'ghost marker' to bind the label to
-            var marker = new L.marker(feature.getBounds().getNorthWest(), { opacity: 0.01 });
-            marker.bindLabel(labeltext, {noHide: true, className: "my-label", offset: [0, 0] });
+            var marker = new L.marker(latlng, { opacity: 0.01, draggable: true, icon: L.divIcon({className: 'labelDragHandle', iconAnchor: [0,0]}) });
+            marker.bindLabel(labeltext, {noHide: true, className: classname, offset: [-20, -15] });
             labels.addLayer(marker);
+            labelMarkerDic[feature._leaflet_id] = marker;
             //labels.addTo(map);
             marker.showLabel();
         }
@@ -127,97 +151,6 @@ GeoJSONControl.onAdd = function (map) {
     this._div.innerHTML = '<button id="savebutton" onclick="saveGeoJson()">Save</button>';
     return this._div;
 };
-
-//GeoServer Print Controls
-var printProvider = L.print.provider({
-   method: 'GET',
-//           url: 'http://localhost:8080/geoserver/pdf',
-    capabilities: {
-        scales: [
-        {
-        name: "1:25,000",
-        value: "25000.0"
-        },
-        {
-        name: "1:50,000",
-        value: "50000.0"
-        },
-        {
-        name: "1:100,000",
-        value: "100000.0"
-        },
-        {
-        name: "1:200,000",
-        value: "200000.0"
-        },
-        {
-        name: "1:500,000",
-        value: "500000.0"
-        },
-        {
-        name: "1:1,000,000",
-        value: "1000000.0"
-        },
-        {
-        name: "1:2,000,000",
-        value: "2000000.0"
-        },
-        {
-        name: "1:4,000,000",
-        value: "4000000.0"
-        }
-        ],
-        dpis: [
-        {
-        name: "75",
-        value: "75"
-        },
-        {
-        name: "150",
-        value: "150"
-        },
-        {
-        name: "300",
-        value: "300"
-        }
-        ],
-        outputFormats: [
-        {
-        name: "pdf"
-        }
-        ],
-        layouts: [
-        {
-        name: "A4 portrait",
-        map: {
-        width: 440,
-        height: 483
-        },
-        rotation: true
-        },
-        {
-        name: "Legal",
-        map: {
-        width: 440,
-        height: 483
-        },
-        rotation: false
-        }
-        ],
-        printURL: "http://localhost:8080/geoserver/pdf/print.pdf",
-        createURL: "http://localhost:8080/geoserver/pdf/create.json"
-        },
-    customParams: {
-        mapTitle: "Printing Demo",
-        comment: "This is a simple map printed from GeoExt."
-    },
-   autoLoad: true,
-   dpi: 300
-});
-var printControl = L.control.print({
-   provider: printProvider
-});
-
 
 // Base Maps
 var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -361,6 +294,7 @@ function userLogin() {
     
     firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
+        $( "#dialog-login" ).dialog("close");
         $('#userLoginContainer').hide();
         $('#fbName').text(user.email);
         $('#logindeetz').show();
@@ -368,6 +302,7 @@ function userLogin() {
         $('#userLoginContainer').show();
         $('#logindeetz').hide();
         resetLayers();
+        $( "#dialog-login" ).dialog("open");
     }
     });
 }

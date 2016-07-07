@@ -40,7 +40,7 @@
 <body class="w3-light-grey">
 <div class="w3-container w3-top w3-black w3-large w3-padding" style="z-index:4" id="topbar">
   <button class="w3-btn w3-hide-large w3-padding-0 w3-hover-text-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
-  <span class="w3-right">AGIS Map Editor</span>
+  <img class="w3-left logo" src="images/aklcncl_logo.png"><h3 class="header-title">Regional Parks Mapping Tool</h3>
 </div>
     
 <div class="w3-sidenav w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
@@ -48,25 +48,16 @@
         <div>
             <div>
                 <div>
-                <div id="userLoginContainer">
-                    <label for="email">Email</label>
-                    <input type="text" id="email"><br>
-                    <label for="password">Password</label>
-                    <input type="password" id="password">
-                    <br>
-                    <button onclick="userLogin()">Login</button>
-                    <a href="/register.html">Sign up</a>
-                </div>
-                <div id="logindeetz" style="display: none;">
-                    <h4>You are logged in as <b><span id="fbName"></span></b></h4>
-                    <a href="/profile.html">Profile</a><br />
-                    <button id="logoutButton" onclick="logout()">Logout</button>
-                    <div id="locationContreainer">
-                        <select id="location" onchange="locationSwitch(this)">
-                            <option value="" disabled selected>Select Location</option>
-                        </select>
+                    <div id="logindeetz" style="display: none;">
+                        <p>Hi, <span id="fbName"></span>
+                        <a href="#" onclick="logout()">Logout</a></p>
+<!--                        <a href="/profile.html">Profile</a><br />-->
+                        <div id="locationContreainer">
+                            <select id="location" onchange="locationSwitch(this)">
+                                <option value="" disabled selected>Select Location</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
                 </div>
                 <br />
                 <div id='featuregrid' class="accordion"></div>
@@ -80,6 +71,45 @@
 <div id='mappane' class="w3-main" style="margin-left:300px;">
     <div id="map"></div>
 </div>
+    
+    <div id="printFooter">
+    <p>Footer: AGIS and Mapbox Attributions Here</p>
+    </div>
+    
+<div id="dialog-login" title="Log in">
+    <div id="userLoginContainer">
+        <label for="email">Email</label><br />
+        <input type="text" id="email" style="width:90%;"><br>
+        <label for="password">Password</label><br />
+        <input type="password" id="password" style="width:90%;">
+        <br><br />
+        <button onclick="userLogin()">Login</button><br /><br />
+        <a href="/register.html">Sign up</a><br />
+        <a href="#">Forgotten Password</a>
+        <label class="validateTips"></label>
+    </div>
+</div>
+<script>
+    dialog = $( "#dialog-login" ).dialog({
+      autoOpen: true,
+      height: 250,
+      width: 350,
+      modal: true,
+      draggable: false,
+      resizable: false,
+      dialogClass: "no-close"
+//      buttons: {
+//        "Login": userLogin,
+//        Cancel: function() {
+//          dialog.dialog( "close" );
+//        }
+//      },
+//      close: function() {
+//        form[ 0 ].reset();
+//        allFields.removeClass( "ui-state-error" );
+//      }
+    });
+</script>
     
     <script>
   window.fbAsyncInit = function() {

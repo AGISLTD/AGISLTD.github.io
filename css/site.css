@@ -71,3 +71,77 @@
     width: 50px;
     height: 50px;
 }
+
+#printFooter {
+    display: none;
+}
+
+/*Print*/
+@media print {
+    * {
+        visibility: hidden
+    }
+    div#map {
+        background-color: white;
+        height: 100% !important;
+        width: 100% !important;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        margin: 0;
+    }
+    div#map * {
+        visibility: visible;
+    }
+    
+    #printFooter {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 9999999;
+    }
+    
+    .leaflet-control-container{
+        display: none;
+    }
+}
+
+#topbar>.logo{
+    height: 60px;
+}
+
+#topbar .header-title {
+    color: #dbddd9;
+    padding-left: 7em;
+}
+
+/* Map Labels */
+
+.polyLabel{
+/*    color: 'yellow';*/
+}
+.markerLabel{
+/*    color: 'yellow';*/
+}
+.lineLabel{
+/*    color: 'yellow';*/
+}
+
+.labelDragHandle{
+    height: 30px !important;
+    width: 30px !important;
+}
+.labelDragHandle:hover{
+    cursor:move;
+}
+
+/*JQuery UI stuff*/
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+.ui-state-active{
+    background: #48abe7 !important;
+    border-color: #48abe7 !important;
+}

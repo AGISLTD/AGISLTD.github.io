@@ -11,6 +11,7 @@ function disableExistingDraw() {
 function addFeature(type){
     disableExistingDraw();
     var feat = Feature[type];
+    drawFeature = null;
     if (feat) {
         switch (feat.family) {
             case "marker":
