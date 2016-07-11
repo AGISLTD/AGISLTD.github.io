@@ -69,14 +69,18 @@ function getCentreOfLatlngs(latlngs){
                                 L.geoJson(geojson.geometry, {
                                     onEachFeature: function (feature, layer) {
                                         layer.properties = feature.properties;
-                                        $.extend(layer.options, Feature[feature.properties.type].options); // Add symbology to the feature
-                                        if (layer.feature.geometry.type == "Point") {
-                                            layer.options.icon = L.icon(Feature[feature.properties.type].options.icon);
+                                        if (Feature[feature.properties.type]){// Skip features not in our Feature-definitions
+                                            $.extend(layer.options, Feature[feature.properties.type].options); // Add symbology to the feature
+                                            if (layer.feature.geometry.type == "Point") {
+                                                layer.options.icon = L.icon(Feature[feature.properties.type].options.icon);
+                                            }
+                                            if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
+                                                featureGroups[feature.properties.type].addLayer(layer);
+                                            }
+                                            addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
+                                        } else {
+                                            console.log("GeoJSON contained unkown feature: "+feature.properties.type);
                                         }
-                                        if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
-                                            featureGroups[feature.properties.type].addLayer(layer);
-                                        }
-                                        addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
                                     }
                                 });
                             }

@@ -38,31 +38,34 @@
     </script>
 </head>
 <body class="w3-light-grey">
-<div class="w3-container w3-top w3-black w3-large w3-padding" style="z-index:4" id="topbar">
+<div class="w3-container w3-top w3-dark-grey w3-large w3-padding" style="z-index:4" id="topbar">
   <button class="w3-btn w3-hide-large w3-padding-0 w3-hover-text-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
-  <img class="w3-left logo" src="images/agis_logo.png"><h3 class="header-title">Regional Parks Mapping Tool</h3>
-</div>
+  <img class="w3-left logo" src="images/ac_web_app_log.png">
     
-<div class="w3-sidenav w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
-    <div class="w3-container">
+    <a href="http://www.agis.co.nz" target="_blank"><img class="w3-right companylogo" src="images/Agis_web_logo_buffer.png"></a>
+<div id="userDetails" class="w3-right w3-medium">
+        <p>Hi, <span id="fbName"></span><br />
+        <a href="#" onclick="logout()">Logout</a></p>
+    </div>
+    </div>
+    
+<div class="w3-sidenav w3-collapse w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
+    <div class="w3-container" style="padding:1em">
         <div>
             <div>
-                <div>
-                    <div id="logindeetz" style="display: none;">
-                        <p>Hi, <span id="fbName"></span>
-                        <a href="#" onclick="logout()">Logout</a></p>
+                <div id="mapControls">
 <!--                        <a href="/profile.html">Profile</a><br />-->
-                        <div id="locationContreainer">
-                            <select id="location" onchange="locationSwitch(this)">
-                                <option value="" disabled selected>Select Location</option>
-                            </select>
-                        </div>
+                    <div id="locationContainer" class="w3-container">
+                        <select class="w3-select" id="location" onchange="locationSwitch(this)">
+                            <option value="" disabled selected>Select Location</option>
+                        </select>
                     </div>
+
+                    <br />
+                    <div id='featuregrid' class="accordion"></div>
+                    <br>
                 </div>
-                <br />
-                <div id='featuregrid' class="accordion"></div>
-                <br>
-                <textarea id="JSONBox" style="width: 5px; height 5px" rows="1" cols="1" ></textarea>
+                <textarea id="JSONBox" style="display:none;width: 5px; height 5px" rows="1" cols="1" ></textarea>
             </div>
         </div>
     </div>

@@ -15,21 +15,6 @@
     font-variant: small-caps;
 }
 
-.buttontable div {
-  background-position: 50% 50%;
-  background-repeat: no-repeat;
-    cursor: pointer;
-}
-.buttontable div:hover {
-    border: 2px solid black;
-}
-
-.buttontable{
-    background-size: 50px 50px;
-    width: 50px;
-    height: 50px;
-}
-
 #printFooter {
     display: none;
 }
@@ -64,15 +49,81 @@
         display: none;
     }
 }
-
+#topbar {
+    height: 80px;
+}
 #topbar>.logo{
-    height: 60px;
+    height: 80px;
+    position: fixed;
+    left: 0;
+    top: 0;
 }
 
 #topbar .header-title {
     color: #dbddd9;
     padding-left: 7em;
 }
+
+#topbar .companylogo {
+  -webkit-transform: translateY(30%);
+  -ms-transform: translateY(30%);
+  transform: translateY(30%);
+  height: 40px;
+}
+
+#userDetails {
+    display: none;
+    padding-right:1em;
+    text-align: right;
+}
+
+#location {
+    font-weight: bold;
+}
+
+/*Feature Grid*/
+.accordionDiv {
+    padding: .7em .5em !important;
+}
+.accordionDiv h3 {
+    text-transform: capitalize;
+}
+.featureTable>tbody>tr{
+    cursor: pointer;
+}
+.featureTable>tbody>tr:hover {
+    background-color:beige;
+}
+.featurebutton {
+background-size: 40px 40px;
+width: 50px;
+height: 50px;
+background-position: 50% 50%;
+background-repeat: no-repeat;
+}
+
+#featuregrid>h3 {
+    background-color: transparent;
+    border: none;
+    border-bottom: solid black 1px;
+    color: black;
+    font-weight: bold;
+}
+#featuregrid>h3.ui-state-active {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border: none;
+    border-bottom: solid blue 3px;
+    color: black;
+    font-weight: bold;
+}
+
+.ui-state-active .ui-icon {
+    background-image: url("images/ui-icons_444444_256x240.png") !important;
+}
+#featuregrid>h3:hover {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
 
 /* Map Labels */
 

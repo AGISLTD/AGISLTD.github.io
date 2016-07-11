@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 15.300323 15.300788"
+   height="15.300788"
+   width="15.300323"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="Gate.svg">
+  <metadata
+     id="metadata14">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>cross-15.svg</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs12" />
+  <sodipodi:namedview
+     pagecolor="#ffff53"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     id="namedview10"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="12.421053"
+     inkscape:cx="7.5696528"
+     inkscape:cy="7.7309"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <title
+     id="title4">cross-15.svg</title>
+  <rect
+     x="-1.9303472"
+     y="-1.9301121"
+     width="19"
+     height="19"
+     id="rect6"
+     style="fill:none" />
+  <path
+     inkscape:connector-curvature="0"
+     style="fill:#ffffff;stroke:#ffffff;stroke-width:2.29999995;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M 2.7901613,1.42 7.6501615,6.28 12.490162,1.44 c 0.1714,-0.1824 0.4097,-0.2871 0.66,-0.29 0.5523,0 1,0.4477 1,1 0.0047,0.2478 -0.093,0.4866 -0.27,0.66 L 8.9901618,7.6499996 13.880162,12.54 c 0.1648,0.1612 0.2615,0.3796 0.27,0.61 0,0.5523 -0.4477,1 -1,1 -0.2577,0.0107 -0.508,-0.0873 -0.69,-0.27 L 7.6501615,9.0199999 2.8001613,13.87 c -0.1707,0.1763 -0.4047,0.2771 -0.65,0.28 -0.5523,0 -1,-0.4477 -1,-1 -0.0047,-0.2478 0.093,-0.4866 0.27,-0.66 L 6.3101615,7.6499996 1.4201613,2.76 c -0.1648,-0.1612 -0.2615,-0.3796 -0.27,-0.61 0,-0.5523 0.4477,-1 1,-1 0.2404,0.0029 0.4701,0.0998 0.64,0.27 z"
+     id="path8-3" />
+  <path
+     d="m 2.7096528,1.3398879 4.86,4.86 4.8400002,-4.84 c 0.1714,-0.1824 0.4097,-0.2871 0.66,-0.29 0.5523,0 1,0.4477 1,1 0.0047,0.2478 -0.093,0.4866 -0.27,0.66 l -4.8900002,4.84 4.8900002,4.8900001 c 0.1648,0.1612 0.2615,0.3796 0.27,0.61 0,0.5523 -0.4477,1 -1,1 -0.2577,0.0107 -0.508,-0.0873 -0.69,-0.27 l -4.8100002,-4.8600001 -4.85,4.8500001 c -0.1707,0.1763 -0.4047,0.2771 -0.65,0.28 -0.5523,0 -1,-0.4477 -1,-1 -0.0047,-0.2478 0.093,-0.4866 0.27,-0.66 l 4.89,-4.8400001 -4.89,-4.89 c -0.1648,-0.1612 -0.2615,-0.3796 -0.27,-0.61 0,-0.5523 0.4477,-1 1,-1 0.2404,0.0029 0.4701,0.0998 0.64,0.27 z"
+     id="path8"
+     inkscape:connector-curvature="0"
+     style="fill:#000000" />
+</svg>

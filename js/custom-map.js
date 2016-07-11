@@ -3,6 +3,7 @@ var drawControl; // Edit/Delete controls
 var location;
 var AucklandLatLng = [-36.8485, 174.7633];
 var labelMarkerDic = {};
+var accordionOptions = {collapsible: true,animate: false,heightStyle: "content"};
 $(document).ready(function(){
     $('#Username').keypress(function(e){
               if(e.keyCode==13)
@@ -12,7 +13,7 @@ $(document).ready(function(){
     map = L.map('map', {
 			center: AucklandLatLng,
 			zoom: 10,
-			layers: [grayscale]
+			layers: [linz]
 		});
     
     GeoJSONControl.addTo(map);
@@ -69,13 +70,13 @@ $(document).ready(function(){
         $('#map').css("margin-top",mapmargin);
     }
     $(window).on("resize", resize);
-    resize();
+    window.dispatchEvent(new Event('resize'));
     
     LayersControl.addTo(map);
 });
 
 // Bind UI
-$('.accordion').accordion();
+$('.accordion').accordion(accordionOptions);
 
 // Asks user for details about the Feature they just added
 function askForFeatureDetails(layer) {
@@ -244,27 +245,38 @@ function populateFeatureGrid(){
     featureRef = rootRef.ref("/features/");
     featureRef.on('child_added', function (featureSnapshot) {
         // Will be called with a featureSnapshot for each child under the /features/ node
-        $('#featuregrid').append('<h3>'+featureSnapshot.key +'</h3>');
-        var html = '<table><thead><tr></tr></thead><tbody>';
-        $.each(featureSnapshot.val(), function(index, element){
-//            row = document.createElement("tr");
-            featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
-//            $(row).append('<td style="background-img:url(\''+element.options.icon.iconURL+'\')" onclick="addFeature(\''+element.name+'\')">'+element.description+'</td><td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>');
-            Feature[element.name] = element; // save symbology for this feature type
-            
-                html += '<tr>';
-                if (element.options && element.options.icon){
-                    html += '<td class="buttontable" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
-                }else {
-                    html+= '<td '//no icon img for background
-                }
-                html += 'onclick="addFeature(\''+element.name+'\')">+</td>';
-                html += '<td>' + element.description + '</td>';
-                html += '<td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>';
-                html += "</tr>";
+        $('#featuregrid').append('<h3>'+featureSnapshot.val().name +'</h3>');
+        var div = document.createElement('div');
+        div.className = "accordion accordionDiv";
+        featureSnapshot.forEach(function(childSnapshot){
+            featureArray = childSnapshot.val();
+            if ($.isArray(featureArray)){
+                $(div).append('<h3>'+childSnapshot.key +'</h3>');
+                var html = '<table class="featureTable"><thead><tr></tr></thead><tbody>';
+                $.each(featureArray, function(index, element){
+        //            row = document.createElement("tr");
+                    featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
+        //            $(row).append('<td style="background-img:url(\''+element.options.icon.iconURL+'\')" onclick="addFeature(\''+element.name+'\')">'+element.description+'</td><td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>');
+                    Feature[element.name] = element; // save symbology for this feature type
+
+                        html += '<tr onclick="addFeature(\''+element.name+'\')">';
+                        if (element.options && element.options.icon){
+                            html += '<td class="featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
+                        }else {
+                            html+= '<td class="featurebutton" '//no icon img for background
+                        }
+                        html += '></td>';
+                        html += '<td>' + element.description + '</td>';
+                        html += '<td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>';
+                        html += "</tr>";
+                });
+                html += '</tbody></table>';
+                $(html).appendTo($(div));
+                $(div).appendTo('#featuregrid');
+                $(div).accordion(accordionOptions);
+                $(div).accordion("refresh" );
+            }
         });
-        html += '</tbody></table>';
-        $(html).appendTo('#featuregrid');
         addFeatureGroupsToParentGroup();
         
         // add show/hide functionality to the checkboxes we added
@@ -282,7 +294,6 @@ function populateFeatureGrid(){
         });
         
         //accordionise our new feature menu grid thing
-    $('#featuregrid').accordion();
     $('#featuregrid').accordion("refresh" );
         
     }, function (err) {
@@ -310,10 +321,12 @@ function userLogin() {
         $( "#dialog-login" ).dialog("close");
         $('#userLoginContainer').hide();
         $('#fbName').text(user.email);
-        $('#logindeetz').show();
+        $('#userDetails').show();
+        $('#mapControls').show();
     } else {
         $('#userLoginContainer').show();
-        $('#logindeetz').hide();
+        $('#userDetails').hide();
+        $('#mapControls').hide();
         resetLayers();
         $( "#dialog-login" ).dialog("open");
     }
