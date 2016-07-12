@@ -7,7 +7,9 @@ function clearOverlays(){
         }
     });
 }
-function loadOverlays(overlayRef){
+
+//Loads the overlays which are defined in the database
+function loadOverlays(overlayRef, centrePoint){
     clearOverlays();
     newOverlays = overlayRef.val();
     if (undefined == overlayRef.val()){
@@ -22,7 +24,6 @@ function loadOverlays(overlayRef){
             map.addLayer(tilelayer);
         }
     });
-    
 }
 
 function setBounds(latlongBounds){
@@ -37,6 +38,7 @@ function setBounds(latlongBounds){
         map.options.minZoom = null;
         map.setZoom(9);
     }
+    addPropertyBoundariesOverlay(getCentreOfLatlngs(latlongBounds));
 }
 
 function getCentreOfLatlngs(latlngs){
@@ -79,7 +81,7 @@ function getCentreOfLatlngs(latlngs){
                                             }
                                             addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
                                         } else {
-                                            console.log("GeoJSON contained unkown feature: "+feature.properties.type);
+                                            console.log("GeoJSON contained unknown feature: "+feature.properties.type);
                                         }
                                     }
                                 });

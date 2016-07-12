@@ -1,6 +1,7 @@
 var map;
 var drawControl; // Edit/Delete controls
 var location;
+var uid = null;
 var AucklandLatLng = [-36.8485, 174.7633];
 var labelMarkerDic = {};
 var accordionOptions = {collapsible: true,animate: false,heightStyle: "content"};
@@ -74,9 +75,9 @@ $(document).ready(function(){
     
     LayersControl.addTo(map);
 });
-
-// Bind UI
-$('.accordion').accordion(accordionOptions);
+//
+//// Bind UI
+//$('.accordion').accordion(accordionOptions);
 
 // Asks user for details about the Feature they just added
 function askForFeatureDetails(layer) {
@@ -196,11 +197,12 @@ function populateLocations(){
     
     // add option for each location
     locationsRef = rootRef.ref("/location/");
-    locationsRef.once('value', function (locationSnapshot) {
-        locations = locationSnapshot.val();
-        $.each(locations, function(index, element){
-            $('#location').append('<option value='+index+'>'+element.name+'</option>');
-        });
+    viewableLocsRed = rootRef.ref("/roles/"+uid+"/view/");
+    viewableLocsRed.on('child_added', function (element) {
+        locationsRef.child(element.key).once("value", function(loc){
+            $('#location').append('<option value='+loc.key+'>'+loc.val().name+'</option>');
+            $('#mapControls').show();
+        })
     });
 }
 
@@ -294,6 +296,7 @@ function populateFeatureGrid(){
         });
         
         //accordionise our new feature menu grid thing
+    $('#featuregrid').accordion(accordionOptions);
     $('#featuregrid').accordion("refresh" );
         
     }, function (err) {
@@ -322,7 +325,6 @@ function userLogin() {
         $('#userLoginContainer').hide();
         $('#fbName').text(user.email);
         $('#userDetails').show();
-        $('#mapControls').show();
     } else {
         $('#userLoginContainer').show();
         $('#userDetails').hide();
@@ -351,7 +353,9 @@ function logout(){
 }
 
 
-function userSwitch(val) {      
+
+function userSwitch(val) {     
+    uid = val; 
     
     if (val == -1) {//logout
         resetLayers();
@@ -361,4 +365,39 @@ function userSwitch(val) {
 
     // set userRef
     userRef = rootRef.ref("/user/"+val);
+}
+
+
+
+// Builds a GeoJSON layer of property title boundaries, from LINZ WFS - adds to Overlay control.
+function addPropertyBoundariesOverlay(mapCentre){
+// GeoJSON from WFS code (from https://stackoverflow.com/questions/25187937/loading-geojson-layers-from-geoserver-to-leaflet-map-based-on-the-current-boundi)
+    var geoJsonUrl = 'http://api.data.linz.govt.nz/api/vectorQuery.json';
+    var parameters = {
+        key: '780af066229e4b63a8f9408cc13c31e8',
+        layer: '804',
+        x: mapCentre[1],
+        y: mapCentre[0],
+        radius: 10000,
+        max_results: '100',
+        geometry: 'true',
+        with_field_names: 'true'
+    };
+
+    $.ajax({
+        url: geoJsonUrl + L.Util.getParamString(parameters),
+//        url: 'http://api.data.linz.govt.nz/api/vectorQuery.json?key=780af066229e4b63a8f9408cc13c31e8&layer=804&x=175.13902664162185&y=-37.80180293956146&max_results=3&radius=10000&geometry=true&with_field_names=true',
+        datatype: 'jsonp',
+        jsonCallback: 'getJson',
+        success: function(data){
+            var geojsonBoundariesLayer = new L.GeoJSON(data.vectorQuery.layers[804],
+                { // Sets the style of the Property Boundary GeoJSON features
+                onEachFeature: function (feature, layer) {
+                            $.each(layer._layers, function(index, element){
+                                $.extend(element.options, {color: 'black', fillOpacity: '0'}); // overwrite default settings with our own specs
+                            });
+                        }});
+            LayersControl.addOverlay(geojsonBoundariesLayer, "Property Title Boundaries");
+        }
+        });
 }
