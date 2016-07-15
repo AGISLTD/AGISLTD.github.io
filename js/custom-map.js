@@ -18,6 +18,7 @@ $(document).ready(function(){
 		});
     
     GeoJSONControl.addTo(map);
+    map.addControl(printControl);
     
     // Add relevant data / icons / labels for new feature created
     map.on('draw:created', function (e) {
@@ -74,6 +75,22 @@ $(document).ready(function(){
     window.dispatchEvent(new Event('resize'));
     
     LayersControl.addTo(map);
+    
+    //CORS http://gis.stackexchange.com/questions/30403/geoext-and-mapfish-print-on-other-domain-cant-get-how-to-proxy
+    var cors_api_host = 'cors-anywhere.herokuapp.com';
+    var cors_api_url = 'https://' + cors_api_host + '/';
+    var slice = [].slice;
+    var origin = window.location.protocol + '//' + window.location.host;
+    var open = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+        var args = slice.call(arguments);
+        var targetOrigin = /^https?:\/\/([^\/]+)/i.exec(args[1]);
+        if (targetOrigin && targetOrigin[0].toLowerCase() !== origin &&
+            targetOrigin[1] !== cors_api_host) {
+            args[1] = cors_api_url + args[1];
+        }
+        return open.apply(this, args);
+    };
 });
 //
 //// Bind UI
@@ -153,6 +170,97 @@ GeoJSONControl.onAdd = function (map) {
     this._div.innerHTML = '<button id="savebutton" onclick="saveGeoJson()">Save</button>';
     return this._div;
 };
+
+//GeoServer Print Controls
+var printProvider = L.print.provider({
+//   method: 'GET',
+   method: 'POST',
+    autoOpen: true,
+    capabilities: {
+        scales: [
+        {
+        name: "1:25,000",
+        value: "25000.0"
+        },
+        {
+        name: "1:50,000",
+        value: "50000.0"
+        },
+        {
+        name: "1:100,000",
+        value: "100000.0"
+        },
+        {
+        name: "1:200,000",
+        value: "200000.0"
+        },
+        {
+        name: "1:500,000",
+        value: "500000.0"
+        },
+        {
+        name: "1:1,000,000",
+        value: "1000000.0"
+        },
+        {
+        name: "1:2,000,000",
+        value: "2000000.0"
+        },
+        {
+        name: "1:4,000,000",
+        value: "4000000.0"
+        }
+        ],
+        dpis: [
+        {
+        name: "75",
+        value: "75"
+        },
+        {
+        name: "150",
+        value: "150"
+        },
+        {
+        name: "300",
+        value: "300"
+        }
+        ],
+        outputFormats: [
+        {
+        name: "pdf"
+        }
+        ],
+        layouts: [
+        {
+        name: "A4 portrait",
+        map: {
+        width: 440,
+        height: 483
+        },
+        rotation: true
+        },
+        {
+        name: "Legal",
+        map: {
+        width: 440,
+        height: 483
+        },
+        rotation: false
+        }
+        ],
+        printURL: "http://localhost:8080/geoserver/pdf/print.pdf",
+        createURL: "http://localhost:8080/geoserver/pdf/create.json"
+        },
+    customParams: {
+        mapTitle: "Printing Demo",
+        comment: "This is a simple map printed from GeoExt."
+    },
+   autoLoad: true,
+   dpi: 300
+});
+var printControl = L.control.print({
+   provider: printProvider
+});
 
 // Base Maps
 var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -306,7 +414,11 @@ function populateFeatureGrid(){
 
 
 function userLogin() {
-    firebase.auth().signInWithEmailAndPassword($("#email").val(), $("#password").val()).catch(function(error) {
+    var email = $("#email").val();
+    if (email.indexOf('@') == -1){ // Not an email address. Assume they're entering a Username only
+        email = email+'@agis.co.nz';
+    }
+    firebase.auth().signInWithEmailAndPassword(email, $("#password").val()).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
