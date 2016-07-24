@@ -40,14 +40,14 @@ $(document).ready(function(){
 			featureGroups[featuretype].addLayer(layer);
         
             layer.properties = {};
-            layer.properties.type = featuretype;
+            layer.properties.LeafType = featuretype;
             askForFeatureDetails(layer);
 		});
     
     // Delete removes layers from drawnItems - we need to remove them from their featureGroup as well
     map.on('draw:deleted', function(e){
         e.layers.eachLayer(function(layer){
-            featureGroups[layer.properties.type].removeLayer(layer);
+            featureGroups[layer.properties.LeafType].removeLayer(layer);
         });
     });
     
@@ -75,22 +75,6 @@ $(document).ready(function(){
     window.dispatchEvent(new Event('resize'));
     
     LayersControl.addTo(map);
-    
-    //CORS http://gis.stackexchange.com/questions/30403/geoext-and-mapfish-print-on-other-domain-cant-get-how-to-proxy
-    var cors_api_host = 'cors-anywhere.herokuapp.com';
-    var cors_api_url = 'https://' + cors_api_host + '/';
-    var slice = [].slice;
-    var origin = window.location.protocol + '//' + window.location.host;
-    var open = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        var args = slice.call(arguments);
-        var targetOrigin = /^https?:\/\/([^\/]+)/i.exec(args[1]);
-        if (targetOrigin && targetOrigin[0].toLowerCase() !== origin &&
-            targetOrigin[1] !== cors_api_host) {
-            args[1] = cors_api_url + args[1];
-        }
-        return open.apply(this, args);
-    };
 });
 //
 //// Bind UI
@@ -99,7 +83,7 @@ $(document).ready(function(){
 // Asks user for details about the Feature they just added
 function askForFeatureDetails(layer) {
     var detailsPopup = L.popup();
-    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.type.toUpperCase()+'\'"/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.type+'\','+layer._leaflet_id+')"/>';
+    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
     detailsPopup.setContent(content);
     detailsPopup.setLatLng(getLatLng(layer)); //calculated based on the e.layertype
     detailsPopup.openOn(map);
@@ -122,8 +106,8 @@ function saveFeatureDetails(featureType, featureID) {
         var sName = document.getElementById("shapeName").value;
         var sDetails = document.getElementById("shapeDesc").value;
      //drawnItems is a container for the drawn objects
-        feature.properties.name = sName;
-        feature.properties.details = sDetails;
+        feature.properties.LeafLabel = sName;
+        feature.properties.LeafDetails = sDetails;
         addLabelsToFeature(feature, sName, sDetails);
     }
     map.closePopup();
@@ -173,90 +157,222 @@ GeoJSONControl.onAdd = function (map) {
 
 //GeoServer Print Controls
 var printProvider = L.print.provider({
-//   method: 'GET',
-   method: 'POST',
-    autoOpen: true,
+//   url: 'http://localhost:8080/print-servlet-2.0.0/',
     capabilities: {
-        scales: [
-        {
-        name: "1:25,000",
-        value: "25000.0"
-        },
-        {
-        name: "1:50,000",
-        value: "50000.0"
-        },
-        {
-        name: "1:100,000",
-        value: "100000.0"
-        },
-        {
-        name: "1:200,000",
-        value: "200000.0"
-        },
-        {
-        name: "1:500,000",
-        value: "500000.0"
-        },
-        {
-        name: "1:1,000,000",
-        value: "1000000.0"
-        },
-        {
-        name: "1:2,000,000",
-        value: "2000000.0"
-        },
-        {
-        name: "1:4,000,000",
-        value: "4000000.0"
-        }
-        ],
-        dpis: [
-        {
-        name: "75",
-        value: "75"
-        },
-        {
-        name: "150",
-        value: "150"
-        },
-        {
-        name: "300",
-        value: "300"
-        }
-        ],
-        outputFormats: [
-        {
-        name: "pdf"
-        }
-        ],
-        layouts: [
-        {
-        name: "A4 portrait",
-        map: {
-        width: 440,
-        height: 483
-        },
-        rotation: true
-        },
-        {
-        name: "Legal",
-        map: {
-        width: 440,
-        height: 483
-        },
-        rotation: false
-        }
-        ],
-        printURL: "http://localhost:8080/geoserver/pdf/print.pdf",
-        createURL: "http://localhost:8080/geoserver/pdf/create.json"
-        },
-    customParams: {
-        mapTitle: "Printing Demo",
-        comment: "This is a simple map printed from GeoExt."
-    },
-   autoLoad: true,
-   dpi: 300
+scales: [
+{
+name: "1:25,000",
+value: "25000.0"
+},
+{
+name: "1:50,000",
+value: "50000.0"
+},
+{
+name: "1:100,000",
+value: "100000.0"
+},
+{
+name: "1:200,000",
+value: "200000.0"
+},
+{
+name: "1:500,000",
+value: "500000.0"
+},
+{
+name: "1:1,000,000",
+value: "1000000.0"
+},
+{
+name: "1:2,000,000",
+value: "2000000.0"
+},
+{
+name: "1:4,000,000",
+value: "4000000.0"
+},
+{
+name: "1:8,000,000",
+value: "8000000.0"
+},
+{
+name: "1:16,000,000",
+value: "1.6E7"
+},
+{
+name: "1:32,000,000",
+value: "3.2E7"
+},
+{
+name: "1:64,000,000",
+value: "6.4E7"
+}
+],
+dpis: [
+{
+name: "56",
+value: "56"
+},
+{
+name: "127",
+value: "127"
+},
+{
+name: "190",
+value: "190"
+},
+{
+name: "254",
+value: "254"
+}
+],
+outputFormats: [
+{
+name: "bmp"
+},
+{
+name: "jpg"
+},
+{
+name: "raw"
+},
+{
+name: "btiff"
+},
+{
+name: "pnm"
+},
+{
+name: "wbmp"
+},
+{
+name: "jpeg"
+},
+{
+name: "tif"
+},
+{
+name: "png"
+},
+{
+name: "pdf"
+},
+{
+name: "jpeg2000"
+},
+{
+name: "jpeg 2000"
+},
+{
+name: "gif"
+},
+{
+name: "tiff"
+}
+],
+layouts: [
+{
+name: "A4 portrait",
+map: {
+width: 440,
+height: 483
+},
+rotation: true
+}
+],
+printURL: "http://localhost:8080/print-servlet-2.0.0/pdf/print.pdf",
+createURL: "http://localhost:8080/print-servlet-2.0.0/pdf/create.json"
+},
+    method: 'POST',
+   autoOpen: true,
+    legends: true,
+    comment: 'Test comment',
+    dpi: '127'
+//   method: 'GET',
+////   method: 'POST',
+//    autoOpen: true,
+//    capabilities: {
+//        scales: [
+//        {
+//        name: "1:25,000",
+//        value: "25000.0"
+//        },
+//        {
+//        name: "1:50,000",
+//        value: "50000.0"
+//        },
+//        {
+//        name: "1:100,000",
+//        value: "100000.0"
+//        },
+//        {
+//        name: "1:200,000",
+//        value: "200000.0"
+//        },
+//        {
+//        name: "1:500,000",
+//        value: "500000.0"
+//        },
+//        {
+//        name: "1:1,000,000",
+//        value: "1000000.0"
+//        },
+//        {
+//        name: "1:2,000,000",
+//        value: "2000000.0"
+//        },
+//        {
+//        name: "1:4,000,000",
+//        value: "4000000.0"
+//        }
+//        ],
+//        dpis: [
+//        {
+//        name: "75",
+//        value: "75"
+//        },
+//        {
+//        name: "150",
+//        value: "150"
+//        },
+//        {
+//        name: "300",
+//        value: "300"
+//        }
+//        ],
+//        outputFormats: [
+//        {
+//        name: "pdf"
+//        }
+//        ],
+//        layouts: [
+//        {
+//        name: "A4 portrait",
+//        map: {
+//        width: 440,
+//        height: 483
+//        },
+//        rotation: true
+//        },
+//        {
+//        name: "Legal",
+//        map: {
+//        width: 440,
+//        height: 483
+//        },
+//        rotation: false
+//        }
+//        ],
+//        printURL: "http://127.0.0.1:8080/geoserver/pdf/print.pdf",
+//        createURL: "http://127.0.0.1:8080/geoserver/pdf/create.json"
+//        },
+//    customParams: {
+//        mapTitle: "Printing Demo",
+//        comment: "This is a simple map printed from GeoExt."
+//    },
+//   autoLoad: true,
+//   dpi: 300
 });
 var printControl = L.control.print({
    provider: printProvider
@@ -334,6 +450,8 @@ function resetLayers(){
     labels = new L.LayerGroup();
     $.each(featureGroups, function(index, element){ // Create a FeatureGroup for each type of Feature
         featureGroups[index] = new L.FeatureGroup();
+//        featureGroups[index] = L.featureGroup.subGroup(drawnItems);
+        map.addLayer(featureGroups[index]);
     });
     // Add the FeatureGroups to parent FeatureGroup (drawnItems)
     addFeatureGroupsToParentGroup();
@@ -343,7 +461,7 @@ function resetLayers(){
 }
 
 function addFeatureGroupsToParentGroup(){
-    drawnItems.clearLayers();
+    drawnItems.clearLayers(); 
     $.each(featureGroups, function(index, element){
         drawnItems.addLayer(element); // add the layer to the parent layergroup
     });
@@ -366,7 +484,7 @@ function populateFeatureGrid(){
                 $.each(featureArray, function(index, element){
         //            row = document.createElement("tr");
                     featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
-        //            $(row).append('<td style="background-img:url(\''+element.options.icon.iconURL+'\')" onclick="addFeature(\''+element.name+'\')">'+element.description+'</td><td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>');
+                    featureGroups[element.name].addTo(map);
                     Feature[element.name] = element; // save symbology for this feature type
 
                         html += '<tr onclick="addFeature(\''+element.name+'\')">';

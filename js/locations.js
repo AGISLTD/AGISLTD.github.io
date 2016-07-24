@@ -50,53 +50,75 @@ function getCentreOfLatlngs(latlngs){
     }
     return [x/i, y/i];
 }
-        
 
-    function locationSwitch(sel){
-        resetLayers();
-        labels = new L.LayerGroup();
-        map.addLayer(labels);
-        
-        locationID = sel.value;
-        locRef = rootRef.ref("/location/"+locationID);
-        locRef.child('currentEdit').once("value", function(data) {
-            // load geojson into featureGroups
-            var editID = data.val();
-            if (undefined != editID){
-                rootRef.ref("edit/"+locationID+"/"+editID+"/geojsonid/").once('value', function(data) {
-                    rootRef.ref("geojson/"+data.val()).once('value', function(json){
-                        geojsons = json.val();
-                        $.each(geojsons.features, function(index, geojson){
-                            if (geojson.geometry.features){ // don't perform on empty (thus malformed) feature groups
-                                L.geoJson(geojson.geometry, {
-                                    onEachFeature: function (feature, layer) {
-                                        layer.properties = feature.properties;
-                                        if (Feature[feature.properties.type]){// Skip features not in our Feature-definitions
-                                            $.extend(layer.options, Feature[feature.properties.type].options); // Add symbology to the feature
-                                            if (layer.feature.geometry.type == "Point") {
-                                                layer.options.icon = L.icon(Feature[feature.properties.type].options.icon);
-                                            }
-                                            if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
-                                                featureGroups[feature.properties.type].addLayer(layer);
-                                            }
-                                            addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
-                                        } else {
-                                            console.log("GeoJSON contained unknown feature: "+feature.properties.type);
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                  });
-                });
-            } else {
-                alert("No data found for this location");
-            }
-        });
-        locRef.child('overlays').once("value", function(data){
-            loadOverlays(data);
-        });
-        locRef.child('bounds').once("value", function(data){
-            setBounds(data.val());
-        });
+//Loads up the GeoJSON into leaflet layers
+function loadLocationsGeoJSON(data){
+    // load geojson into featureGroups
+    var editID = data.val();
+    if (undefined == editID){
+        alert("No data found for this location");
+        return;
     }
+    rootRef.ref("edit/"+locationID+"/"+editID+"/geojsonid/").once('value', function(data) {
+        rootRef.ref("geojson/"+data.val()).once('value', function(json){
+            geojsons = json.val();
+            L.geoJson(geojsons, {
+                        onEachFeature: function (feature, layer) {
+                            layer.properties = feature.properties;
+                            if (feature.properties != undefined && feature.properties.LeafType != undefined && Feature[feature.properties.LeafType]){// Skip features not in our Feature-definitions
+                                $.extend(layer.options, Feature[feature.properties.LeafType].options); // Add symbology to the feature
+                                if (layer.feature.geometry.type == "Point") {
+                                    layer.options.icon = L.icon(Feature[feature.properties.LeafType].options.icon);
+                                }
+                                if (featureGroups[feature.properties.LeafType]) { // check that the featureGroup exists
+                                    featureGroups[feature.properties.LeafType].addLayer(layer);
+                                }
+                                map.addLayer(layer);
+                                addLabelsToFeature(layer, layer.properties.LeafLabel, layer.properties.details);
+                            } else {
+                                console.log("GeoJSON contained unknown feature: "+JSON.stringify(feature));
+                            }
+                        }
+                    });
+//                        $.each(geojsons.features, function(index, geojson){
+//                            if (geojson.geometry.features){ // don't perform on empty (thus malformed) feature groups
+//                                L.geoJson(geojson.geometry, {
+//                                    onEachFeature: function (feature, layer) {
+//                                        layer.properties = feature.properties;
+//                                        if (Feature[feature.properties.type]){// Skip features not in our Feature-definitions
+//                                            $.extend(layer.options, Feature[feature.properties.type].options); // Add symbology to the feature
+//                                            if (layer.feature.geometry.type == "Point") {
+//                                                layer.options.icon = L.icon(Feature[feature.properties.type].options.icon);
+//                                            }
+//                                            if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
+//                                                featureGroups[feature.properties.type].addLayer(layer);
+//                                            }
+//                                            addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
+//                                        } else {
+//                                            console.log("GeoJSON contained unknown feature: "+feature.properties.type);
+//                                        }
+//                                    }
+//                                });
+//                            }
+//                        });
+      });
+    });
+}
+
+function locationSwitch(sel){
+    resetLayers();
+    labels = new L.LayerGroup();
+    map.addLayer(labels);
+
+    locationID = sel.value;
+    locRef = rootRef.ref("/location/"+locationID);
+    locRef.child('currentEdit').once("value", function(data) {
+        loadLocationsGeoJSON(data);
+    });
+    locRef.child('overlays').once("value", function(data){
+        loadOverlays(data);
+    });
+    locRef.child('bounds').once("value", function(data){
+        setBounds(data.val());
+    });
+}

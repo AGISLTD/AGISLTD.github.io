@@ -45,25 +45,27 @@ CustomPoly = L.Draw.Polygon.extend({
 });
 
 // Returns JSON for the given features
-function buildGeoJSONFromFeatureLayer(features){
-    var drawnFeaturesJSON = features.toGeoJSON();
+function buildGeoJSONFromFeatureLayer(category){
+    var drawnFeaturesJSON = category.toGeoJSON();
     // Iterate through each layer and add the custom properties 
     // to the JSON which were not added by the toGeoJSON method.
     var i = 0;
-    features.eachLayer(function(category){
-        var j = 0;
-        category.eachLayer(function(layer){
-            drawnFeaturesJSON.features[i].geometry.features[j].properties = layer.properties;
-            j++;
-        });
+    category.eachLayer(function(layer){
+        drawnFeaturesJSON.features[i].properties = layer.properties;
         i++;
     });
+    
+    this.push.apply(this, drawnFeaturesJSON.features);
     return drawnFeaturesJSON;
 }
 
 // Saves GeoJSON for the current location
 function saveGeoJson(){
-    json = buildGeoJSONFromFeatureLayer(drawnItems);
+    // collect all the features from each Category FeatureGroup
+    var allFeatures = [];
+    drawnItems.eachLayer(buildGeoJSONFromFeatureLayer, allFeatures);
+    var json = drawnItems.toGeoJSON(); // To get out 'base geojson'
+    json.features = allFeatures; // place all our features into the geojson
     
     document.getElementById("JSONBox").value = JSON.stringify(json);
     jsonid = rootRef.ref('/geojson/').push(json).key;

@@ -1,0 +1,41 @@
+@media print {
+    @page {
+        size: auto;
+        margin: 10mm;
+    }
+
+    body {
+        /*border: 5px solid blue;*/
+    }
+
+    #container {
+        /*border: 4px solid green;*/
+        position: absolute;
+    }
+
+    #cover, #maparea, #printOptions, #ppmmtest, .closeDialog, .resize, .msg_qq {
+        display: none !important;
+    }
+
+    #printBox, #printPreview {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        top: 0;
+        right: 0;
+        /*border: 1px solid red;*/
+    }
+
+    #printPreview {
+        border: 1px solid black !important;
+        background-color: white !important;
+    }
+
+    #printPreview span {
+        text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;
+    }
+
+    .leaflet-control-scale-line {
+        text-align: center;
+    }
+}

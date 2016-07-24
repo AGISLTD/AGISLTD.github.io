@@ -1,0 +1,53 @@
+header {
+    height: 100px;
+/*    background: #DDDDDD;*/
+    width: 100%;
+    border-bottom: grey solid;
+}
+
+#headerLogo img {
+    float:left;
+    height: 90px;
+}
+
+footer {
+    height: 250px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    background: white;
+    border-top: grey solid;
+}
+
+#footerTable {
+    width:100%;
+}
+
+#footerLogo img {
+    float:right;
+    height: 50px;
+}
+
+html, body, main {
+    height: 100%;
+    overflow: hidden;
+}
+body {
+    padding-bottom: 300px;
+}
+.wrapper {
+    height: 100%;
+    margin-bottom: 300px;
+}
+
+#map {
+    height: 100%;
+}
+
+.leaflet-control-container {
+    display:none;
+}
+
+@page {
+    margin: 7mm;
+}

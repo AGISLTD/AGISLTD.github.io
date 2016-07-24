@@ -15,15 +15,30 @@
     font-variant: small-caps;
 }
 
-#printFooter {
-    display: none;
-}
-
 /*Print*/
 @media print {
     * {
-        visibility: hidden
+        display: none;
     }
+    div.printWrapper{
+        display: block;
+    }
+    div.printWrapper *{
+      visibility: visible;
+      height:100vh;
+      display:flex;
+/*      // Direction of the items, can be row or column*/
+      flex-direction: column;
+    }
+    main.printBody{
+        background: green;
+    }
+    header,footer{
+        height:100px;
+        background: red;
+    }
+    
+/*
     div#map {
         background-color: white;
         height: 100% !important;
@@ -33,10 +48,14 @@
         left: 0;
         margin: 0;
     }
+*/
+/*
     div#map * {
         visibility: visible;
     }
+*/
     
+/*
     #printFooter {
         display: block;
         position: fixed;
@@ -45,6 +64,7 @@
         z-index: 9999999;
     }
     
+*/
     .leaflet-control-container{
         display: none;
     }
