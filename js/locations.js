@@ -106,7 +106,7 @@ function loadLocationsGeoJSON(data){
     });
 }
 
-function loadEditHistory(data){
+function loadEditHistory(data, currentedit){
 //    clearEditHistory();
     $('#historylist').html(""); // clear the contents
     edits = data.val();
@@ -127,7 +127,7 @@ function loadEditHistory(data){
         html += '<td onclick="loadEdit(\''+index+'\')">'+date.toLocaleDateString('en-NZ')+'</td>';
         html += '<td data=\''+element.user+'\'></td>';
         if ( users.indexOf(element.user) == -1 ) users.push(element.user);
-        if (element.protected){
+        if (element.protected || index == currentedit){
             html += '<td>Protected</td>';
         } else {
             html += '<td class="clickable" onclick="deleteEdit('+locationID+',\''+index+'\')"><b>Delete</b></td>';
@@ -165,16 +165,15 @@ function locationSwitch(sel){
     locRef = rootRef.ref("/location/"+locationID);
     locRef.child('currentEdit').once("value", function(data) {
         loadLocationsGeoJSON(data);
+        rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
+                loadEditHistory(editHistory, data.val());
+        });
     });
     locRef.child('overlays').once("value", function(data){
         loadOverlays(data);
     });
     locRef.child('bounds').once("value", function(data){
         setBounds(data.val());
-    });
-    
-    rootRef.ref("/edit/"+locationID).once("value", function(data){
-        loadEditHistory(data);
     });
     rootRef.ref("/edit/"+locationID).on("child_removed", function(data){
         removeEdit(data);
