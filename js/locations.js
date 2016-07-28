@@ -9,19 +9,32 @@ function clearOverlays(){
 }
 
 //Loads the overlays which are defined in the database
-function loadOverlays(overlayRef, centrePoint){
+function loadOverlays(overlayRef){
     clearOverlays();
+    
+    // Add LINZ property boundaries Overlay
+    tilelayer = L.tileLayer('http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=69/EPSG:3857/{z}/{x}/{y}.png', {attribution: "LINZ Property Parcel Boundaries"});
+    LayersControl.addOverlay(tilelayer, "Property Boundaries (LINZ)");
+    
     newOverlays = overlayRef.val();
     if (undefined == overlayRef.val()){
-        alert("No overlays found for this location");
+        console.log("No overlays found for this location");
         return;
     }
-    // add overlay to LayersControl
+    
+    // add each overlay to LayersControl
     $.each(newOverlays, function(index, overlay){
-        tilelayer = L.tileLayer(overlay.tilesURL, overlay.options);
-        LayersControl.addOverlay(tilelayer, overlay.name);
-        if (index == 0) { //always add the first overlay
-            map.addLayer(tilelayer);
+        if (overlay.geojsonid) { // we have a geojson overlay to add
+            rootRef.ref('geojson/'+overlay.geojsonid).once('value', function(data){
+                geojsonLayer = L.geoJson(data.val(), overlay.style);
+                LayersControl.addOverlay(geojsonLayer, overlay.name);
+            })
+        } else if (overlay.tilesURL) { // we have a tile overlay to add
+            tilelayer = L.tileLayer(overlay.tilesURL, overlay.options);
+            LayersControl.addOverlay(tilelayer, overlay.name);
+            if (overlay.default) { // Set default for the overlay
+                map.addLayer(tilelayer);
+            }
         }
     });
 }
@@ -38,7 +51,7 @@ function setBounds(latlongBounds){
         map.options.minZoom = null;
         map.setZoom(9);
     }
-    addPropertyBoundariesOverlay(getCentreOfLatlngs(latlongBounds));
+//    addPropertyBoundariesOverlay(getCentreOfLatlngs(latlongBounds)); // No longer using this service -- using a WMTS service now
 }
 
 function getCentreOfLatlngs(latlngs){
@@ -51,61 +64,99 @@ function getCentreOfLatlngs(latlngs){
     return [x/i, y/i];
 }
 
+var editingFeature = null; // the feature currently selected for editing
 //Loads up the GeoJSON into leaflet layers
 function loadLocationsGeoJSON(data){
     // load geojson into featureGroups
     var editID = data.val();
     if (undefined == editID){
-        alert("No data found for this location");
+//        alert("No data found for this location");
         return;
     }
     rootRef.ref("edit/"+locationID+"/"+editID+"/geojsonid/").once('value', function(data) {
         rootRef.ref("geojson/"+data.val()).once('value', function(json){
             geojsons = json.val();
             L.geoJson(geojsons, {
-                        onEachFeature: function (feature, layer) {
-                            layer.properties = feature.properties;
-                            if (feature.properties != undefined && feature.properties.LeafType != undefined && Feature[feature.properties.LeafType]){// Skip features not in our Feature-definitions
-                                $.extend(layer.options, Feature[feature.properties.LeafType].options); // Add symbology to the feature
-                                if (layer.feature.geometry.type == "Point") {
-                                    layer.options.icon = L.icon(Feature[feature.properties.LeafType].options.icon);
-                                }
-                                if (featureGroups[feature.properties.LeafType]) { // check that the featureGroup exists
-                                    featureGroups[feature.properties.LeafType].addLayer(layer);
-                                }
-                                map.addLayer(layer);
-                                addLabelsToFeature(layer, layer.properties.LeafLabel, layer.properties.details);
-                            } else {
-                                console.log("GeoJSON contained unknown feature: "+JSON.stringify(feature));
-                            }
-                        }
+                onEachFeature: function (feature, layer) {
+                    layer.on('click', function(e){
+                        setEditLayer(e);
                     });
-//                        $.each(geojsons.features, function(index, geojson){
-//                            if (geojson.geometry.features){ // don't perform on empty (thus malformed) feature groups
-//                                L.geoJson(geojson.geometry, {
-//                                    onEachFeature: function (feature, layer) {
-//                                        layer.properties = feature.properties;
-//                                        if (Feature[feature.properties.type]){// Skip features not in our Feature-definitions
-//                                            $.extend(layer.options, Feature[feature.properties.type].options); // Add symbology to the feature
-//                                            if (layer.feature.geometry.type == "Point") {
-//                                                layer.options.icon = L.icon(Feature[feature.properties.type].options.icon);
-//                                            }
-//                                            if (featureGroups[feature.properties.type]) { // check that the featureGroup exists
-//                                                featureGroups[feature.properties.type].addLayer(layer);
-//                                            }
-//                                            addLabelsToFeature(layer, layer.properties.name, layer.properties.details);
-//                                        } else {
-//                                            console.log("GeoJSON contained unknown feature: "+feature.properties.type);
-//                                        }
-//                                    }
-//                                });
-//                            }
-//                        });
+                    layer.properties = feature.properties;
+                    if (feature.properties != undefined && feature.properties.LeafType != undefined && Feature[feature.properties.LeafType]){// Skip features not in our Feature-definitions
+                        if (layer.options == undefined) { layer.options = {}; }
+                        $.extend(layer.options, Feature[feature.properties.LeafType].options); // Add symbology to the feature
+                        if (layer.feature.geometry.type == "Point") {
+                            layer.options.icon = L.icon(Feature[feature.properties.LeafType].options.icon);
+                        }
+                        if (featureGroups[feature.properties.LeafType]) { // check that the featureGroup exists
+                            featureGroups[feature.properties.LeafType].addLayer(layer);
+                        }
+                        map.addLayer(layer);
+                        addLabelsToFeature(layer, layer.properties.LeafLabel, layer.properties.details);
+                    } else {
+                        if (feature.properties && feature.properties.LeafType){
+                            console.log("GeoJSON contained unknown feature: "+feature.properties.LeafType);
+                        } else {
+                            console.log("GeoJSON contained malformed feature: "+JSON.stringify(feature));
+                        }
+                    }
+                }
+            });
       });
     });
 }
 
+function loadEditHistory(data){
+//    clearEditHistory();
+    $('#historylist').html(""); // clear the contents
+    edits = data.val();
+    if (edits == undefined){
+        return;
+    }
+    $('#historylist').append('<h3>Edit History</h3>');
+    var div = document.createElement('div');
+    div.className = "accordion accordionDiv";
+//    $(div).append('<h3>'+childSnapshot.key+'</h3>');
+    var html = '<table class="historyTable"><thead><tr></tr></thead><tbody>';
+    // add edits to Edit list
+    var users = []; // List of userIDs in the list
+    $.each(edits, function(index, element){
+        timestamp = Number(element.datetime);
+        date = new Date(timestamp) || new Date(element.datetime);
+        html += '<tr data=\''+index+'\'>';
+        html += '<td onclick="loadEdit(\''+index+'\')">'+date.toLocaleDateString('en-NZ')+'</td>';
+        html += '<td data=\''+element.user+'\'></td>';
+        if ( users.indexOf(element.user) == -1 ) users.push(element.user);
+        if (element.protected){
+            html += '<td>Protected</td>';
+        } else {
+            html += '<td class="clickable" onclick="deleteEdit('+locationID+',\''+index+'\')"><b>Delete</b></td>';
+        }
+        html += "</tr>";
+    });
+    $.each(users, function(index, element){
+        // Get username of each user and set it
+        rootRef.ref("/user/"+element).once('value', function(data){
+            userData = data.val();
+            if(userData && userData.name){
+                $('.historyTable td[data="'+data.key+'"]').html(userDate.name);
+            }
+        });
+    });
+    html += '</tbody></table>';
+    $(html).appendTo($(div));
+    $(div).appendTo('#historylist');
+    $('#historylist').accordion(accordionOptions);
+    $('#historylist').accordion("refresh" );
+}
+
+function removeEdit(data){
+    $('.historyTable tr[data="'+data.key+'"]').remove();
+}
+
 function locationSwitch(sel){
+    removeDrawControl();
+    editingFeature = ""; // fiddly state change of drawcontrol editing.
     resetLayers();
     labels = new L.LayerGroup();
     map.addLayer(labels);
@@ -120,5 +171,12 @@ function locationSwitch(sel){
     });
     locRef.child('bounds').once("value", function(data){
         setBounds(data.val());
+    });
+    
+    rootRef.ref("/edit/"+locationID).once("value", function(data){
+        loadEditHistory(data);
+    });
+    rootRef.ref("/edit/"+locationID).on("child_removed", function(data){
+        removeEdit(data);
     });
 }

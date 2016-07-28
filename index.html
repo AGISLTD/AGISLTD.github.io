@@ -14,17 +14,17 @@
     <link rel="stylesheet" href="css/w3.css" />
     <link rel="stylesheet" href="/css/leaflet.css" />
     <link rel="stylesheet" href="/css/leaflet.label.css" />
+    <link rel="stylesheet" href="/css/leaflet-messagebox.css" />
+<!--    <link rel="stylesheet" href="/css/leaflet.tooltip.css" />-->
     <link rel="stylesheet" href="/css/leaflet-areaselect.css" />
-    <link rel="stylesheet" href="/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="/css/jquery-ui.min.css" />
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
-    <script src="/js/lib/leaflet-src.js"></script> <!-- use leaflet.js in production -->
-    <script src="/js/lib/leaflet.label.js"></script> <!-- use leaflet.js in production -->
-    <script src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script> <!-- self-host this -->
     <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
-    <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.4/leaflet-image.js'></script>
-    <script src="/js/lib/easy-button.js"></script>
-    <script src="/js/lib/leaflet-print.js"></script>
-    <script src="/js/lib/leaflet.subgroup.js"></script>
+    <script src="/js/lib/leaflet-src.js"></script>
+     <script src="/js/lib/leaflet.draw-src.js"></script>
+     <script src="/js/lib/leaflet-messagebox.js"></script>
+    <script src="/js/lib/leaflet.label.js"></script>
+<!--    <script src="/js/lib/leaflet.tooltip.js"></script>-->
     <script src="/js/lib/leaflet-areaselect.js"></script>
     <script src="/js/printout.js"></script>
     <script src="/js/locations.js"></script>
@@ -52,7 +52,7 @@
         <p>Hi, <span id="fbName"></span><br />
         <a href="#" onclick="logout()">Logout</a></p>
     </div>
-    <div class="w3-right w3-medium">
+    <div class="w3-right w3-medium" style="display: none">
         <select id="selectPrintRatio">
             <option value="[250, 300]" selected="selected">Portrait</option>
             <option value="[300, 250]">Landscape A2</option>
@@ -60,12 +60,12 @@
             <option value="[400, 100]">Landscape A4</option>
           </select>
     </div>
-    <div class="w3-right w3-medium"><button id='selectPrintArea'>Select Print Area</button></div>
-    <div class="w3-right w3-medium"><button id='printButton'>Print</button></div>
+    <div class="w3-right w3-medium" style="display: none"><button id='selectPrintArea'>Select Print Area</button></div>
+    <div class="w3-right w3-medium" style="display: none"><button id='printButton'>Print</button></div>
     </div>
     
 <div class="w3-sidenav w3-collapse w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
-    <div class="w3-container" style="padding:1em">
+    <div class="w3-container" style="padding:1em;position:relative">
         <div>
             <div>
                 <div id="mapControls" style="display:none">
@@ -77,11 +77,12 @@
                     </div>
                     <br />
                     <div id='featuregrid' class="accordion"></div>
-                    <br>
+                    <br />
                 </div>
                 <textarea id="JSONBox" style="display:none;width: 5px; height 5px" rows="1" cols="1" ></textarea>
             </div>
         </div>
+        <div id='historylist' class="accordion"></div>
     </div>
 </div>
     <div id='mappane' class="w3-main" style="margin-left:300px;">
@@ -96,8 +97,8 @@
         <input type="password" id="password" style="width:90%;">
         <br><br />
         <button onclick="userLogin()">Login</button><br /><br />
-        <a href="/register.html">Sign up</a><br />
-        <a href="#">Forgotten Password</a>
+<!--        <a href="/register.html">Sign up</a><br />-->
+<!--        <a href="#">Forgotten Password</a>-->
         <label class="validateTips"></label>
     </div>
 </div>

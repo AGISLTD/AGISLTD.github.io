@@ -101,15 +101,16 @@
     font-weight: bold;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 /*Feature Grid*/
 .accordionDiv {
     padding: .7em .5em !important;
 }
 .accordionDiv h3 {
     text-transform: capitalize;
-}
-.featureTable>tbody>tr{
-    cursor: pointer;
 }
 .featureTable>tbody>tr:hover {
     background-color:beige;
@@ -121,6 +122,27 @@ height: 50px;
 background-position: 50% 50%;
 background-repeat: no-repeat;
 }
+
+.linefeaturebutton{
+    width: 50px;
+    height: 50px;
+}
+.linefeaturebutton .line {
+  position: relative;
+  z-index: 1;
+  top: 50%;
+  height: 4px;
+  -webkit-transform: rotate(-45deg); /* Safari and Chrome */
+      -ms-transform: rotate(-45deg); /* IE 9 */
+          transform: rotate(-45deg);
+}
+
+.polyfeaturebutton{
+    width: 50px;
+    height: 50px;
+    border: solid 6px;
+}
+
 
 #featuregrid>h3 {
     background-color: transparent;

@@ -1,10 +1,23 @@
 var map;
 var drawControl; // Edit/Delete controls
 var location;
+var drawControl;
+var currentlyEditing = false; // flag to indicate state of drawControl
+var editingFeature = null; // the feature currently selected for editing
 var uid = null;
 var AucklandLatLng = [-36.8485, 174.7633];
 var labelMarkerDic = {};
-var accordionOptions = {collapsible: true,animate: false,heightStyle: "content"};
+var accordionOptions = {active: false, collapsible: true,animate: false,heightStyle: "content"};
+var iconSize = {
+    small: [16, 16],
+    normal: [28, 28],
+    medium: [28, 28],
+    large: [32, 32],
+    xlarge: [48, 48],
+    xxlarge: [128, 128],
+    massive: [164, 164],
+};
+//var location = require("location");
 $(document).ready(function(){
     $('#Username').keypress(function(e){
               if(e.keyCode==13)
@@ -14,11 +27,10 @@ $(document).ready(function(){
     map = L.map('map', {
 			center: AucklandLatLng,
 			zoom: 10,
-			layers: [linz]
+			layers: [grayscale]
 		});
     
     GeoJSONControl.addTo(map);
-    map.addControl(printControl);
     
     // Add relevant data / icons / labels for new feature created
     map.on('draw:created', function (e) {
@@ -36,13 +48,31 @@ $(document).ready(function(){
                 featuretype = layer.options.lineType
             }
         
-            // Add to our feature  group
+            // Add layer to our feature  group
 			featureGroups[featuretype].addLayer(layer);
         
             layer.properties = {};
             layer.properties.LeafType = featuretype;
             askForFeatureDetails(layer);
-		});
+            layer.on('click', function(e){
+                setEditLayer(e);
+            });
+    });
+    
+    map.on('draw:deletestart', function(e){
+        currentlyEditing = true;
+    });
+    map.on('draw:editstart', function(e){
+        currentlyEditing = true;
+    });
+    map.on('draw:editstop', function(e){
+        currentlyEditing = false;
+//        TODO -- if "canceled" revert changes to drawnItems also
+    });
+    map.on('draw:deletestop', function(e){
+        currentlyEditing = false;
+//        TODO -- if "canceled" revert changes to drawnItems also
+    });
     
     // Delete removes layers from drawnItems - we need to remove them from their featureGroup as well
     map.on('draw:deleted', function(e){
@@ -155,263 +185,69 @@ GeoJSONControl.onAdd = function (map) {
     return this._div;
 };
 
-//GeoServer Print Controls
-var printProvider = L.print.provider({
-//   url: 'http://localhost:8080/print-servlet-2.0.0/',
-    capabilities: {
-scales: [
-{
-name: "1:25,000",
-value: "25000.0"
-},
-{
-name: "1:50,000",
-value: "50000.0"
-},
-{
-name: "1:100,000",
-value: "100000.0"
-},
-{
-name: "1:200,000",
-value: "200000.0"
-},
-{
-name: "1:500,000",
-value: "500000.0"
-},
-{
-name: "1:1,000,000",
-value: "1000000.0"
-},
-{
-name: "1:2,000,000",
-value: "2000000.0"
-},
-{
-name: "1:4,000,000",
-value: "4000000.0"
-},
-{
-name: "1:8,000,000",
-value: "8000000.0"
-},
-{
-name: "1:16,000,000",
-value: "1.6E7"
-},
-{
-name: "1:32,000,000",
-value: "3.2E7"
-},
-{
-name: "1:64,000,000",
-value: "6.4E7"
-}
-],
-dpis: [
-{
-name: "56",
-value: "56"
-},
-{
-name: "127",
-value: "127"
-},
-{
-name: "190",
-value: "190"
-},
-{
-name: "254",
-value: "254"
-}
-],
-outputFormats: [
-{
-name: "bmp"
-},
-{
-name: "jpg"
-},
-{
-name: "raw"
-},
-{
-name: "btiff"
-},
-{
-name: "pnm"
-},
-{
-name: "wbmp"
-},
-{
-name: "jpeg"
-},
-{
-name: "tif"
-},
-{
-name: "png"
-},
-{
-name: "pdf"
-},
-{
-name: "jpeg2000"
-},
-{
-name: "jpeg 2000"
-},
-{
-name: "gif"
-},
-{
-name: "tiff"
-}
-],
-layouts: [
-{
-name: "A4 portrait",
-map: {
-width: 440,
-height: 483
-},
-rotation: true
-}
-],
-printURL: "http://localhost:8080/print-servlet-2.0.0/pdf/print.pdf",
-createURL: "http://localhost:8080/print-servlet-2.0.0/pdf/create.json"
-},
-    method: 'POST',
-   autoOpen: true,
-    legends: true,
-    comment: 'Test comment',
-    dpi: '127'
-//   method: 'GET',
-////   method: 'POST',
-//    autoOpen: true,
-//    capabilities: {
-//        scales: [
-//        {
-//        name: "1:25,000",
-//        value: "25000.0"
-//        },
-//        {
-//        name: "1:50,000",
-//        value: "50000.0"
-//        },
-//        {
-//        name: "1:100,000",
-//        value: "100000.0"
-//        },
-//        {
-//        name: "1:200,000",
-//        value: "200000.0"
-//        },
-//        {
-//        name: "1:500,000",
-//        value: "500000.0"
-//        },
-//        {
-//        name: "1:1,000,000",
-//        value: "1000000.0"
-//        },
-//        {
-//        name: "1:2,000,000",
-//        value: "2000000.0"
-//        },
-//        {
-//        name: "1:4,000,000",
-//        value: "4000000.0"
-//        }
-//        ],
-//        dpis: [
-//        {
-//        name: "75",
-//        value: "75"
-//        },
-//        {
-//        name: "150",
-//        value: "150"
-//        },
-//        {
-//        name: "300",
-//        value: "300"
-//        }
-//        ],
-//        outputFormats: [
-//        {
-//        name: "pdf"
-//        }
-//        ],
-//        layouts: [
-//        {
-//        name: "A4 portrait",
-//        map: {
-//        width: 440,
-//        height: 483
-//        },
-//        rotation: true
-//        },
-//        {
-//        name: "Legal",
-//        map: {
-//        width: 440,
-//        height: 483
-//        },
-//        rotation: false
-//        }
-//        ],
-//        printURL: "http://127.0.0.1:8080/geoserver/pdf/print.pdf",
-//        createURL: "http://127.0.0.1:8080/geoserver/pdf/create.json"
-//        },
-//    customParams: {
-//        mapTitle: "Printing Demo",
-//        comment: "This is a simple map printed from GeoExt."
-//    },
-//   autoLoad: true,
-//   dpi: 300
-});
-var printControl = L.control.print({
-   provider: printProvider
-});
-
 // Base Maps
 var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
         'Imagery © <a href="http://mapbox.com">Mapbox</a>',
     mbUrl = 'https://api.tiles.mapbox.com/v4/mapbox.light/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw',
     linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
-var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr, base:true}),
-    linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography", base:true});
+var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr, base:true, maxZoom: 20}),
+    linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography", base:true, maxZoom: 20});
 var baseLayers = {
     "Grayscale": grayscale,
-    "LINZ": linz
+    "LINZ Aerial": linz,
+//    "No basemap": null
 };
 
 var LayersControl = L.control.layers(baseLayers, {}, {
             position: 'topleft'});
 
-function registerDrawControl(fGroup){
+// Registers the DrawControl to the layer that was clicked
+function setEditLayer(e){
+    if(editingFeature === e.target.properties.LeafType || currentlyEditing){
+       return;
+    }
+    editingFeature = e.target.properties.LeafType;
+    registerDrawControl(featureGroups[e.target.properties.LeafType], e.target.properties.LeafType);
+}
+
+// Registers drawControl (for edits) to the given featureGroup
+function registerDrawControl(fGroup, type){
+    removeDrawControl();
+    
+    // Add drawcontrol
     drawControl = new L.Control.Draw({
         position: 'topleft',
-        draw: {
-            polygon: false,
-            polyline: false,
-            rectangle: false,
-            circle: false,
-            marker: false,
-            square: false
-        },
+        draw: false, // Don't want Leaflet Draw's draw toolbar
         edit: {
             featureGroup: fGroup
         }
     });
     map.addControl(drawControl);
+    
+    // Customize the text of the drawControl
+    if (type){
+        L.drawLocal.edit.toolbar.actions.save.title = "Confirm changes";
+        L.drawLocal.edit.toolbar.actions.save.text = "Confirm";
+        L.drawLocal.edit.toolbar.buttons.edit = "Edit "+type+" features";
+        L.drawLocal.edit.toolbar.buttons.edit = "Edit "+type+" features";
+        L.drawLocal.edit.toolbar.buttons.editDisabled = "No "+type+" features to edit";
+        L.drawLocal.edit.toolbar.buttons.remove = "Remove "+type+" features";
+        L.drawLocal.edit.toolbar.buttons.removeDisabled = "No "+type+" features to remove.";
+        L.drawLocal.edit.handlers.remove.tooltip.text = "Click a "+type+" feature to remove it.";
+        
+        // Add messagebox to indicate to user
+        var box = L.control.messagebox({position: 'topleft', timeout: '2000'}).addTo(map);
+        box.show('Edit controls switched to '+type+' features.');
+    }
 }
 
+function removeDrawControl(){
+    currentlyEditing = false;
+    if (drawControl && drawControl._map){ // remove exisiting drawcontrol.
+        map.removeControl(drawControl);
+    }
+}
 
 // Populates the Location selector
 function populateLocations(){
@@ -487,15 +323,23 @@ function populateFeatureGrid(){
                     featureGroups[element.name].addTo(map);
                     Feature[element.name] = element; // save symbology for this feature type
 
-                        html += '<tr onclick="addFeature(\''+element.name+'\')">';
-                        if (element.options && element.options.icon){
-                            html += '<td class="featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
-                        }else {
-                            html+= '<td class="featurebutton" '//no icon img for background
+                        html += '<tr>';
+                        html += '<td title="Add '+element.description+'" onclick="addFeature(\''+element.name+'\')"'
+                        if (element.family == "marker"){
+                            // Set icon's size and anchor point
+                            element.options.icon.iconSize = iconSize[element.size];
+                            element.options.icon.iconAnchor = iconSize[element.size].map(function(obj){
+                                return obj / 2; // Icon Anchor is in the middle of the icon.
+                            });
+                            html +='class="clickable featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
+                        }else if (element.family == "polyline") {
+                            html+= 'class="clickable"><div class="linefeaturebutton"><div class="line" style="background-color:'+element.options.color+';height:'+element.options.weight+'px;"/></div';
+                        }else if (element.family == "polygon") {
+                            html+= 'class="clickable"><div class="polyfeaturebutton" style="background-color:'+element.options.fillColor+';border-color:'+element.options.color+'"/';
                         }
                         html += '></td>';
                         html += '<td>' + element.description + '</td>';
-                        html += '<td><input featuretype='+element.name+' class="showLayer" type="checkbox" checked></td>';
+                        html += '<td><input featuretype='+element.name+' class="w3-check showLayer" type="checkbox" checked></td>';
                         html += "</tr>";
                 });
                 html += '</tbody></table>';
@@ -530,6 +374,15 @@ function populateFeatureGrid(){
     });
 }
 
+function deleteEdit(location, editKey){
+    editRef = rootRef.ref("edit/"+location+"/"+editKey);
+    editRef.once("value", function(data){
+        jsonRef = rootRef.ref("geojson/"+data.val().geojsonid);
+        jsonRef.remove();
+    });
+    editRef.remove();
+//    alert("Deleted edit");
+}
 
 function userLogin() {
     var email = $("#email").val();
@@ -546,7 +399,6 @@ function userLogin() {
         userSwitch(user.uid);
         populateFeatureGrid();
         populateLocations();
-        registerDrawControl(drawnItems);
     });
     
     firebase.auth().onAuthStateChanged(function(user) {
@@ -595,10 +447,15 @@ function userSwitch(val) {
 
     // set userRef
     userRef = rootRef.ref("/user/"+val);
+    
+    userRef.once('value', function(data){
+        if (data.val() && data.val().name){
+            $('#fbName').text(data.val().name);
+        }
+    });
 }
 
-
-
+// DEPRECATED -- found a WMTS service (NZ Parcel Boundaries Wireframe) to provide same functionality with easier implementation.
 // Builds a GeoJSON layer of property title boundaries, from LINZ WFS - adds to Overlay control.
 function addPropertyBoundariesOverlay(mapCentre){
 // GeoJSON from WFS code (from https://stackoverflow.com/questions/25187937/loading-geojson-layers-from-geoserver-to-leaflet-map-based-on-the-current-boundi)
@@ -613,6 +470,8 @@ function addPropertyBoundariesOverlay(mapCentre){
         geometry: 'true',
         with_field_names: 'true'
     };
+    
+    var boundaryStyle = {color: 'black', fillOpacity: '0'}; // Style options applied to the boundary geojson
 
     $.ajax({
         url: geoJsonUrl + L.Util.getParamString(parameters),
@@ -620,13 +479,8 @@ function addPropertyBoundariesOverlay(mapCentre){
         datatype: 'jsonp',
         jsonCallback: 'getJson',
         success: function(data){
-            var geojsonBoundariesLayer = new L.GeoJSON(data.vectorQuery.layers[804],
-                { // Sets the style of the Property Boundary GeoJSON features
-                onEachFeature: function (feature, layer) {
-                            $.each(layer._layers, function(index, element){
-                                $.extend(element.options, {color: 'black', fillOpacity: '0'}); // overwrite default settings with our own specs
-                            });
-                        }});
+            var geojsonBoundariesLayer = new L.GeoJSON(data.vectorQuery.layers[804], boundaryStyle);
+            geojsonBoundariesLayer.getAttribution = function() { return 'LINZ Property Parcels'; };
             LayersControl.addOverlay(geojsonBoundariesLayer, "Property Title Boundaries");
         }
         });
