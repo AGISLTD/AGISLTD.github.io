@@ -339,7 +339,7 @@ function populateFeatureGrid(){
                         }
                         html += '></td>';
                         html += '<td>' + element.description + '</td>';
-                        html += '<td><input featuretype='+element.name+' class="w3-check showLayer" type="checkbox" checked></td>';
+                        html += '<td><input featuretype="'+element.name+'" class="w3-check showLayer" type="checkbox" checked></td>';
                         html += "</tr>";
                 });
                 html += '</tbody></table>';

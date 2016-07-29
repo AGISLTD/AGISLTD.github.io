@@ -162,6 +162,14 @@ function locationSwitch(sel){
     map.addLayer(labels);
 
     locationID = sel.value;
+    
+    // Temporary/hardcoded/very bad way to set the banner based on location
+    if (parseInt(locationID) <= 10){
+        $('#banner').html("<img class=\"w3-left logo\" src=\"images/ac_web_app_log.png\">");
+    } else {
+        $('#banner').html("");
+    }    
+    
     locRef = rootRef.ref("/location/"+locationID);
     locRef.child('currentEdit').once("value", function(data) {
         loadLocationsGeoJSON(data);
@@ -174,6 +182,9 @@ function locationSwitch(sel){
     });
     locRef.child('bounds').once("value", function(data){
         setBounds(data.val());
+    });
+    locRef.child('name').once("value", function(data){
+        $('#banner').html($('#banner').html() + "<h1>"+data.val()+"</h1>");
     });
     rootRef.ref("/edit/"+locationID).on("child_removed", function(data){
         removeEdit(data);

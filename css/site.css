@@ -72,7 +72,7 @@
 #topbar {
     height: 80px;
 }
-#topbar>.logo{
+#topbar .logo{
     height: 80px;
     position: fixed;
     left: 0;
