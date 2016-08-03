@@ -81,6 +81,7 @@
                 </div>
                 <textarea id="JSONBox" style="display:none;width: 5px; height 5px" rows="1" cols="1" ></textarea>
             </div>
+            <div id="saveButtonDiv"></div>
         </div>
         <div id='historylist' class="accordion"></div>
     </div>
@@ -96,51 +97,12 @@
         <label for="password">Password</label><br />
         <input type="password" id="password" style="width:90%;">
         <br><br />
-        <button onclick="userLogin()">Login</button><br /><br />
+        <button id="loginbutton" onclick="userLogin()">Login</button><br /><br />
 <!--        <a href="/register.html">Sign up</a><br />-->
 <!--        <a href="#">Forgotten Password</a>-->
         <label class="validateTips"></label>
     </div>
 </div>
-<script>
-    dialog = $( "#dialog-login" ).dialog({
-      autoOpen: true,
-      height: 250,
-      width: 350,
-      modal: true,
-      draggable: false,
-      resizable: false,
-      dialogClass: "no-close"
-//      buttons: {
-//        "Login": userLogin,
-//        Cancel: function() {
-//          dialog.dialog( "close" );
-//        }
-//      },
-//      close: function() {
-//        form[ 0 ].reset();
-//        allFields.removeClass( "ui-state-error" );
-//      }
-    });
-</script>
-    
-    <script>
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '619432824875705',
-      xfbml      : true,
-      version    : 'v2.6'
-    });
-  };
-
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-</script>
     
     <script>
         var rootRef = firebase.database();

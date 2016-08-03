@@ -169,14 +169,21 @@ background-repeat: no-repeat;
 
 /* Map Labels */
 
+.featureLabel{
+    text-shadow: 0 0 0.4em #FFF, 0 0 0.4em #FFF, 0 0 0.4em #FFF, 0 0 0.4em #FFF, 0 0 0.4em #FFF, 0 0 0.4em #FFF, 0 0 0.4em #FFF, 
+        0 0 0.4em #FFF, 0 0 0.4em #FFF, 0 0 0.4em #FFF;
+    border: none !important;
+    background: none !important;
+}
+.featureLabel:before, .featureLabel:after{
+    display: none !important;
+}
+
 .polyLabel{
-/*    color: 'yellow';*/
 }
 .markerLabel{
-/*    color: 'yellow';*/
 }
 .lineLabel{
-/*    color: 'yellow';*/
 }
 
 .labelDragHandle{

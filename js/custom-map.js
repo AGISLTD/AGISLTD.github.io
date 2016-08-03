@@ -2,6 +2,7 @@ var map;
 var drawControl; // Edit/Delete controls
 var location;
 var drawControl;
+var editsEnabled = false;
 var currentlyEditing = false; // flag to indicate state of drawControl
 var editingFeature = null; // the feature currently selected for editing
 var uid = null;
@@ -19,18 +20,16 @@ var iconSize = {
 };
 //var location = require("location");
 $(document).ready(function(){
-    $('#Username').keypress(function(e){
+    $('#password').keypress(function(e){
               if(e.keyCode==13)
-              $('#userLogin').click();
+              $('#loginbutton').click();
             });
     
     map = L.map('map', {
 			center: AucklandLatLng,
-			zoom: 10,
+			zoom: 7,
 			layers: [grayscale]
 		});
-    
-    GeoJSONControl.addTo(map);
     
     // Add relevant data / icons / labels for new feature created
     map.on('draw:created', function (e) {
@@ -67,11 +66,9 @@ $(document).ready(function(){
     });
     map.on('draw:editstop', function(e){
         currentlyEditing = false;
-//        TODO -- if "canceled" revert changes to drawnItems also
     });
     map.on('draw:deletestop', function(e){
         currentlyEditing = false;
-//        TODO -- if "canceled" revert changes to drawnItems also
     });
     
     // Delete removes layers from drawnItems - we need to remove them from their featureGroup as well
@@ -95,6 +92,35 @@ $(document).ready(function(){
         }
     })
     
+    // Auth handling    
+        var logindialog = null;
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            if (logindialog){
+                logindialog.dialog("close");
+            }
+            $('#userLoginContainer').hide();
+            $('#fbName').text(user.email);
+            $('#userDetails').show();
+            userSwitch(user.uid);
+        } else {
+            logindialog = $( "#dialog-login" ).dialog({
+              autoOpen: true,
+              height: 250,
+              width: 350,
+              modal: true,
+              draggable: false,
+              resizable: false,
+              dialogClass: "no-close"
+            });
+            $('#userLoginContainer').show();
+            $('#userDetails').hide();
+            $('#mapControls').hide();
+            resetLayers();
+        }
+    });
+    
+    
     //Resize leaflet map dynamically
     var mapmargin = $('#topbar').outerHeight();
     function resize(){
@@ -113,7 +139,7 @@ $(document).ready(function(){
 // Asks user for details about the Feature they just added
 function askForFeatureDetails(layer) {
     var detailsPopup = L.popup();
-    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
+    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
     detailsPopup.setContent(content);
     detailsPopup.setLatLng(getLatLng(layer)); //calculated based on the e.layertype
     detailsPopup.openOn(map);
@@ -134,21 +160,14 @@ function saveFeatureDetails(featureType, featureID) {
     if (featureGroups[featureType]){
         feature = featureGroups[featureType].getLayer(featureID); // retrieve the layer just created
         var sName = document.getElementById("shapeName").value;
-        var sDetails = document.getElementById("shapeDesc").value;
      //drawnItems is a container for the drawn objects
         feature.properties.LeafLabel = sName;
-        feature.properties.LeafDetails = sDetails;
-        addLabelsToFeature(feature, sName, sDetails);
+        addLabelsToFeature(feature, sName);
     }
     map.closePopup();
 }
 
-function addLabelsToFeature(feature, labeltext, details){
-    // add the details popup
-    if (details) {
-        feature.bindPopup(details);
-    }
-    
+function addLabelsToFeature(feature, labeltext){
     // add the overlay label
     if (labeltext) {
         if (feature._latlng){ // hacky way to check if it's a point marker, rather than line or poly
@@ -166,7 +185,7 @@ function addLabelsToFeature(feature, labeltext, details){
             }
             // create a 'ghost marker' to bind the label to
             var marker = new L.marker(latlng, { opacity: 0.01, draggable: true, icon: L.divIcon({className: 'labelDragHandle', iconAnchor: [0,0]}) });
-            marker.bindLabel(labeltext, {noHide: true, className: classname, offset: [-20, -15] });
+            marker.bindLabel(labeltext, {noHide: true, className: 'featureLabel '+classname, offset: [-20, -15] });
             labels.addLayer(marker);
             labelMarkerDic[feature._leaflet_id] = marker;
             //labels.addTo(map);
@@ -177,13 +196,13 @@ function addLabelsToFeature(feature, labeltext, details){
 
 
 // GeoJSON save / show controls
-var GeoJSONControl = L.control({
-            position: 'topleft'});
-GeoJSONControl.onAdd = function (map) {
-    this._div = L.DomUtil.create('div', 'customC'); // Creates our div with class "customC"
-    this._div.innerHTML = '<button id="savebutton" onclick="saveGeoJson()">Save</button>';
-    return this._div;
-};
+//var GeoJSONControl = L.control({
+//            position: 'topleft'});
+//GeoJSONControl.onAdd = function (map) {
+//    this._div = L.DomUtil.create('div', 'customC'); // Creates our div with class "customC"
+//    this._div.innerHTML = '<button id="savebutton" onclick="saveGeoJson()">Save</button>';
+//    return this._div;
+//};
 
 // Base Maps
 var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -204,7 +223,7 @@ var LayersControl = L.control.layers(baseLayers, {}, {
 
 // Registers the DrawControl to the layer that was clicked
 function setEditLayer(e){
-    if(editingFeature === e.target.properties.LeafType || currentlyEditing){
+    if(!editsEnabled || (editingFeature === e.target.properties.LeafType || currentlyEditing)){
        return;
     }
     editingFeature = e.target.properties.LeafType;
@@ -257,13 +276,23 @@ function populateLocations(){
     
     // add option for each location
     locationsRef = rootRef.ref("/location/");
-    viewableLocsRed = rootRef.ref("/roles/"+uid+"/view/");
-    viewableLocsRed.on('child_added', function (element) {
-        locationsRef.child(element.key).once("value", function(loc){
-            $('#location').append('<option value='+loc.key+'>'+loc.val().name+'</option>');
-            $('#mapControls').show();
+    rolesRef = rootRef.ref("/roles/"+uid);
+    rolesRef.once('value', function (snapshot) {
+        var viewList = snapshot.val().view;
+        var editList = snapshot.val().edit;
+        $.each(viewList, function(index, element){
+            locationsRef.child(index).once("value", function(loc){
+                $('#location').append('<option value='+loc.key+' '+((editList && (index in editList)) ? 'editable': '')+'>'+loc.val().name+'</option>');
+                $('#mapControls').show();
+            });
         })
     });
+}
+
+function resetInterface(){
+    resetLayers();
+    $('#location').html(""); 
+    $('#featuregrid').html("");
 }
 
 // Feature Layers
@@ -304,7 +333,7 @@ function addFeatureGroupsToParentGroup(){
 }
 
 //Retrieves features from db and populates the view
-function populateFeatureGrid(){
+function populateFeatureGrid(editable){
     $('#featuregrid').html(""); // clear the contents
     featureRef = rootRef.ref("/features/");
     featureRef.on('child_added', function (featureSnapshot) {
@@ -324,7 +353,11 @@ function populateFeatureGrid(){
                     Feature[element.name] = element; // save symbology for this feature type
 
                         html += '<tr>';
-                        html += '<td title="Add '+element.description+'" onclick="addFeature(\''+element.name+'\')"'
+                        if (editable){
+                            html += '<td title="Add '+element.description+'" onclick="addFeature(\''+element.name+'\')"';
+                        } else {
+                            html += '<td ';
+                        }
                         if (element.family == "marker"){
                             // Set icon's size and anchor point
                             element.options.icon.iconSize = iconSize[element.size];
@@ -346,7 +379,7 @@ function populateFeatureGrid(){
                 $(html).appendTo($(div));
                 $(div).appendTo('#featuregrid');
                 $(div).accordion(accordionOptions);
-                $(div).accordion("refresh" );
+                $(div).accordion("refresh");
             }
         });
         addFeatureGroupsToParentGroup();
@@ -368,20 +401,24 @@ function populateFeatureGrid(){
         //accordionise our new feature menu grid thing
     $('#featuregrid').accordion(accordionOptions);
     $('#featuregrid').accordion("refresh" );
-        
     }, function (err) {
       // code to handle read error
     });
+    
+    if (editable){
+        $("#saveButtonDiv").html("<br><br><br><button id=\"savebutton\" onclick=\"saveGeoJson()\">Save Changes</button><br>");
+    }
 }
 
 function deleteEdit(location, editKey){
-    editRef = rootRef.ref("edit/"+location+"/"+editKey);
-    editRef.once("value", function(data){
-        jsonRef = rootRef.ref("geojson/"+data.val().geojsonid);
-        jsonRef.remove();
-    });
-    editRef.remove();
-//    alert("Deleted edit");
+    if (confirm("Are you sure you want to delete this older map version?")){
+        editRef = rootRef.ref("edit/"+location+"/"+editKey);
+        editRef.once("value", function(data){
+            jsonRef = rootRef.ref("geojson/"+data.val().geojsonid);
+            jsonRef.remove();
+        });
+        editRef.remove();
+    }
 }
 
 function userLogin() {
@@ -395,33 +432,14 @@ function userLogin() {
       var errorMessage = error.message;
       alert("Failed to log in: "+errorMessage)
       return;
-    }).then(function(user){
-        userSwitch(user.uid);
-        populateFeatureGrid();
-        populateLocations();
-    });
-    
-    firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-        $( "#dialog-login" ).dialog("close");
-        $('#userLoginContainer').hide();
-        $('#fbName').text(user.email);
-        $('#userDetails').show();
-    } else {
-        $('#userLoginContainer').show();
-        $('#userDetails').hide();
-        $('#mapControls').hide();
-        resetLayers();
-        $( "#dialog-login" ).dialog("open");
-    }
     });
 }
 
 function logout(){
-    if (drawControl._map) { // http://stackoverflow.com/questions/33146809/find-out-if-a-leaflet-control-has-already-been-added-to-the-map
+    if (drawControl && drawControl._map) { // http://stackoverflow.com/questions/33146809/find-out-if-a-leaflet-control-has-already-been-added-to-the-map
         map.removeControl(drawControl);
     }
-    resetLayers();
+    resetInterface();
     firebase.auth().signOut().then(function() {
         $('#logindeetz').hide();
           $('#fbName').text("");
@@ -444,6 +462,7 @@ function userSwitch(val) {
         userRef = null;
         return;
     }
+    populateLocations();
 
     // set userRef
     userRef = rootRef.ref("/user/"+val);
@@ -453,35 +472,4 @@ function userSwitch(val) {
             $('#fbName').text(data.val().name);
         }
     });
-}
-
-// DEPRECATED -- found a WMTS service (NZ Parcel Boundaries Wireframe) to provide same functionality with easier implementation.
-// Builds a GeoJSON layer of property title boundaries, from LINZ WFS - adds to Overlay control.
-function addPropertyBoundariesOverlay(mapCentre){
-// GeoJSON from WFS code (from https://stackoverflow.com/questions/25187937/loading-geojson-layers-from-geoserver-to-leaflet-map-based-on-the-current-boundi)
-    var geoJsonUrl = 'http://api.data.linz.govt.nz/api/vectorQuery.json';
-    var parameters = {
-        key: '780af066229e4b63a8f9408cc13c31e8',
-        layer: '804',
-        x: mapCentre[1],
-        y: mapCentre[0],
-        radius: 10000,
-        max_results: '100',
-        geometry: 'true',
-        with_field_names: 'true'
-    };
-    
-    var boundaryStyle = {color: 'black', fillOpacity: '0'}; // Style options applied to the boundary geojson
-
-    $.ajax({
-        url: geoJsonUrl + L.Util.getParamString(parameters),
-//        url: 'http://api.data.linz.govt.nz/api/vectorQuery.json?key=780af066229e4b63a8f9408cc13c31e8&layer=804&x=175.13902664162185&y=-37.80180293956146&max_results=3&radius=10000&geometry=true&with_field_names=true',
-        datatype: 'jsonp',
-        jsonCallback: 'getJson',
-        success: function(data){
-            var geojsonBoundariesLayer = new L.GeoJSON(data.vectorQuery.layers[804], boundaryStyle);
-            geojsonBoundariesLayer.getAttribution = function() { return 'LINZ Property Parcels'; };
-            LayersControl.addOverlay(geojsonBoundariesLayer, "Property Title Boundaries");
-        }
-        });
 }

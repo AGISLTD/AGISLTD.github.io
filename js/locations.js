@@ -41,14 +41,9 @@ function loadOverlays(overlayRef){
 
 function setBounds(latlongBounds){
     if (latlongBounds){
-        map.panTo(getCentreOfLatlngs(latlongBounds), {animate: true});
-        map.setMaxBounds(latlongBounds);
-        map.options.minZoom = 14;
-        map.setZoom(14);
+        map.fitBounds(latlongBounds, {animate: true});
     } else { // reset all
         map.panTo(AucklandLatLng, {animate: true});
-        map.setMaxBounds(null);
-        map.options.minZoom = null;
         map.setZoom(9);
     }
 //    addPropertyBoundariesOverlay(getCentreOfLatlngs(latlongBounds)); // No longer using this service -- using a WMTS service now
@@ -127,10 +122,12 @@ function loadEditHistory(data, currentedit){
         html += '<td onclick="loadEdit(\''+index+'\')">'+date.toLocaleDateString('en-NZ')+'</td>';
         html += '<td data=\''+element.user+'\'></td>';
         if ( users.indexOf(element.user) == -1 ) users.push(element.user);
-        if (element.protected || index == currentedit){
-            html += '<td>Protected</td>';
-        } else {
-            html += '<td class="clickable" onclick="deleteEdit('+locationID+',\''+index+'\')"><b>Delete</b></td>';
+        if (editsEnabled){ // only show delete/protected if user is able to edit
+            if (element.protected || index == currentedit){
+                html += '<td>Protected</td>';
+            } else {
+                html += '<td class="clickable" onclick="deleteEdit('+locationID+',\''+index+'\')"><b>Delete</b></td>';
+            }
         }
         html += "</tr>";
     });
@@ -162,13 +159,16 @@ function locationSwitch(sel){
     map.addLayer(labels);
 
     locationID = sel.value;
+    editsEnabled = $(sel.selectedOptions[0]).is("[editable]");
     
-    // Temporary/hardcoded/very bad way to set the banner based on location
-    if (parseInt(locationID) <= 10){
+    populateFeatureGrid(editsEnabled);
+    
+    // Temporary/hardcoded/very-bad-way to set the banner based on location id
+    if (parseInt(locationID) <= 10 || parseInt(locationID) > 12){
         $('#banner').html("<img class=\"w3-left logo\" src=\"images/ac_web_app_log.png\">");
     } else {
         $('#banner').html("");
-    }    
+    }
     
     locRef = rootRef.ref("/location/"+locationID);
     locRef.child('currentEdit').once("value", function(data) {
