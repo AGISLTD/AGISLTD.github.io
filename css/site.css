@@ -16,6 +16,7 @@
 }
 
 /*Print*/
+/*
 @media print {
     * {
         display: none;
@@ -27,7 +28,7 @@
       visibility: visible;
       height:100vh;
       display:flex;
-/*      // Direction of the items, can be row or column*/
+      Direction of the items, can be row or column
       flex-direction: column;
     }
     main.printBody{
@@ -37,6 +38,7 @@
         height:100px;
         background: red;
     }
+*/
     
 /*
     div#map {
