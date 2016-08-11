@@ -9,13 +9,11 @@
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
     <link rel="stylesheet" href="css/easy-button.css" />
-    <link rel="stylesheet" href="css/site.css" media="screen" />
-<!--    <link rel="stylesheet" href="css/print.css" media="print"/>-->
+    <link rel="stylesheet" href="css/site.css"/>
     <link rel="stylesheet" href="css/w3.css" />
     <link rel="stylesheet" href="/css/leaflet.css" />
     <link rel="stylesheet" href="/css/leaflet.label.css" />
     <link rel="stylesheet" href="/css/leaflet-messagebox.css" />
-<!--    <link rel="stylesheet" href="/css/leaflet.tooltip.css" />-->
     <link rel="stylesheet" href="/css/leaflet-areaselect.css" />
     <link rel="stylesheet" href="/css/jquery-ui.min.css" />
     <link rel="stylesheet" href="/css/printpreview.css" />
@@ -25,7 +23,6 @@
      <script src="/js/lib/leaflet.draw-src.js"></script>
      <script src="/js/lib/leaflet-messagebox.js"></script>
     <script src="/js/lib/leaflet.label.js"></script>
-<!--    <script src="/js/lib/leaflet.tooltip.js"></script>-->
     <script src="/js/lib/leaflet-areaselect.js"></script>
     <script src="/js/printpreview.js"></script>
     <script src="/js/locations.js"></script>
@@ -44,124 +41,113 @@
     </script>
 </head>
 <body class="w3-light-grey">
-<div class="w3-container w3-top w3-dark-grey w3-large w3-padding" style="z-index:4" id="topbar">
-  <button class="w3-btn w3-hide-large w3-padding-0 w3-hover-text-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
-    <div class="w3-left" id="banner"></div>  
+    <div class="w3-container w3-top w3-dark-grey w3-large w3-padding" style="z-index:4" id="topbar">
+        <button class="w3-btn w3-hide-large w3-padding-0 w3-hover-text-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+        <div class="w3-left" id="banner"></div>  
 
-    <a href="http://www.agis.co.nz" target="_blank"><img class="w3-right companylogo" src="images/Agis_web_logo_buffer.png"></a>
-<div id="userDetails" class="w3-right w3-medium">
-        <p>Hi, <span id="fbName"></span><br />
-        <a href="#" onclick="logout()">Logout</a></p>
-    </div>
-    <div class="w3-right w3-medium"><button name='print'>Print Preview</button></div>
+        <a href="http://www.agis.co.nz" target="_blank"><img class="w3-right companylogo" src="images/Agis_web_logo_buffer.png"></a>
+        <div id="userDetails" class="w3-right w3-medium">
+            <p>Hi, <span id="fbName"></span><br />
+            <a href="#" onclick="logout()">Logout</a></p>
+        </div>
+        <div class="w3-right w3-medium"><p style="margin-right: 1em"><button class="w3-btn w3-white" name='print'>Print</button></p></div>
     </div>
     
-<div class="w3-sidenav w3-collapse w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
-    <div class="w3-container" style="padding:1em;position:relative">
-        <div>
+    <div class="w3-sidenav w3-collapse w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
+        <div class="w3-container" style="padding:1em;position:relative">
             <div>
-                <div id="mapControls" style="display:none">
-<!--                        <a href="/profile.html">Profile</a><br />-->
-                    <div id="locationContainer" class="w3-container">
-                        <select class="w3-select" id="location" onchange="locationSwitch(this)">
-                            <option value="" disabled selected>Select Location</option>
-                        </select>
+                <div>
+                    <div id="mapControls" style="display:none">
+    <!--                        <a href="/profile.html">Profile</a><br />-->
+                        <div id="locationContainer" class="w3-container">
+                            <select class="w3-select" id="location" onchange="locationSwitch(this)">
+                                <option value="" disabled selected>Select Location</option>
+                            </select>
+                        </div>
+                        <br />
+                        <div id='featuregrid' class="accordion"></div>
+                        <br />
                     </div>
-                    <br />
-                    <div id='featuregrid' class="accordion"></div>
-                    <br />
+                    <textarea id="JSONBox" style="display:none;width: 5px; height 5px" rows="1" cols="1" ></textarea>
                 </div>
-                <textarea id="JSONBox" style="display:none;width: 5px; height 5px" rows="1" cols="1" ></textarea>
+                <div id="saveButtonDiv"></div>
             </div>
-            <div id="saveButtonDiv"></div>
+            <div id='historylist' class="accordion"></div>
         </div>
-        <div id='historylist' class="accordion"></div>
     </div>
-</div>
     <div id='mappane' class="w3-main" style="margin-left:300px;">
         <div id="map"></div>
     </div>
     
-<div id="dialog-login" title="Log in">
-    <div id="userLoginContainer">
-        <label for="email">Email</label><br />
-        <input type="text" id="email" style="width:90%;"><br>
-        <label for="password">Password</label><br />
-        <input type="password" id="password" style="width:90%;">
-        <br><br />
-        <button id="loginbutton" onclick="userLogin()">Login</button><br /><br />
-<!--        <a href="/register.html">Sign up</a><br />-->
-<!--        <a href="#">Forgotten Password</a>-->
-        <label class="validateTips"></label>
+    <div id="dialog-login" title="Log in">
+        <div id="userLoginContainer">
+            <label for="email">Email</label><br />
+            <input type="text" id="email" style="width:90%;"><br>
+            <label for="password">Password</label><br />
+            <input type="password" id="password" style="width:90%;">
+            <br><br />
+            <button id="loginbutton" onclick="userLogin()">Login</button><br /><br />
+    <!--        <a href="/register.html">Sign up</a><br />-->
+    <!--        <a href="#">Forgotten Password</a>-->
+            <label class="validateTips"></label>
+        </div>
     </div>
-</div>
     
     
-            <div id="printBox" class="whitebox" style="visibility:hidden;">
-                <a class="closeDialog"><img class="closebutton" src="img/close.png"></a>
-                <h1 class="msg_qq">Print Map</h1>
-                <div id="printPreview"></div>
-                <div id="previewLoading">
-                    <img src="img/loadingCircle.gif">&nbsp;
-                    <em class="msg_rr">Generating preview...</em>
-                </div>
-                <div id="printOptions">
-                    <h3 class="msg_uu">Options</h3>
-                    <div id="printScale" class="printOption">
-                        <span class="msg_vv">Scale:</span>
-                        <a class="scaleimg" id="minus" href="#"><img src="img/minus.png" alt="moins"></a>
-                        <img id="scalebar" src="img/scalebar.png"><img id="scalegrip" src="img/scalegrip.png">
-                        <a class="scaleimg" id="plus" href="#"><img src="img/plus.png" alt="plus"></a>
-                        <div id="ratioScale">1:<span></span></div>
-                    </div>
-                    <div id="paperSize" class="printOption">
-                        <span class="msg_ww">Paper size:</span>
-                        <select>
-                            <option value="A0">A0</option>
-                            <option value="A1">A1</option>
-                            <option value="A2">A2</option>
-                            <option value="A3">A3</option>
-                            <option value="A4" selected>A4</option>
-                            <option value="A5">A5</option>
-                            <option value="B0">B0</option>
-                            <option value="B1">B1</option>
-                            <option value="B2">B2</option>
-                            <option value="B3">B3</option>
-                            <option value="B4">B4</option>
-                            <option value="B5">B5</option>
-                        </select>
-                    </div>
-                    <div id="paperOrientation" class="printOption">
-                        <span class="msg_xx">Orientation:</span>
-                        <select>
-                            <option class="msg_yy" value="portrait" selected>portrait</option>
-                            <option class="msg_zz" value="landscape">landscape</option>
-                        </select>
-                    </div>
-<!--
-                    <div id="markerType" class="printOption">
-                        <span class="msg_aaa">Marker Symbol Style:</span>
-                        <form>
-                            <input class="msg_bbb" type="radio" name="markerType" value="circle" autocomplete="off">Circles</input>
-                            <input class="msg_ccc" type="radio" name="markerType" value="icon" autocomplete="off" checked >Icons</input>
-                        </form>
-                    </div>
--->
-                    <div>
-                        <button class="msg_ddd" id="printButton">Print</button>
-                    </div>
-                </div><!--end printOptions div-->
-            </div><!--end printBox div-->
-
-<!--<div id="cover"></div> -->
-
+    
+    <div id="printBox" class="whitebox" style="visibility:hidden;">
+        <a class="closeDialog"><img class="closebutton" src="img/close.png"></a>
+        <h1 class="msg_qq">Print Format</h1>
+        <div id="printPreview"></div>
+        <div id="previewLoading">
+            <img src="img/loadingCircle.gif">&nbsp;
+            <em class="msg_rr">Generating preview...</em>
+        </div>
+        <div id="printOptions">
+            <h3 class="msg_uu">Options</h3>
+            <div id="printScale" class="printOption">
+                <span class="msg_vv">Scale:</span>
+                <a class="scaleimg" id="minus" href="#"><img src="img/minus.png" alt="moins"></a>
+                <img id="scalebar" src="img/scalebar.png"><img id="scalegrip" src="img/scalegrip.png">
+                <a class="scaleimg" id="plus" href="#"><img src="img/plus.png" alt="plus"></a>
+                <div id="ratioScale">1:<span></span></div>
+            </div>
+            <div id="paperSize" class="printOption">
+                <span class="msg_ww">Paper size:</span>
+                <select>
+                    <option value="A0">A0</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="A3">A3</option>
+                    <option value="A4" selected>A4</option>
+                    <option value="A5">A5</option>
+                    <option value="B0">B0</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="B3">B3</option>
+                    <option value="B4">B4</option>
+                    <option value="B5">B5</option>
+                </select>
+            </div>
+            <div id="paperOrientation" class="printOption">
+                <span class="msg_xx">Orientation:</span>
+                <select>
+                    <option class="msg_yy" value="portrait" selected>portrait</option>
+                    <option class="msg_zz" value="landscape">landscape</option>
+                </select>
+            </div>
+            <div>
+                <button class="msg_ddd" id="printButton">Print</button>
+            </div>
+        </div><!--end printOptions div-->
+    </div><!--end printBox div-->
     
     <script>
         var rootRef = firebase.database();
     </script>
-    
+
     <div id="images"></div>
-    
+
     <script src="/js/custom-map.js"></script>
     <script src="/js/custom-markers.js"></script>
 </body>

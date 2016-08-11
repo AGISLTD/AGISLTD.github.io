@@ -120,19 +120,20 @@
 @media print {
 	@page {
         size: auto;
-        margin: 10mm;
+        margin: 5mm;
     }
 
-    body {
-    	/*border: 5px solid blue;*/
+    html {
+/*    	border: 5px solid blue;*/
+        background: white;
     }
 
     #container {
-    	/*border: 4px solid green;*/
+/*    	border: 4px solid green;*/
     	position: absolute;
     }
 
-    #cover, #maparea, #printOptions, #ppmmtest, .closeDialog, .resize, .msg_qq {
+    #cover, #maparea, #printOptions, #ppmmtest, #mappane, #sidePanel, #topbar, .closeDialog, .resize, .msg_qq {
 		display: none !important;
 	}
 
@@ -142,11 +143,20 @@
 		left: 0;
 		top: 0;
 		right: 0;
-		/*border: 1px solid red;*/
+/*		border: 1px solid red;*/
+        border: none;
+        max-height:100%;
 	}
+    
+    .whitebox {
+        border: none;
+        border-radius: none;
+        padding: 0px;
+        box-shadow: none;
+    }
 
 	#printPreview {
-		border: 1px solid black !important;
+/*		border: 1px solid black !important;*/
 		background-color: white !important;
 	}
 
@@ -157,4 +167,8 @@
 	.leaflet-control-scale-line {
 		text-align: center;
 	}
+    
+    .leaflet-label {
+        background: rgba(255, 255, 255, 0.4) !important;
+    }
 }

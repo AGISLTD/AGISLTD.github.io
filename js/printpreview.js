@@ -34,6 +34,7 @@ var lang = window.location.search.split("=")[1],
 		markerType,
 		featuresToApprove,
 		commentsToApprove,
+        titleBox,
 		usersites = {};
 
 function initialize() {
@@ -67,17 +68,39 @@ function initialize() {
 		if (typeof printPreviewMap === 'undefined'){ //only run on first print preview
 			setPreview(mapZoom); //->
 		} else {
-			printPreviewMap.setView(getMapCentre(), mapZoom);
+			printPreviewMap.setView(getMapCentre(), getMapZoom());
+            $.each(printPreviewMap._layers, function(index, element){
+                printPreviewMap.removeLayer(element);
+            });
 		};
+        
+        
+        // add title
+        if (titleBox) { titleBox.removeFrom(printPreviewMap); }
+        titleBox = L.control({position: 'topleft'});
+		titleBox.onAdd = function (map) {
+			var container = L.DomUtil.create('div', 'printcomponent');
+			$(container).html($('#banner').html());
+			return container;
+		};
+		titleBox.addTo(printPreviewMap);
+        
+        // Set each layer of underlying map to the printpreview map
+        $.each(map._layers, function(index, element){
+            if (element == drawnItems) { return; }
+            printPreviewMap.addLayer(cloneLayer(element));
+        });
 
 //		setPreviewLayers(); //->
 
 		$("#scalegrip").css({
-			"margin-left": String(-182 + ((mapZoom - 8) * 19)) + "px",
+			"margin-left": String(-182 + ((mapZoom - 11) * 19)) + "px",
 		});
+        
+        window.dispatchEvent(new Event('resize')); // Jiggle elements to correct size.
 	};
 
-	function setPreview(mapZoom){
+	function setPreview(mapZoom){        
 		printPreviewMap = L.map("printPreview", {
 			center: getMapCentre(),
 			zoom: mapZoom,
@@ -89,9 +112,6 @@ function initialize() {
 			boxZoom: false,
 			tap: false
 		});
-        
-        // Set each layer of underlying map to the printpreview map
-        $.each(map._layers, function(index, element){printPreviewMap.addLayer(cloneLayer(element))});
 
 		L.control.scale({
 			imperial: false
@@ -104,6 +124,15 @@ function initialize() {
 			return container;
 		};
 		northArrow.addTo(printPreviewMap);
+        
+        // add logo
+		var logo = L.control({position: 'bottomright'});
+		logo.onAdd = function (map) {
+			var container = L.DomUtil.create('div', 'printcomponent');
+			$(container).html('<img src="images/Agis_web_logo_buffer.png">');
+			return container;
+		};
+		logo.addTo(printPreviewMap);
 
 		$("#printButton").click(function(){	
 
@@ -216,20 +245,20 @@ function initialize() {
 			$("#previewLoading").show();
 			if ($(this).attr("id") == "plus"){
 				//zoom in
-				if (mapZoom < 17){
+				if (mapZoom < 20){ //17 def
 					mapZoom++;
 					printPreviewMap.setZoom(mapZoom);
 				}
 			} else {
 				//zoom out
-				if (mapZoom > 8){
+				if (mapZoom > 11){ //8 def
 					mapZoom--;
 					printPreviewMap.setZoom(mapZoom);
 				}
 			};
 			//move scale bar indicator
 			$("#scalegrip").css({
-				"margin-left": String(-182 + ((mapZoom - 8) * 19)) + "px",
+				"margin-left": String(-182 + ((mapZoom - 11) * 19)) + "px",
 			});
 		});
 	};
@@ -506,10 +535,31 @@ function initialize() {
 			"margin-right": side / 4,
 			"margin-top": side / 4
 		});
+        
+        //adjust agis logo
+		$(".printcomponent img").css({
+			height: side + "px"
+		});
+		$(".printcomponent").css({
+			"margin-right": side / 4,
+			"margin-top": side / 4
+		});
+        
+		$(".printcomponent h1").css({
+			"margin-top": side + 5,
+            "background": "rgba(128, 128, 128, 0.49)",
+            "padding": "0 "+side/2+"px",
+            "font-size": side*.7+"pt",
+            "color": "white"
+		});
+        
+		$("#printPreview .leaflet-label").css({
+			"font-size": (side / 2) + "px"
+		});
 
-		//resize labels
-		newlabels = newlabels || false;
-		setLabels(newlabels); //->
+//		//resize labels
+//		newlabels = newlabels || false;
+//		setLabels(newlabels); //->
 	};
 
 	function getRadius(){

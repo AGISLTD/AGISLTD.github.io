@@ -406,7 +406,7 @@ function populateFeatureGrid(editable){
     });
     
     if (editable){
-        $("#saveButtonDiv").html("<br><br><br><button id=\"savebutton\" onclick=\"saveGeoJson()\">Save Changes</button><br>");
+        $("#saveButtonDiv").html("<br><br><br><button class=\"w3-btn w3-grey\"  id=\"savebutton\" onclick=\"saveGeoJson()\">Save Changes</button><br>");
     }
 }
 
@@ -527,8 +527,15 @@ function cloneLayer (layer) {
         });
         return layergroup;
     }
+    
+    // Label markers..
+    if (layer instanceof L.Class) {
+        var marker = new L.marker(layer._latlng, { opacity: 0.01, draggable: true, icon: L.divIcon({className: 'labelDragHandle', iconAnchor: [0,0]}) });
+        marker.bindLabel(layer._content, options);
+        return marker;
+    }
 
-    throw 'Unknown layer, cannot clone this layer';
+    throw 'Unknown layer, cannot clone this layer: '+layer;
 }
 
 function getMapZoom() {
