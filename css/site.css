@@ -52,6 +52,10 @@
 }
 
 /*Feature Grid*/
+input[type=checkbox].w3-check {
+    top: 0px !important;
+}
+
 .accordionDiv {
     padding: .7em .5em !important;
 }

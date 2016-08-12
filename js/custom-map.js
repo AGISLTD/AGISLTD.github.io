@@ -120,7 +120,6 @@ $(document).ready(function(){
         }
     });
     
-    
     //Resize leaflet map dynamically
     var mapmargin = $('#topbar').outerHeight();
     function resize(){
@@ -338,13 +337,13 @@ function populateFeatureGrid(editable){
     featureRef = rootRef.ref("/features/");
     featureRef.on('child_added', function (featureSnapshot) {
         // Will be called with a featureSnapshot for each child under the /features/ node
-        $('#featuregrid').append('<h3>'+featureSnapshot.val().name +'</h3>');
+        $('#featuregrid').append('<h3>'+featureSnapshot.val().name +'<input class=\"w3-check w3-right toplvlcheckbx\" type=\"checkbox\" checked/></h3>');
         var div = document.createElement('div');
         div.className = "accordion accordionDiv";
         featureSnapshot.forEach(function(childSnapshot){
             featureArray = childSnapshot.val();
             if ($.isArray(featureArray)){
-                $(div).append('<h3>'+childSnapshot.key +'</h3>');
+                $(div).append('<h3>'+childSnapshot.key +'<input class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/></h3>');
                 var html = '<table class="featureTable"><thead><tr></tr></thead><tbody>';
                 $.each(featureArray, function(index, element){
         //            row = document.createElement("tr");
@@ -397,6 +396,20 @@ function populateFeatureGrid(editable){
                 }
            }
         });
+        
+    
+    // Propogated checkbox selection
+    $('#featuregrid input[type="checkbox"]').click(function(e) {
+        e.stopPropagation();
+    });
+    $('#featuregrid .toplvlcheckbx').change(function(e) {
+        var checked = $(this).prop('checked');
+        $(this).parent().next().find(".midlvlcheckbx").prop('checked', checked).change();
+    });
+    $('#featuregrid .midlvlcheckbx').change(function(e) {
+        var checked = $(this).prop('checked');
+        $(this).parent().next().find('input[type="checkbox"]').prop('checked', checked).change();
+    });
         
         //accordionise our new feature menu grid thing
     $('#featuregrid').accordion(accordionOptions);
