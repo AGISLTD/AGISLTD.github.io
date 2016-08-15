@@ -60,7 +60,7 @@ function buildGeoJSONFromFeatureLayer(category){
 }
 
 // Saves GeoJSON for the current location
-function saveGeoJson(){
+function saveGeoJson(){    
     // collect all the features from each Category FeatureGroup
     var allFeatures = [];
     drawnItems.eachLayer(buildGeoJSONFromFeatureLayer, allFeatures);
@@ -73,6 +73,8 @@ function saveGeoJson(){
     edit.geojsonid = jsonid;
     edit.user = firebase.auth().currentUser.uid;
     edit.datetime = Date.now();
+    edit.note = $('#note').val();
     editID = rootRef.ref('/edit/'+locationID).push(edit).key;
     locRef.update({'currentEdit': editID});
+    saveDialog.dialog( "close" );
 }

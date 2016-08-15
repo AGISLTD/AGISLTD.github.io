@@ -61,9 +61,8 @@ function getCentreOfLatlngs(latlngs){
 
 var editingFeature = null; // the feature currently selected for editing
 //Loads up the GeoJSON into leaflet layers
-function loadLocationsGeoJSON(data){
+function loadLocationsGeoJSON(editID){
     // load geojson into featureGroups
-    var editID = data.val();
     if (undefined == editID){
 //        alert("No data found for this location");
         return;
@@ -101,7 +100,7 @@ function loadLocationsGeoJSON(data){
     });
 }
 
-function loadEditHistory(data, currentedit){
+function loadEditHistory(data, currentedit, specificVersion){
 //    clearEditHistory();
     $('#historylist').html(""); // clear the contents
     edits = data.val();
@@ -112,22 +111,33 @@ function loadEditHistory(data, currentedit){
     var div = document.createElement('div');
     div.className = "accordion accordionDiv";
 //    $(div).append('<h3>'+childSnapshot.key+'</h3>');
-    var html = '<table class="historyTable"><thead><tr></tr></thead><tbody>';
+    var html = '<table class="historyTable w3-table w3-bordered w3-hoverable w3-small"><thead><tr></tr></thead><tbody>';
     // add edits to Edit list
     var users = []; // List of userIDs in the list
     $.each(edits, function(index, element){
         timestamp = Number(element.datetime);
-        date = new Date(timestamp) || new Date(element.datetime);
-        html += '<tr data=\''+index+'\'>';
-        html += '<td onclick="loadEdit(\''+index+'\')">'+date.toLocaleDateString('en-NZ')+'</td>';
-        html += '<td data=\''+element.user+'\'></td>';
+        date = element.datetime ? new Date(timestamp).toLocaleDateString('en-NZ') : "---";
+        if ((index == currentedit && !specificVersion) || index == specificVersion){
+            html += '<tr class="current" data=\''+index+'\'>';
+        } else {
+            html += '<tr data=\''+index+'\'>';
+        }
+        html += '<td class="details" onclick="loadEdit(\''+index+'\')"><span>'+date+'</span><br/><span data=\''+element.user+'\'></span></td>';
+        if (element.note) {
+            html += '<td class="note" title="'+element.note+'"><p class="fadeouttext">'+truncate.apply(element.note, [90, true])+'</p></td>';
+        } else {
+            html += '<td class="note w3-text-grey">---</td>';
+        }
+        
         if ( users.indexOf(element.user) == -1 ) users.push(element.user);
         if (editsEnabled){ // only show delete/protected if user is able to edit
+            html += '<td class="delete"><span class="w3-right ';
             if (element.protected || index == currentedit){
-                html += '<td>Protected</td>';
+                html += 'w3-text-grey">Protected</span></td>';
             } else {
-                html += '<td class="clickable" onclick="deleteEdit('+locationID+',\''+index+'\')"><b>Delete</b></td>';
+                html += 'clickable w3-text-red" onclick="deleteEdit('+locationID+',\''+index+'\')"><b>Delete</b></span>';
             }
+            html += '</td>';
         }
         html += "</tr>";
     });
@@ -136,7 +146,7 @@ function loadEditHistory(data, currentedit){
         rootRef.ref("/user/"+element).once('value', function(data){
             userData = data.val();
             if(userData && userData.name){
-                $('.historyTable td[data="'+data.key+'"]').html(userDate.name);
+                $('.historyTable span[data="'+data.key+'"]').html(userData.name);
             }
         });
     });
@@ -145,13 +155,24 @@ function loadEditHistory(data, currentedit){
     $(div).appendTo('#historylist');
     $('#historylist').accordion(accordionOptions);
     $('#historylist').accordion("refresh" );
+    if (specificVersion){ // we want to keep list expanded after making selection
+        // hacky way to make the accordion expand - set it to uncollapsible momentarily.
+        $('#historylist').accordion( "option", "collapsible", false );
+        $('#historylist').accordion( "option", "collapsible", true );
+    }
 }
 
 function removeEdit(data){
     $('.historyTable tr[data="'+data.key+'"]').remove();
 }
 
-function locationSwitch(sel){
+function loadEdit(editKey){
+    if (confirm("Load this map version? Any unsaved changes will be lost")){
+        locationSwitch(document.getElementById('location'), editKey);
+    }
+}
+
+function locationSwitch(sel, specificVersion){
     removeDrawControl();
     editingFeature = ""; // fiddly state change of drawcontrol editing.
     resetLayers();
@@ -171,12 +192,21 @@ function locationSwitch(sel){
     }
     
     locRef = rootRef.ref("/location/"+locationID);
-    locRef.child('currentEdit').once("value", function(data) {
-        loadLocationsGeoJSON(data);
-        rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
-                loadEditHistory(editHistory, data.val());
+    if (specificVersion){ // loading a previous edit
+        locRef.child('currentEdit').once("value", function(data) {
+            loadLocationsGeoJSON(specificVersion);
+            rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
+                    loadEditHistory(editHistory, data.val(), specificVersion);
+            });
         });
-    });
+    } else {
+        locRef.child('currentEdit').once("value", function(data) {
+            loadLocationsGeoJSON(data.val());
+            rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
+                    loadEditHistory(editHistory, data.val());
+            });
+        });
+    }
     locRef.child('overlays').once("value", function(data){
         loadOverlays(data);
     });

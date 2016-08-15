@@ -25,6 +25,7 @@
     <script src="/js/lib/leaflet.label.js"></script>
     <script src="/js/lib/jquery.deepcheckbox.min.js"></script>
     <script src="/js/printpreview.js"></script>
+    <script src="js/helpers.js"></script>
     <script src="/js/locations.js"></script>
     <script src="/js/lib/jquery-ui.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
@@ -137,10 +138,21 @@
                 </select>
             </div>
             <div>
-                <button class="msg_ddd" id="printButton">Print</button>
+                <button class="w3-btn w3-light-grey" id="printButton">Print</button>
             </div>
         </div><!--end printOptions div-->
     </div><!--end printBox div-->
+    
+    <div id="dialog-form" title="Save Map" style="display:none;">
+      <form>
+        <fieldset>
+          <label for="note">Add a brief summary of your changes</label>
+            <textarea rows="11" cols="30" name="note" id="note" class="text ui-widget-content ui-corner-all"></textarea>
+          <!-- Allow form submission with keyboard without duplicating the dialog button -->
+          <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+      </form>
+    </div>
     
     <script>
         var rootRef = firebase.database();

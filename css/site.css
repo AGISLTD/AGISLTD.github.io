@@ -116,6 +116,24 @@ background-repeat: no-repeat;
     background-color: rgba(255, 255, 255, 0.8) !important;
 }
 
+/* history grid */
+tr.current {
+    background-color: lightyellow;
+}
+td.details{
+    width:60px;
+    cursor: pointer;
+}
+td.note {
+    max-width: 130px;
+}
+td.delete {
+    width:55px;
+}
+.fadeouttext {
+  overflow: ellipsis;
+}
+
 
 /* Map Labels */
 

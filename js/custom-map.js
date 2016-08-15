@@ -6,6 +6,7 @@ var editsEnabled = false;
 var currentlyEditing = false; // flag to indicate state of drawControl
 var editingFeature = null; // the feature currently selected for editing
 var uid = null;
+var saveDialog;
 var AucklandLatLng = [-36.8485, 174.7633];
 var labelMarkerDic = {};
 var accordionOptions = {active: false, collapsible: true,animate: false,heightStyle: "content"};
@@ -118,6 +119,20 @@ $(document).ready(function(){
             $('#mapControls').hide();
             resetLayers();
         }
+    });
+    
+    // Save dialog
+    saveDialog = $( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 400,
+      width: 350,
+      modal: true,
+      buttons: {
+        "Save map": saveGeoJson,
+        Cancel: function() {
+          saveDialog.dialog( "close" );
+        }
+      }
     });
     
     //Resize leaflet map dynamically
@@ -419,12 +434,15 @@ function populateFeatureGrid(editable){
     });
     
     if (editable){
-        $("#saveButtonDiv").html("<br><br><br><button class=\"w3-btn w3-grey\"  id=\"savebutton\" onclick=\"saveGeoJson()\">Save Changes</button><br>");
+        $("#saveButtonDiv").html("<br><br><br><button class=\"w3-btn w3-light-green\"  id=\"savebutton\">Save Changes</button><br/><br>");
+        $("#savebutton").on("click", function(){
+            saveDialog.dialog("open");
+        });
     }
 }
 
 function deleteEdit(location, editKey){
-    if (confirm("Are you sure you want to delete this older map version?")){
+    if (confirm("Are you sure you want to delete this map version?")){
         editRef = rootRef.ref("edit/"+location+"/"+editKey);
         editRef.once("value", function(data){
             jsonRef = rootRef.ref("geojson/"+data.val().geojsonid);
