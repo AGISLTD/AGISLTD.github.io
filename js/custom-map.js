@@ -372,6 +372,7 @@ function populateFeatureGrid(editable){
                         } else {
                             html += '<td ';
                         }
+                        var detailFn = null;
                         if (element.family == "marker"){
                             // Set icon's size and anchor point
                             element.options.icon.iconSize = iconSize[element.size];
@@ -379,15 +380,21 @@ function populateFeatureGrid(editable){
                                 return obj / 2; // Icon Anchor is in the middle of the icon.
                             });
                             html +='class="clickable featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
+                            detailFn = updateCount;
                         }else if (element.family == "polyline") {
                             html+= 'class="clickable"><div class="linefeaturebutton"><div class="line" style="background-color:'+element.options.color+';height:'+element.options.weight+'px;"/></div';
+                            detailFn = updateLength;
                         }else if (element.family == "polygon") {
                             html+= 'class="clickable"><div class="polyfeaturebutton" style="background-color:'+element.options.fillColor+';border-color:'+element.options.color+'"/';
+                            detailFn = updateArea;
                         }
-                        html += '></td>';
-                        html += '<td>' + element.description + '</td>';
-                        html += '<td><input featuretype="'+element.name+'" class="w3-check showLayer" type="checkbox" checked></td>';
+                        html += '></td><td>' + element.description;
+                        html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
+                        html += '</td><td><input featuretype="'+element.name+'" class="w3-check showLayer" type="checkbox" checked></td>';
                         html += "</tr>";
+                        // attach detail-update handling
+                        featureGroups[element.name].on('layeradd', detailFn);
+                        featureGroups[element.name].on('layerremove', detailFn);
                 });
                 html += '</tbody></table>';
                 $(html).appendTo($(div));
@@ -439,6 +446,33 @@ function populateFeatureGrid(editable){
             saveDialog.dialog("open");
         });
     }
+}
+
+function updateArea(e){
+    var type = e.layer.options.type;
+    var group = this;
+    $('.featureTable span.detail[data-featuretype="'+type+'"]').text(function(){
+        var sumArea = 0;
+        $.each(group._layers, function(index, element){
+            sumArea += L.GeometryUtil.geodesicArea(element.getLatLngs());
+        });
+        return (sumArea / 10000).toFixed(2)+" ha";
+    });
+}
+function updateLength(e){
+    var type = e.layer.options.lineType;
+    var group = this;
+    $('.featureTable span.detail[data-featuretype="'+type+'"]').text(function(){
+        var sumLength = 0;
+        $.each(group._layers, function(index, element){
+            sumLength += L.GeometryUtil.length(element);
+        });
+        return sumLength.toFixed(0)+"m";
+    });
+}
+function updateCount(e){
+    var type = e.layer.options.icon.options.type;
+    $('.featureTable span.detail[data-featuretype="'+type+'"]').text(this.getLayers().length);
 }
 
 function deleteEdit(location, editKey){

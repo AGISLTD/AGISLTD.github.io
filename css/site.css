@@ -56,6 +56,11 @@ input[type=checkbox].w3-check {
     top: 0px !important;
 }
 
+#featuregrid span.detail {
+    font-size: small;
+    font-style: italic;
+}
+
 .accordionDiv {
     padding: .7em .5em !important;
 }
