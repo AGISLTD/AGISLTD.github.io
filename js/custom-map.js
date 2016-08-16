@@ -22,9 +22,9 @@ var snapguides = [];
 //var location = require("location");
 $(document).ready(function(){
     $('#password').keypress(function(e){
-              if(e.keyCode==13)
-              $('#loginbutton').click();
-            });
+      if(e.keyCode==13)
+      $('#loginbutton').click();
+    });
     
     map = L.map('map', {
 			center: AucklandLatLng,
@@ -92,13 +92,17 @@ $(document).ready(function(){
         if (labelMarkerDic[id]){
             map.addLayer(labelMarkerDic[id]);
         }
+        if (e.layer.on){
+            var layer = e.layer;
+            e.layer.on('dblclick', function(e){askForFeatureDetails(layer)});
+        }
     });
     map.on('layerremove', function(e){
         id = e.layer._leaflet_id
         if (labelMarkerDic[id]){
             map.removeLayer(labelMarkerDic[id]);
         }
-    })
+    });
     
     // Auth handling    
         var logindialog = null;
@@ -159,11 +163,19 @@ $(document).ready(function(){
 
 // Asks user for details about the Feature they just added
 function askForFeatureDetails(layer) {
+    if (!layer.properties || !layer.properties.LeafType){
+        return;
+    }
     var detailsPopup = L.popup();
     var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
     detailsPopup.setContent(content);
     detailsPopup.setLatLng(getLatLng(layer)); //calculated based on the e.layertype
     detailsPopup.openOn(map);
+    $('#shapeName').focus();
+    $('#shapeName').keypress(function(e){
+      if(e.keyCode==13)
+        $('#okBtn').click();
+    });
 }
 
 // Returns 'middle' latlng for a given feature
@@ -181,7 +193,6 @@ function saveFeatureDetails(featureType, featureID) {
     if (featureGroups[featureType]){
         feature = featureGroups[featureType].getLayer(featureID); // retrieve the layer just created
         var sName = document.getElementById("shapeName").value;
-     //drawnItems is a container for the drawn objects
         feature.properties.LeafLabel = sName;
         addLabelsToFeature(feature, sName);
     }
@@ -208,6 +219,9 @@ function addLabelsToFeature(feature, labeltext){
             var marker = new L.marker(latlng, { opacity: 0.01, draggable: true, icon: L.divIcon({className: 'labelDragHandle', iconAnchor: [0,0]}) });
             marker.bindLabel(labeltext, {noHide: true, className: 'featureLabel '+classname, offset: [-20, -15] });
             labels.addLayer(marker);
+            if (labelMarkerDic[feature._leaflet_id]) { // remove any existing label
+                map.removeLayer(labelMarkerDic[feature._leaflet_id]);
+            }
             labelMarkerDic[feature._leaflet_id] = marker;
             //labels.addTo(map);
             marker.showLabel();
@@ -291,6 +305,7 @@ function removeDrawControl(){
 
 // Populates the Location selector
 function populateLocations(){
+    $('#cover').show();
     // clear the contents and add placeholder
     $('#location').html(""); 
     $('#location').append('<option value="" disabled="" selected="">Select Location</option>');
@@ -308,12 +323,30 @@ function populateLocations(){
             });
         })
     });
+    
+    // Wait for locations to load up, then automatically select
+    window.setTimeout(function(){
+        if ($('#location').children('option[value]:not([disabled])').length == 1) {
+            $('#location option[value]').prop('selected', true);
+            $('#location').change();
+            $('#location').hide();
+        }
+        $('#cover').hide();
+    }, 2500);
+    window.setTimeout(function(){
+        if ($('#location').children('option[value]:not([disabled])').length > 1) {
+            $('#location').show(); // in case for some reason the other locations were very slow to load.
+        }
+    }, 10000);
 }
 
 function resetInterface(){
     resetLayers();
     $('#location').html(""); 
     $('#featuregrid').html("");
+    $('#saveButtonDiv').html("");
+    $('#historylist').html("");
+    $('#banner').html("");
 }
 
 // Feature Layers

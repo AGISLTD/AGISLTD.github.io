@@ -104,10 +104,11 @@ function loadLocationsGeoJSON(editID){
 function loadEditHistory(data, currentedit, specificVersion){
 //    clearEditHistory();
     $('#historylist').html(""); // clear the contents
-    edits = data.val();
+    var edits = data.val();
     if (edits == undefined){
         return;
     }
+//    edits = $(edits).children().get().reverse();
     $('#historylist').append('<h3>Edit History</h3>');
     var div = document.createElement('div');
     div.className = "accordion accordionDiv";
@@ -117,7 +118,7 @@ function loadEditHistory(data, currentedit, specificVersion){
     var users = []; // List of userIDs in the list
     $.each(edits, function(index, element){
         timestamp = Number(element.datetime);
-        date = element.datetime ? new Date(timestamp).toLocaleDateString('en-NZ') : "---";
+        date = element.datetime ? new Date(timestamp).toLocaleDateString('en-NZ') : '---';
         if ((index == currentedit && !specificVersion) || index == specificVersion){
             html += '<tr class="current" data=\''+index+'\'>';
         } else {
