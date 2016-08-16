@@ -19,13 +19,15 @@ function addFeature(type){
                 drawFeature.options.icon = L.icon(feat.options.icon);
                 break;
             case "polygon":
-                drawFeature = new CustomPoly(map, {shapeOptions: feat.options});
+                drawFeature = new CustomPoly(map, {shapeOptions: feat.options, showArea: true});
                 break;
             case "polyline":
                 drawFeature = new CustomLine(map, {shapeOptions: feat.options});
                 break;
         }
-        drawFeature.enable();
+        drawFeature.options.guideLayers = snapguides;
+        drawFeature.snapDistance = 10;
+        drawFeature.enable(); // enable draw start
     }
 }
 

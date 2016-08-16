@@ -75,6 +75,7 @@ function loadLocationsGeoJSON(editID){
                     layer.on('click', function(e){
                         setEditLayer(e);
                     });
+                    snapguides.push(layer); // add to snap-guides
                     layer.properties = feature.properties;
                     if (feature.properties != undefined && feature.properties.LeafType != undefined && Feature[feature.properties.LeafType]){// Skip features not in our Feature-definitions
                         if (layer.options == undefined) { layer.options = {}; }

@@ -1,5 +1,4 @@
 var map;
-var drawControl; // Edit/Delete controls
 var location;
 var drawControl;
 var editsEnabled = false;
@@ -19,6 +18,7 @@ var iconSize = {
     xxlarge: [128, 128],
     massive: [164, 164],
 };
+var snapguides = [];
 //var location = require("location");
 $(document).ready(function(){
     $('#password').keypress(function(e){
@@ -48,8 +48,9 @@ $(document).ready(function(){
                 featuretype = layer.options.lineType
             }
         
-            // Add layer to our feature  group
+            // Add layer to our feature  group, and to snap guidelayers
 			featureGroups[featuretype].addLayer(layer);
+            snapguides.push(e.layer);
         
             layer.properties = {};
             layer.properties.LeafType = featuretype;
@@ -76,6 +77,12 @@ $(document).ready(function(){
     map.on('draw:deleted', function(e){
         e.layers.eachLayer(function(layer){
             featureGroups[layer.properties.LeafType].removeLayer(layer);
+            
+            // remove the layer from our snapguides array
+            var index = snapguides.indexOf(layer);
+            if (index > -1) {
+                snapguides.splice(index, 1);
+            }
         });
     });
     
@@ -322,6 +329,7 @@ function resetLayers(){
 //            map.removeLayer(layer);
 //        }
 //    });
+    snapguides = [];
     drawnItems.clearLayers();
     labels.clearLayers();
     clearOverlays();
