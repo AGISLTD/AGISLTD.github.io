@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
     <link rel="stylesheet" href="css/easy-button.css" />
     <link rel="stylesheet" href="css/site.css"/>
-    <link rel="stylesheet" href="css/w3.css" />
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
     <link rel="stylesheet" href="/css/leaflet.css" />
     <link rel="stylesheet" href="/css/leaflet.label.css" />
     <link rel="stylesheet" href="/css/leaflet-messagebox.css" />
@@ -54,7 +54,14 @@
             <p>Hi, <span id="fbName"></span><br />
             <a href="#" onclick="logout()">Logout</a></p>
         </div>
-        <div class="w3-right w3-medium"><p style="margin-right: 1em"><button class="w3-btn w3-white" name='print'>Print</button></p></div>
+        <div class="w3-right w3-medium w3-padding"><button class="w3-btn w3-white" name='print'>Print</button></div>
+        <div class="w3-dropdown-hover w3-right w3-medium w3-padding">
+          <button class="w3-btn w3-white">Request</button>
+          <div class="w3-dropdown-content w3-border">
+            <a href="#" onclick="request('Assistance')">Assistance</a>
+            <a href="#" onclick="request('Custom Print')">Custom Print</a>
+          </div>
+        </div>
     </div>
     
     <div class="w3-sidenav w3-collapse w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
@@ -96,8 +103,6 @@
             <label class="validateTips"></label>
         </div>
     </div>
-    
-    
     
     <div id="printBox" class="whitebox" style="visibility:hidden;">
         <a class="closeDialog"><img class="closebutton" src="img/close.png"></a>
@@ -157,6 +162,32 @@
       </form>
     </div>
     
+    <div id="request-form" class="w3-modal">
+      <div class="w3-modal-content w3-card-8 w3-animate-zoom" style="max-width:600px">
+
+        <div class="w3-center"><br>
+          <span onclick="document.getElementById('request-form').style.display='none'" class="w3-closebtn w3-hover-red w3-container w3-padding-8 w3-display-topright" title="Close Modal">&times;</span>
+        </div>
+
+        <form action="https://formspree.io/tyler@agis.co.nz" method="POST">
+          <div class="w3-container w3-section">
+            <label><b>Request</b></label>
+            <input id="requestformtype" class="w3-input w3-border w3-margin-bottom" type="text" value="" name="requesttype" required>
+
+            <label><b>Details</b></label>
+              <textarea class="w3-input w3-border" rows="5" placeholder="Tell us a bit about what you require" name="details" required></textarea>
+              
+              <input id="requestformuser" type="test" value="" name="user" style="display:none" />
+          </div>
+
+            <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+              <button onclick="document.getElementById('request-form').style.display='none'" type="button" class="w3-btn w3-red">Cancel</button>
+              <input class="w3-right w3-btn w3-green w3-padding" type="submit" value="Send" />
+            </div>
+        </form>
+
+      </div>
+    </div>
     <script>
         var rootRef = firebase.database();
     </script>

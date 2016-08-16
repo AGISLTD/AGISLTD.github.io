@@ -5,3 +5,9 @@ function truncate( n, useWordBoundary ){
         s_ = (useWordBoundary && isTooLong) ? s_.substr(0,s_.lastIndexOf(' ')) : s_;
     return  isTooLong ? s_ + '&hellip;' : s_;
 };
+
+function request(type){
+    document.getElementById('request-form').style.display='block';
+    $('#requestformtype').val(type);
+    $('#requestformuser').val(firebase.auth().currentUser.email);
+}
