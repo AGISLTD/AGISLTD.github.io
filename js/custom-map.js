@@ -217,7 +217,7 @@ function addLabelsToFeature(feature, labeltext){
             }
             // create a 'ghost marker' to bind the label to
             var marker = new L.marker(latlng, { opacity: 0.01, draggable: true, icon: L.divIcon({className: 'labelDragHandle', iconAnchor: [0,0]}) });
-            marker.bindLabel(labeltext, {noHide: true, className: 'featureLabel '+classname, offset: [-20, -15] });
+            marker.bindLabel(labeltext, {noHide: true, className: 'featureLabel '+classname, offset: [0, 0] });
             labels.addLayer(marker);
             if (labelMarkerDic[feature._leaflet_id]) { // remove any existing label
                 map.removeLayer(labelMarkerDic[feature._leaflet_id]);
