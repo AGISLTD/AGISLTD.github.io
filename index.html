@@ -46,7 +46,6 @@
 <body class="w3-light-grey">
     <div id="cover"><div id="loading-img"></div></div>
     <div class="w3-container w3-top w3-dark-grey w3-large w3-padding" style="z-index:4" id="topbar">
-        <button class="w3-btn w3-hide-large w3-padding-0 w3-hover-text-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
         <div class="w3-left" id="banner"></div>  
 
         <a href="http://www.agis.co.nz" target="_blank"><img class="w3-right companylogo" src="images/Agis_web_logo_buffer.png"></a>
@@ -54,7 +53,20 @@
             <p>Hi, <span id="fbName"></span><br />
             <a href="#" onclick="logout()">Logout</a></p>
         </div>
-        <div class="w3-right w3-medium w3-padding"><button class="w3-btn w3-white" name='print'>Print</button></div>
+        <div class="w3-right w3-btn-bar w3-margin">
+            <button class="w3-btn" name='print'>Print</button>
+            <div class="w3-dropdown-hover">
+                <button class="w3-btn ">Request</button>
+                  <div class="w3-dropdown-content w3-border w3-grey">
+                    <a href="#" onclick="request('Map Feature')">Map Feature</a>
+                    <a href="#" onclick="request('Tree Height Survey')">Tree Height Survey</a>
+                    <a href="#" onclick="request('Drone Flight')">Drone Flight</a>
+                    <a href="#" onclick="request('Slope Analysis')">Slope Analysis</a>
+                  </div>
+            </div>
+        </div>
+<!--
+        <div class="w3-right w3-medium w3-padding"></div>
         <div class="w3-dropdown-hover w3-right w3-medium w3-padding">
           <button class="w3-btn w3-white">Request</button>
           <div class="w3-dropdown-content w3-border">
@@ -62,6 +74,7 @@
             <a href="#" onclick="request('Custom Print')">Custom Print</a>
           </div>
         </div>
+-->
     </div>
     
     <div class="w3-sidenav w3-collapse w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">
