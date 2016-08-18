@@ -57,8 +57,9 @@
             <button class="w3-btn" name='print'>Print</button>
             <div class="w3-dropdown-hover">
                 <button class="w3-btn ">Request</button>
-                  <div class="w3-dropdown-content w3-border w3-grey">
+                  <div class="w3-dropdown-content w3-border w3-dark-grey w3-text-white">
                     <a href="#" onclick="request('Map Feature')">Map Feature</a>
+                    <a href="#" onclick="request('Custom Print')">Custom Print</a>
                     <a href="#" onclick="request('Tree Height Survey')">Tree Height Survey</a>
                     <a href="#" onclick="request('Drone Flight')">Drone Flight</a>
                     <a href="#" onclick="request('Slope Analysis')">Slope Analysis</a>
@@ -119,14 +120,7 @@
     
     <div id="printBox" class="whitebox" style="visibility:hidden;">
         <a class="closeDialog"><img class="closebutton" src="img/close.png"></a>
-        <h1 class="msg_qq">Print Format</h1>
-        <div id="printPreview"></div>
-        <div id="previewLoading">
-            <img src="img/loadingCircle.gif">&nbsp;
-            <em class="msg_rr">Generating preview...</em>
-        </div>
         <div id="printOptions">
-            <h3 class="msg_uu">Options</h3>
             <div id="printScale" class="printOption">
                 <span class="msg_vv">Scale:</span>
                 <a class="scaleimg" id="minus" href="#"><img src="img/minus.png" alt="moins"></a>
@@ -162,6 +156,11 @@
                 <button class="w3-btn w3-light-grey" id="printButton">Print</button>
             </div>
         </div><!--end printOptions div-->
+        <div id="printPreview"></div>
+        <div id="previewLoading">
+            <img src="img/loadingCircle.gif">&nbsp;
+            <em class="msg_rr">Generating preview...</em>
+        </div>
     </div><!--end printBox div-->
     
     <div id="dialog-form" title="Save Map" style="display:none;">

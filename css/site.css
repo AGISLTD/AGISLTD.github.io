@@ -156,11 +156,14 @@ td.delete {
     border: none !important;
     background: none !important;
 }
-.featureLabel:before, .featureLabel:after{
-    display: none !important;
-}
 
-.polyLabel{
+.polyLabel p{
+    margin: 0;
+    line-height: 1.3em;
+}
+.polyLabel .size{
+    font-style:italic;
+    font-weight: normal;
 }
 .markerLabel{
 }

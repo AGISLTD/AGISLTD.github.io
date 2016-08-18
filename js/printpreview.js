@@ -35,6 +35,7 @@ var lang = window.location.search.split("=")[1],
 		featuresToApprove,
 		commentsToApprove,
         titleBox,
+        legendBox,
 		usersites = {};
 
 function initialize() {
@@ -76,14 +77,19 @@ function initialize() {
         
         
         // add title
-        if (titleBox) { titleBox.removeFrom(printPreviewMap); }
-        titleBox = L.control({position: 'topleft'});
-		titleBox.onAdd = function (map) {
+        $('.leaflet-control .printcomponent .maptitle').remove(); 
+        var disclaimer = "This map is illustrative only and all information should be independently verified on site before taking any action. Whilst due care has been taken, AGIS Ltd. give no warranty to the accuracy and completeness of any of the information on this map and accepts no liability for any error, omission or use of the information.";
+        $($('<div />', {class: "leaflet-control printcomponent maptitle" })).appendTo("#printPreview .leaflet-control-container").append($("<h1 />", { text: $('#maptitle').text() })).append($("<p />", { class: 'disclaimer', text: disclaimer }));
+       
+        // add legend
+        if (legendBox) { legendBox.removeFrom(printPreviewMap); }
+        legendBox = L.control({position: 'topright'});
+		legendBox.onAdd = function (map) {
 			var container = L.DomUtil.create('div', 'printcomponent');
-			$(container).html($('#banner').html());
+			$(container).html(buildLegend());
 			return container;
 		};
-		titleBox.addTo(printPreviewMap);
+		legendBox.addTo(printPreviewMap);
         
         // Set each layer of underlying map to the printpreview map
         $.each(map._layers, function(index, element){
@@ -114,10 +120,10 @@ function initialize() {
 		});
 
 		L.control.scale({
-			imperial: false
+			imperial: false, position: 'topleft'
 		}).addTo(printPreviewMap);
 
-		var northArrow = L.control({position: 'topright'});
+		var northArrow = L.control({position: 'topleft'});
 		northArrow.onAdd = function (map) {
 			var container = L.DomUtil.create('div', 'northArrow');
 			$(container).html('<img src="img/northarrow.png">');
@@ -536,6 +542,10 @@ function initialize() {
 			"margin-top": side / 4
 		});
         
+		$("#printBox .leaflet-control-scale-line").css({
+			"font-size": (side / 3.5) + "px"
+		});
+        
         //adjust agis logo
 		$(".printcomponent img").css({
 			height: side + "px"
@@ -544,6 +554,25 @@ function initialize() {
 			"margin-right": side / 4,
 			"margin-top": side / 4
 		});
+        
+		$(".printcomponent .legend .clickable").children().css({
+			width: side*.8 + "px",
+			height: side*.8 + "px"
+		});
+        
+		$(".printcomponent p.disclaimer").css({
+			"font-size": (side / 3) + "px"
+		});
+        
+		$(".printcomponent .featurebutton").css({
+			width: side*.8 + "px",
+			height: side*.8 + "px",
+            "background-size": side*.8 + "px "+ side*.8 + "px" 
+		});
+        
+        $(".printcomponent .legend").css({
+			"font-size": (side / 3.5) + "px"
+        });
         
 		$(".printcomponent h1").css({
 			"margin-top": side + 5,
@@ -566,7 +595,7 @@ function initialize() {
 		//adjust ratio scale and return scale ratios
 		var scales = adjustScale();
 		var mmppPaper = scales[1];
-		return 4 / mmppPaper;
+		return 3 / mmppPaper;
 	};
 
 	function adjustPreviewBox(){
@@ -627,6 +656,13 @@ function initialize() {
 		};
 	    return longside;
 	};
+    
+    function buildLegend(){
+        var features = $('#featuregrid tr:has(input:checked):not(:has(span.detail:empty))').clone();
+        features.children().remove('td:has(input)');
+        features.find('span.detail').remove();
+        return $('<table class="legend">').append(features);
+    };
 };
 
 $(document).ready(initialize);

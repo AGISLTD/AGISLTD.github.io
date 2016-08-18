@@ -25,6 +25,7 @@
 .leaflet-label.leaflet-clickable {
 	cursor: pointer;
 }
+/*
 
 .leaflet-label:before,
 .leaflet-label:after {
@@ -51,3 +52,4 @@
 .leaflet-label-left:after {
 	content: "";
 }
+*/

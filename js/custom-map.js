@@ -206,18 +206,21 @@ function addLabelsToFeature(feature, labeltext){
             feature.bindLabel(labeltext, { noHide: true, className: 'markerLabel' });
             feature.showLabel();
         } else {
-            var latlng, classname;
+            var latlng, classname, labelContents;
             if (feature.options.polyType) {
                 latlng = getLatLng(feature);
                 classname = "polyLabel";
+                labelContents = '<div><p>'+labeltext+'</p><p class="size">'+L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(feature._latlngs), 'metric')+'</p></div>';
             }
             if (feature.options.lineType)  {
                 latlng = feature._latlngs[0];
                 classname = "lineLabel";
+                labelContents = labeltext;
             }
+            
             // create a 'ghost marker' to bind the label to
             var marker = new L.marker(latlng, { opacity: 0.01, draggable: true, icon: L.divIcon({className: 'labelDragHandle', iconAnchor: [0,0]}) });
-            marker.bindLabel(labeltext, {noHide: true, className: 'featureLabel '+classname, offset: [0, 0] });
+            marker.bindLabel(labelContents, {noHide: true, className: 'featureLabel '+classname, offset: [0, 0] });
             labels.addLayer(marker);
             if (labelMarkerDic[feature._leaflet_id]) { // remove any existing label
                 map.removeLayer(labelMarkerDic[feature._leaflet_id]);
@@ -330,6 +333,8 @@ function populateLocations(){
             $('#location option[value]').prop('selected', true);
             $('#location').change();
             $('#location').hide();
+        } else {
+            $('#location').show();
         }
         $('#cover').hide();
     }, 2500);

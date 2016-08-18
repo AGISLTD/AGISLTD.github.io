@@ -1,4 +1,33 @@
 
+.legend {
+    background-color: rgba(255, 255, 255, 0.84);
+}
+
+.legend .polyfeaturebutton {
+    border-width: 2px;
+}
+
+#printPreview .maptitle {
+    position: absolute;
+    bottom: 0;
+    background-color: white;
+    width:100%;
+    text-align: center;
+}
+.printcomponent p.disclaimer {
+    position: absolute;
+    z-index: 8;
+    bottom: 0;
+    left: 1%;
+    height: 80%;
+    max-width: 20%;
+    text-align: left;
+}
+#printPreview .maptitle h1 {
+    background-color: white !important;
+    color: black !important;
+    margin: 1em 0em !important;
+}
 
 	.closeDialog {
 		margin-bottom: 20px;
@@ -45,7 +74,9 @@
 	#printPreview {
 		border: 1px solid black;
 		background-color: white;
+        margin: 10px 0px;
 	}
+    
 
 	.northArrow {
 		background-color: rgba(255, 255, 255, 0);
@@ -54,7 +85,7 @@
 	#previewLoading {
 		position: absolute;
 		top: 71px;
-		left: 30px;
+		left: 400px;
 		background-color: rgba(255, 255, 255, 0.9);
 		padding: 5px;
 	}
@@ -64,7 +95,7 @@
 	}
 
 	#printOptions {
-		margin-left: 20px;
+		margin: 10px 20px;
 	}
 
 	.printOption {
@@ -111,7 +142,6 @@
 @media print {
 	@page {
         size: auto;
-        margin: 5mm;
     }
 
     html {
@@ -137,6 +167,7 @@
 /*		border: 1px solid red;*/
         border: none;
         max-height:100%;
+        margin: auto 0;
 	}
     
     .whitebox {
