@@ -10,13 +10,13 @@ var AucklandLatLng = [-36.8485, 174.7633];
 var labelMarkerDic = {};
 var accordionOptions = {active: false, collapsible: true,animate: false,heightStyle: "content"};
 var iconSize = {
-    small: [16, 16],
-    normal: [28, 28],
-    medium: [28, 28],
-    large: [32, 32],
-    xlarge: [48, 48],
-    xxlarge: [128, 128],
-    massive: [164, 164],
+    small: 10,
+    normal: 15,
+    medium: 15,
+    large: 20,
+    xlarge: 30,
+    xxlarge: 64,
+    massive: 128,
 };
 var snapguides = [];
 //var location = require("location");
@@ -421,8 +421,9 @@ function populateFeatureGrid(editable){
                         var detailFn = null;
                         if (element.family == "marker"){
                             // Set icon's size and anchor point
-                            element.options.icon.iconSize = iconSize[element.size];
-                            element.options.icon.iconAnchor = iconSize[element.size].map(function(obj){
+                            var iconWidth = iconSize[element.size];
+                            element.options.icon.iconSize = [iconWidth,iconWidth]; // square
+                            element.options.icon.iconAnchor = [iconWidth,iconWidth].map(function(obj){
                                 return obj / 2; // Icon Anchor is in the middle of the icon.
                             });
                             html +='class="clickable featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';

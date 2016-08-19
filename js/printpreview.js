@@ -524,14 +524,19 @@ function initialize() {
 
 		//each icon will print at 8 mm per side regardless of map scale and page size
 		var side = 2 * radius;
+        var ratio = side / 30;
+        
+        var setScaleTransform = function(existing){
+            var translate = existing.substring(0, existing.indexOf(')')+1);
+            return translate +" scale("+ratio+")";
+        }
 
 		//need to change dimensions and offset
-		$("#printPreview .leaflet-marker-icon").css({
-			width: side + "px",
-			height: side + "px",
-			"margin-left": -(side / 2),
-			"margin-top": -(side / 2)
-		});
+		$.each($("#printPreview .leaflet-marker-icon"), function(index, value){
+            $(this).css({
+                transform: function(){return setScaleTransform($(this).prop('style').transform)},
+		      });
+        });
 		//adjust north arrow
 		$(".northArrow img").css({
 			width: side + "px",
@@ -556,46 +561,48 @@ function initialize() {
 		});
         
 		$(".printcomponent .legend .clickable").children().css({
-			width: side*.8 + "px",
-			height: side*.8 + "px"
+			width: side*.5 + "px",
+			height: side*.5 + "px"
 		});
         
 		$(".printcomponent p.disclaimer").css({
-			"font-size": (side / 3) + "px"
+			"font-size": (side*.2) + "px"
 		});
         
 		$(".printcomponent .featurebutton").css({
-			width: side*.8 + "px",
-			height: side*.8 + "px",
-            "background-size": side*.8 + "px "+ side*.8 + "px" 
+			width: side*.6 + "px",
+			height: side*.6 + "px",
+            "background-size": side*.6 + "px "+ side*.6 + "px" 
 		});
         
         $(".printcomponent .legend").css({
-			"font-size": (side / 3.5) + "px"
+			"font-size": (side*.2) + "px",
+            "padding-top": (side / 4) + "px",
+        });
+		$(".printcomponent h3").css({
+			"font-size": (side*.3) + "px",
+            "margin-left": side*.5,
+            "margin-bottom": side*.2,
         });
         
 		$(".printcomponent h1").css({
 			"margin-top": side + 5,
             "background": "rgba(128, 128, 128, 0.49)",
             "padding": "0 "+side/2+"px",
-            "font-size": side*.7+"pt",
+            "font-size": side*.55+"pt",
             "color": "white"
 		});
         
 		$("#printPreview .leaflet-label").css({
-			"font-size": (side / 2) + "px"
+			"font-size": (side*.2) + "px"
 		});
-
-//		//resize labels
-//		newlabels = newlabels || false;
-//		setLabels(newlabels); //->
 	};
 
 	function getRadius(){
 		//adjust ratio scale and return scale ratios
 		var scales = adjustScale();
 		var mmppPaper = scales[1];
-		return 3 / mmppPaper;
+		return 4 / mmppPaper;
 	};
 
 	function adjustPreviewBox(){
@@ -661,7 +668,7 @@ function initialize() {
         var features = $('#featuregrid tr:has(input:checked):not(:has(span.detail:empty))').clone();
         features.children().remove('td:has(input)');
         features.find('span.detail').remove();
-        return $('<table class="legend">').append(features);
+        return $($('<div class="legend"/>').append("<h3>LEGEND</h3>")).append($('<table>').append(features));
     };
 };
 
