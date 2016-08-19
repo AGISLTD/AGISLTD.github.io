@@ -43,7 +43,7 @@ function initialize() {
     // Class variables
 	
     
-    $("button[name=print]").click(printMap);
+    $("li[name=print]").click(printMap);
     $(".closeDialog").click(function(){
         closeDialog($(this).parents(".whitebox").attr("id"));
         return false;

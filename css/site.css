@@ -22,15 +22,26 @@
 .controlbuttons button {
     font-variant: small-caps;
 }
-
 #topbar {
-    height: 80px;
+    height: 45px;
+    background-color: #4a4a4a !important;
 }
+
+#topbar .actionButton {
+    font-weight: bold;
+}
+
+#topbar .actionButton:before{
+    content: " | ";
+    position: absolute;
+    font-size: x-large;
+    opacity: 0.2;
+}
+
 #topbar .logo{
-    height: 80px;
-    position: fixed;
-    left: 0;
-    top: 0;
+    height: 30px;
+    transform: translateX(-17px);
+/*    display:none;*/
 }
 
 #topbar .header-title {
@@ -41,13 +52,27 @@
 #topbar .companylogo {
   -webkit-transform: translateY(30%);
   -ms-transform: translateY(30%);
-  transform: translateY(30%);
-  height: 40px;
+  transform: translateY(30%) translateX(-5%);
+  height: 27px;
+}
+
+#fbName {
+    font-weight: bold;
+}
+#logout{
+    padding: 1em;
+}
+
+#topbar #maptitle{
+    font-weight: bold;
+    font-size: 17pt;
+    padding: 0 5em 0 1em;
 }
 
 #userDetails {
     display: none;
     padding-right:1em;
+    padding-left:3em;
     text-align: right;
 }
 

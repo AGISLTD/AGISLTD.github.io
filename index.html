@@ -45,37 +45,27 @@
 </head>
 <body class="w3-light-grey">
     <div id="cover"><div id="loading-img"></div></div>
-    <div class="w3-container w3-top w3-dark-grey w3-large w3-padding" style="z-index:4" id="topbar">
-        <div class="w3-left" id="banner"></div>  
+    <div class="w3-navbar w3-dark-grey" style="z-index:4" id="topbar">
+        <li class="w3-navitem w3-padding-8" id="banner"></li>  
 
         <a href="http://www.agis.co.nz" target="_blank"><img class="w3-right companylogo" src="images/Agis_web_logo_buffer.png"></a>
-        <div id="userDetails" class="w3-right w3-medium">
-            <p>Hi, <span id="fbName"></span><br />
-            <a href="#" onclick="logout()">Logout</a></p>
-        </div>
-        <div class="w3-right w3-btn-bar w3-margin">
-            <button class="w3-btn" name='print'>Print</button>
-            <div class="w3-dropdown-hover">
-                <button class="w3-btn ">Request</button>
-                  <div class="w3-dropdown-content w3-border w3-dark-grey w3-text-white">
-                    <a href="#" onclick="request('Map Feature')">Map Feature</a>
-                    <a href="#" onclick="request('Custom Print')">Custom Print</a>
-                    <a href="#" onclick="request('Tree Height Survey')">Tree Height Survey</a>
-                    <a href="#" onclick="request('Drone Flight')">Drone Flight</a>
-                    <a href="#" onclick="request('Slope Analysis')">Slope Analysis</a>
-                  </div>
+        
+        <li id="userDetails" class="w3-right w3-navitem w3-small w3-padding-12">
+            Logged in as <span id="fbName"></span>
+            <span id="logout" class="clickable w3-hover-deep-orange w3-tiny" href="#" onclick="logout()">Logout</span>
+        </li>
+        <li class="w3-right actionButton w3-dropdown-hover">
+            <a class="w3-dropdown" href="#">Request<i class="fa fa-caret-down"></i></a>
+            <div class="w3-dropdown-content w3-border w3-dark-grey w3-text-white">
+                <a href="#" onclick="request('Map Feature')">Map Feature</a>
+                <a href="#" onclick="request('Custom Print')">Custom Print</a>
+                <a href="#" onclick="request('Tree Height Survey')">Tree Height Survey</a>
+                <a href="#" onclick="request('Drone Flight')">Drone Flight</a>
+                <a href="#" onclick="request('Slope Analysis')">Slope Analysis</a>
+                <a href="#" onclick="request('Signup')">Sign Up!</a>
             </div>
-        </div>
-<!--
-        <div class="w3-right w3-medium w3-padding"></div>
-        <div class="w3-dropdown-hover w3-right w3-medium w3-padding">
-          <button class="w3-btn w3-white">Request</button>
-          <div class="w3-dropdown-content w3-border">
-            <a href="#" onclick="request('Assistance')">Assistance</a>
-            <a href="#" onclick="request('Custom Print')">Custom Print</a>
-          </div>
-        </div>
--->
+        </li>
+        <li class="w3-right actionButton" name='print'><a href="#">Print</a></li>
     </div>
     
     <div class="w3-sidenav w3-collapse w3-animate-left" style="z-index:3;width:300px;" id="sidePanel">

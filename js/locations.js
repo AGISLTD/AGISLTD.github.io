@@ -216,7 +216,7 @@ function locationSwitch(sel, specificVersion){
         setBounds(data.val());
     });
     locRef.child('name').once("value", function(data){
-        $('#banner').html($('#banner').html() + "<div id='maptitle'><h1>"+data.val()+"</h1></div>");
+        $('#banner').html($('#banner').html() + "<span id='maptitle'>"+data.val()+"</span>");
     });
     rootRef.ref("/edit/"+locationID).on("child_removed", function(data){
         removeEdit(data);

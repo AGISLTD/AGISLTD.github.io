@@ -147,10 +147,11 @@ $(document).ready(function(){
     });
     
     //Resize leaflet map dynamically
-    var mapmargin = $('#topbar').outerHeight();
+//    var mapmargin = $('#topbar').outerHeight();
+    var mapmargin = "45";
     function resize(){
         $('#map').css("height", ($(window).height() - mapmargin));    
-        $('#map').css("margin-top",mapmargin);
+//        $('#map').css("margin-top",mapmargin);
     }
     $(window).on("resize", resize);
     window.dispatchEvent(new Event('resize'));
