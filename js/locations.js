@@ -39,8 +39,17 @@ function loadOverlays(overlayRef){
     });
 }
 
+function extendBounds(latlngBounds, amount){
+    //extend top left
+    var topLeft =[latlngBounds[0][0]-amount, latlngBounds[0][1]-amount];
+    var bottomRight = [latlngBounds[1][0]+amount, latlngBounds[1][1]+amount];
+    return [topLeft, bottomRight];
+    
+}
+
 function setBounds(latlongBounds){
     if (latlongBounds){
+        map.setMaxBounds(extendBounds(latlongBounds, 0.06));
         map.fitBounds(latlongBounds, {animate: true});
     } else { // reset all
         map.panTo(AucklandLatLng, {animate: true});
@@ -97,6 +106,7 @@ function loadLocationsGeoJSON(editID){
                     }
                 }
             });
+            $('#cover').hide();
       });
     });
 }
@@ -175,6 +185,7 @@ function loadEdit(editKey){
 }
 
 function locationSwitch(sel, specificVersion){
+    $('#cover').show();
     removeDrawControl();
     editingFeature = ""; // fiddly state change of drawcontrol editing.
     resetLayers();
