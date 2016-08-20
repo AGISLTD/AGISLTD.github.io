@@ -35,6 +35,7 @@
     content: " | ";
     position: absolute;
     font-size: x-large;
+    font-weight: 100;
     opacity: 0.2;
 }
 
