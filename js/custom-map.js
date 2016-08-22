@@ -115,6 +115,11 @@ $(document).ready(function(){
             $('#fbName').text(user.email);
             $('#userDetails').show();
             userSwitch(user.uid);
+        }
+        else if (getUrlParameter('sampleuser') == "true"){
+            $("#email").val("sample1");
+            $("#password").val("sample1");
+            userLogin();
         } else {
             logindialog = $( "#dialog-login" ).dialog({
               autoOpen: true,
@@ -129,6 +134,7 @@ $(document).ready(function(){
             $('#userDetails').hide();
             $('#mapControls').hide();
             resetLayers();
+            
         }
     });
     
