@@ -94,7 +94,7 @@ $(document).ready(function(){
         }
         if (e.layer.on){
             var layer = e.layer;
-            e.layer.on('dblclick', function(e){askForFeatureDetails(layer)});
+            e.layer.on('contextmenu', function(e){askForFeatureDetails(layer)}); // right click to edit feature details
         }
     });
     map.on('layerremove', function(e){
@@ -174,7 +174,8 @@ function askForFeatureDetails(layer) {
         return;
     }
     var detailsPopup = L.popup();
-    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
+    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" '+getLabelPlaceholder(layer)+'/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5" '+getDetailsPlaceholder(layer)+'</textarea><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
+//    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
     detailsPopup.setContent(content);
     detailsPopup.setLatLng(getLatLng(layer)); //calculated based on the e.layertype
     detailsPopup.openOn(map);
@@ -183,6 +184,31 @@ function askForFeatureDetails(layer) {
       if(e.keyCode==13)
         $('#okBtn').click();
     });
+    $('#shapeDesc').keypress(function(e){
+      if(e.keyCode==13)
+        $('#okBtn').click();
+    });
+}
+
+function getLabelPlaceholder(feature){
+    if (feature.properties.LeafLabel){
+        return 'value="'+feature.properties.LeafLabel+'"';
+    } else if (Feature[feature.options.type] && Feature[feature.options.type].usecodelabel){ // for LMUs
+        return 'value="'+feature.properties.LeafType[0]+'" disabled';
+    } else if (feature.properties.LeafType){
+        return 'placeholder="'+feature.properties.LeafType+'"';
+    } else {
+        return "";
+    }
+}
+function getDetailsPlaceholder(feature){
+    if (feature.properties.details){
+        return '>'+feature.properties.details;
+    } else if (Feature[feature.options.type] && Feature[feature.options.type].detailsuggestions){
+        return 'placeholder="'+Feature[feature.options.type].detailsuggestions+'">';
+    } else {
+        return 'placeholder="Add more information about this feature">';
+    }
 }
 
 // Returns 'middle' latlng for a given feature
@@ -200,13 +226,19 @@ function saveFeatureDetails(featureType, featureID) {
     if (featureGroups[featureType]){
         feature = featureGroups[featureType].getLayer(featureID); // retrieve the layer just created
         var sName = document.getElementById("shapeName").value;
+        var sDetails = document.getElementById("shapeDesc").value;
         feature.properties.LeafLabel = sName;
-        addLabelsToFeature(feature, sName);
+        feature.properties.details = sDetails;
+        addLabelsToFeature(feature, sName, sDetails);
     }
     map.closePopup();
 }
 
-function addLabelsToFeature(feature, labeltext){
+function addLabelsToFeature(feature, labeltext, details){
+    if (details){
+        feature.bindPopup(details);
+    }
+    
     // add the overlay label
     if (labeltext) {
         if (feature._latlng){ // hacky way to check if it's a point marker, rather than line or poly
@@ -342,8 +374,8 @@ function populateLocations(){
             $('#location').hide();
         } else {
             $('#location').show();
+            $('#cover').hide();
         }
-        $('#cover').hide();
     }, 2500);
     window.setTimeout(function(){
         if ($('#location').children('option[value]:not([disabled])').length > 1) {

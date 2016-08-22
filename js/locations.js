@@ -80,6 +80,7 @@ function loadLocationsGeoJSON(editID){
         rootRef.ref("geojson/"+data.val()).once('value', function(json){
             geojsons = json.val();
             try {
+            $('#cover').show(); // ensures this remains shown during loading
             L.geoJson(geojsons, {
                 onEachFeature: function (feature, layer) {
                     layer.on('click', function(e){
