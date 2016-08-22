@@ -49,7 +49,7 @@ function extendBounds(latlngBounds, amount){
 
 function setBounds(latlongBounds){
     if (latlongBounds){
-        map.setMaxBounds(extendBounds(latlongBounds, 0.06));
+        map.setMaxBounds(extendBounds(latlongBounds, 0.1));
         map.fitBounds(latlongBounds, {animate: true});
     } else { // reset all
         map.panTo(AucklandLatLng, {animate: true});
@@ -79,6 +79,7 @@ function loadLocationsGeoJSON(editID){
     rootRef.ref("edit/"+locationID+"/"+editID+"/geojsonid/").once('value', function(data) {
         rootRef.ref("geojson/"+data.val()).once('value', function(json){
             geojsons = json.val();
+            try {
             L.geoJson(geojsons, {
                 onEachFeature: function (feature, layer) {
                     layer.on('click', function(e){
@@ -105,8 +106,10 @@ function loadLocationsGeoJSON(editID){
                         }
                     }
                 }
-            });
-            $('#cover').hide();
+                });
+            } finally {
+                $('#cover').hide();
+            }
       });
     });
 }
@@ -201,7 +204,7 @@ function locationSwitch(sel, specificVersion){
     if (parseInt(locationID) <= 10 || parseInt(locationID) > 12){
         $('#banner').html("<img class=\"w3-left logo\" src=\"images/ac_web_app_log.png\">");
     } else {
-        $('#banner').html("");
+        $('#banner').html("<img title='Your Logo' class=\"w3-left logo\" src=\"images/agis_banner_logo.png\">");
     }
     
     locRef = rootRef.ref("/location/"+locationID);

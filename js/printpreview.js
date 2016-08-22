@@ -56,11 +56,11 @@ function initialize() {
 			$("#"+dialog).css("visibility", "hidden");
 			$("#"+dialog+" #buttons").css("visibility", "hidden");
 		};
-		$("#cover").css({opacity: 0}).hide();
+		$("#cover").hide();
 	};
 
 	function printMap(){
-		$("#cover").css({opacity: 0.6}).show();
+		$("#cover").show();
 		$("#printBox").css("visibility", "visible");
 
 		adjustPreviewBox(); //->
@@ -666,6 +666,9 @@ function initialize() {
     
     function buildLegend(){
         var features = $('#featuregrid tr:has(input:checked):not(:has(span.detail:empty))').clone();
+        if (features.length < 1){
+            return;
+        }
         features.children().remove('td:has(input)');
         features.find('span.detail').remove();
         return $($('<div class="legend"/>').append("<h3>LEGEND</h3>")).append($('<table>').append(features));
