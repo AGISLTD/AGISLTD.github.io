@@ -15,7 +15,7 @@
    width="287.9826"
    height="204.53209"
    viewBox="0 0 287.9826 204.53209"
-   sodipodi:docname="emergency power shutoff1.svg">
+   sodipodi:docname="emergency power shutoff2.svg">
   <metadata
      id="metadata3392">
     <rdf:RDF>
@@ -94,20 +94,7 @@
      height="201.40208"
      x="1.5650001"
      y="1.5650001" />
-  <flowRoot
-     xml:space="preserve"
-     id="flowRoot4178"
-     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     transform="translate(1.5499104,-0.35982558)"><flowRegion
-       id="flowRegion4180"><rect
-         id="rect4182"
-         width="259.94354"
-         height="195.67708"
-         x="12.469618"
-         y="92.074654"
-         style="text-align:center;text-anchor:middle" /></flowRegion><flowPara
-       id="flowPara4184"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:124.00000095%;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0.80000007px;word-spacing:-0.04px;fill:#000000;fill-opacity:1">POWER SHUT OFF</flowPara></flowRoot>  <rect
+  <rect
      style="opacity:1;fill:#007548;fill-opacity:1;stroke:none;stroke-width:9.71500015;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
      id="rect4190"
      width="267.61719"
@@ -128,4 +115,30 @@
        y="57.969315"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:48.71686554px;line-height:5.99999987%;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:-2.00186825px;word-spacing:2.77686143px;fill:#ffffff;fill-opacity:1"
        dy="0">EMERGENCY</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:43.42199326px;line-height:5.99999987%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="80.305298"
+     y="124.01772"
+     id="text4149-0-5"
+     sodipodi:linespacing="5.9999999%"
+     transform="scale(0.88707586,1.1272993)"><tspan
+       sodipodi:role="line"
+       x="80.305298"
+       y="124.01772"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:43.42199326px;line-height:5.99999987%;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:-1.78429174px;word-spacing:2.47505355px;fill:#000000;fill-opacity:1"
+       id="tspan4174">POWER </tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:43.42199326px;line-height:5.99999987%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="50.128197"
+     y="164.03598"
+     id="text4149-0-5-7"
+     sodipodi:linespacing="5.9999999%"
+     transform="scale(0.88707586,1.1272993)"><tspan
+       sodipodi:role="line"
+       x="50.128197"
+       y="164.03598"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:43.42199326px;line-height:5.99999987%;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:-1.78429174px;word-spacing:2.47505355px;fill:#000000;fill-opacity:1"
+       id="tspan4174-7">SHUT OFF </tspan></text>
 </svg>
