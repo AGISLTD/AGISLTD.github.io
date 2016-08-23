@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="/css/jquery-ui.min.css" />
     <link rel="stylesheet" href="/css/printpreview.css" />
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
-    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script src='https://www.gstatic.com/firebasejs/3.3.0/firebase.js'></script>
     <script src="/js/lib/leaflet-src.js"></script>
      <script src="/js/lib/leaflet.draw-src.js"></script>
      <script src="/js/lib/leaflet-messagebox.js"></script>
@@ -101,7 +101,9 @@
             <label for="password">Password</label><br />
             <input type="password" id="password" style="width:90%;">
             <br><br />
-            <button id="loginbutton" onclick="userLogin()">Login</button><br /><br />
+            <button id="loginbutton" onclick="userLogin()">Login</button><br />
+            <span class="w3-right w3-small" onclick="forgotPassword()"><a href="#">Forgot your password?</a></span>
+            <span class="w3-left w3-small" id="forgotPasswordStatus"></span>
     <!--        <a href="/register.html">Sign up</a><br />-->
     <!--        <a href="#">Forgotten Password</a>-->
             <label class="validateTips"></label>

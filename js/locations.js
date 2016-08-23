@@ -73,7 +73,8 @@ var editingFeature = null; // the feature currently selected for editing
 function loadLocationsGeoJSON(editID){
     // load geojson into featureGroups
     if (undefined == editID){
-//        alert("No data found for this location");
+        console.log("No GeoJSON found for this location");
+        $('#cover').hide();
         return;
     }
     rootRef.ref("edit/"+locationID+"/"+editID+"/geojsonid/").once('value', function(data) {

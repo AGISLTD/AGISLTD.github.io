@@ -242,8 +242,12 @@ function addLabelsToFeature(feature, labeltext, details){
     // add the overlay label
     if (labeltext) {
         if (feature._latlng){ // hacky way to check if it's a point marker, rather than line or poly
-            feature.bindLabel(labeltext, { noHide: true, className: 'markerLabel' });
-            feature.showLabel();
+            if (feature.label){
+                feature.updateLabelContent(labeltext);
+            } else {
+                feature.bindLabel(labeltext, { noHide: true, className: 'markerLabel' });
+                feature.showLabel();
+            }
         } else {
             var latlng, classname, labelContents;
             if (feature.options.polyType) {
@@ -573,10 +577,7 @@ function deleteEdit(location, editKey){
 }
 
 function userLogin() {
-    var email = $("#email").val();
-    if (email.indexOf('@') == -1){ // Not an email address. Assume they're entering a Username only
-        email = email+'@agis.co.nz';
-    }
+    var email = getEmail();
     firebase.auth().signInWithEmailAndPassword(email, $("#password").val()).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;

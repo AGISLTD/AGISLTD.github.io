@@ -577,7 +577,7 @@ function initialize() {
         
         $(".printcomponent .legend").css({
 			"font-size": (side*.2) + "px",
-            "padding-top": (side / 4) + "px",
+            "padding": (side / 4) + "px"
         });
 		$(".printcomponent h3").css({
 			"font-size": (side*.3) + "px",
