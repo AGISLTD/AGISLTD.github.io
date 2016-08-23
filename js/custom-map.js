@@ -15,8 +15,9 @@ var iconSize = {
     medium: 15,
     large: 20,
     xlarge: 30,
-    xxlarge: 128,
-    massive: 256,
+    xxlarge: 60,
+    xxxlarge: 75,
+    massive: 100,
 };
 var snapguides = [];
 //var location = require("location");
@@ -115,6 +116,11 @@ $(document).ready(function(){
             $('#fbName').text(user.email);
             $('#userDetails').show();
             userSwitch(user.uid);
+        } else if (getUrlParameter('sampleuser').length > 0){
+            var num = getUrlParameter('sampleuser')[0];
+            $("#email").val("sample"+num);
+            $("#password").val("sample"+num);
+            userLogin();
         } else {
             logindialog = $( "#dialog-login" ).dialog({
               autoOpen: true,
@@ -129,7 +135,6 @@ $(document).ready(function(){
             $('#userDetails').hide();
             $('#mapControls').hide();
             resetLayers();
-            
         }
     });
     
@@ -158,14 +163,6 @@ $(document).ready(function(){
     window.dispatchEvent(new Event('resize'));
     
     LayersControl.addTo(map);
-    
-    
-    if (getUrlParameter('sampleuser').length > 0){
-        var num = getUrlParameter('sampleuser')[0];
-        $("#email").val("sample"+num);
-        $("#password").val("sample"+num);
-        userLogin();
-    }
 });
 //
 //// Bind UI
