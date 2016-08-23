@@ -26,3 +26,21 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
     }
 };
+
+function getEmail(){
+    var email = $("#email").val();
+    if (email.indexOf('@') == -1){ // Not an email address. Assume they're entering a Username only
+        email = email+'@agis.co.nz';
+    }
+    return email;
+}
+
+function forgotPassword(){
+    firebase.auth().sendPasswordResetEmail(getEmail()).then(function(){
+        $('#forgotPasswordStatus').css({'color':'green'});
+        $('#forgotPasswordStatus').text("Password reset email sent - please check your emails");
+    }).catch (function(error) {
+        $('#forgotPasswordStatus').css({'color':'red'});
+        $('#forgotPasswordStatus').text("Failed to reset password")
+    });
+}
