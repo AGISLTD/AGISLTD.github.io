@@ -12,7 +12,7 @@ function request(type){
     $('#requestformuser').val(firebase.auth().currentUser.email);
 }
 
-var getUrlParameter = function getUrlParameter(sParam) {
+function getUrlParameter(sParam) {
     var sPageURL = decodeURIComponent(window.location.search.substring(1)),
         sURLVariables = sPageURL.split('&'),
         sParameterName,
@@ -25,7 +25,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
             return sParameterName[1] === undefined ? true : sParameterName[1];
         }
     }
-};
+}
 
 function getEmail(){
     var email = $("#email").val();
