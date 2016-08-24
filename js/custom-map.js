@@ -116,7 +116,7 @@ $(document).ready(function(){
             $('#fbName').text(user.email);
             $('#userDetails').show();
             userSwitch(user.uid);
-        } else if (getUrlParameter('sampleuser').length > 0){
+        } else if (getUrlParameter('sampleuser') && getUrlParameter('sampleuser').length > 0){
             var num = getUrlParameter('sampleuser')[0];
             $("#email").val("sample"+num);
             $("#password").val("sample"+num);
