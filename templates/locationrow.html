@@ -1,0 +1,9 @@
+<tr data-template-bind='[{"attribute": "data-key", "value": "key"}]'>
+    <td name="name" data-content="data.name"></td>
+    <td name="bounds" data-template-bind='[{"attribute": "data", "value": "data.bounds"}]' data-content="data.bounds" data-format="BoundsFormatter"></td>
+    <td data-content="data.overlays.length"></td>
+    <td>
+        <button class="w3-btn w3-yellow" data-template-bind='[{"attribute": "data-key", "value": "key"}]' onclick="editLocation(this)" >Edit</button>&nbsp;
+<!--        <button class="w3-btn w3-red" data-template-bind='[{"attribute": "data-key", "value": "key"}]' onclick="deleteLocation(this)" >Delete</button>-->
+    </td>
+</tr>

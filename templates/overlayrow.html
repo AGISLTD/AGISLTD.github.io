@@ -1,0 +1,10 @@
+<tr data-template-bind='[{"attribute": "data-key", "value": "key"}]'>
+    <td data-content="data.name"></td>
+    <td data-content="data.tilesURL"></td>
+    <td data-content="data.geojsonid"></td>
+    <td data-content-text="data.default"></td>
+    <td>
+<!--        <button class="w3-btn w3-yellow" onclick="showProduct()" >Edit</button>&nbsp;-->
+        <button class="w3-btn w3-red" data-template-bind='[{"attribute": "data-key", "value": "key"}]' onclick="deleteOverlay()" >Delete</button>
+    </td>
+</tr>

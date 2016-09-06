@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AGIS Admin Page</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/site.css"/>
+        <link rel="stylesheet" href="css/chosen.min.css"/>
+        <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
+        <script src='https://www.gstatic.com/firebasejs/3.3.0/firebase.js'></script>
+        <script src="js/admin.js" type="application/javascript" ></script>
+        <script src="js/lib/chosen.jquery.min.js" type="application/javascript"></script>
+        <script src="js/lib/jquery.loadTemplate.min.js" type="application/javascript" ></script>
+        <script>
+          // Initialize Firebase
+          var config = {
+            apiKey: "AIzaSyBnt-OrDf9lrpTQeLnBthuud1lte4PR0_o",
+            authDomain: "test-db-b43d2.firebaseapp.com",
+            databaseURL: "https://test-db-b43d2.firebaseio.com",
+            storageBucket: "test-db-b43d2.appspot.com",
+          };
+          firebase.initializeApp(config);
+        </script>
+    
+    </head>
+    <body>
+        <ul class="w3-navbar w3-grey w3-text-white">
+          <li><a href="#" onclick="openTab('Users')">Users</a></li>
+          <li><a href="#" onclick="openTab('Locations')">Locations</a></li>
+          <li><a href="#" onclick="openTab('Overlays')">Overlays</a></li>
+        </ul>
+        <!-- Tabs -->
+        <div id="Users" class="tab w3-container w3-padding">
+            <h3>Users</h3>
+        <div>
+            <table id="userTable" class="w3-table w3-hoverable w3-padding w3-border">
+                <thead>
+                <tr class="w3-opacity w3-light-grey">
+                    <td><b>Name</b></td>
+                    <td><b>Role</b></td>
+                    <td><b># Locations</b></td>
+                    <td><b>Features</b></td>
+                    <td><b>Actions</b></td>
+                </tr>
+                </thead>
+                <tbody id="userTableBody">
+                </tbody>
+            </table>
+            <div class="w3-padding">
+                <button class="w3-btn w3-green" onclick="openUserForm();">Add User Details</button>
+            </div>
+        </div>
+        </div>
+        <div id="Locations" class="tab w3-container w3-padding">
+            <h3>Locations</h3>
+        <div>
+            <table class="w3-table w3-hoverable w3-padding w3-border">
+                <thead>
+                <tr class="w3-opacity w3-light-grey">
+                    <td><b>Name</b></td>
+                    <td><b>Bounds</b></td>
+                    <td><b># Overlays</b></td>
+                    <td><b>Actions</b></td>
+                </tr>
+                </thead>
+                <tbody id="locationTableBody">
+                </tbody>
+            </table>
+            <div class="w3-padding">
+                <button class="w3-btn w3-green" onclick="openLocationForm()">+</button>
+            </div>
+        </div>
+        </div>
+        <div id="Overlays" class="tab w3-container w3-padding">
+            <h3>Overlays</h3>
+            <div style="width:300px;" class="w3-padding">
+                <select onchange="locationSelected();" class="w3-select chosen-select allLocationsDropDown" id="overlayLocationSelect">
+                    <option value="" disabled="" selected="">Select Location</option>
+                </select>
+            </div>
+        <div>
+            <table class="w3-table w3-hoverable w3-padding w3-border">
+                <thead>
+                    <tr class="w3-opacity w3-light-grey">
+                        <td><b>Name</b></td>
+                        <td><b>Tiles WMS URL</b></td>
+                        <td><b>GeoJSON name</b></td>
+                        <td><b>Default</b></td>
+                        <td><b>Actions</b></td>
+                    </tr>
+                </thead>
+                <tbody id="overlayTableBody">
+                </tbody>
+            </table>
+            <div class="w3-padding">
+                <button class="w3-btn w3-green" onclick="openOverlayForm()">Add Overlay</button>
+            </div>
+        </div>
+        </div>
+        <!-- End tabs -->
+        
+        <!-- Modal Forms -->
+        <div id="userForm" class="w3-modal">
+          <div class="w3-modal-content w3-card-8 w3-animate-zoom" style="max-width:600px">
+
+            <div class="w3-center"><br>
+              <span onclick="document.getElementById('userForm').style.display='none'" class="w3-closebtn w3-hover-red w3-container w3-padding-8 w3-display-topright" title="Close Modal">&times;</span>
+            </div>
+
+              <div class="w3-container w3-section">
+                <label for="newUserGuid"><b>User's GUID (from Firebase Auth)</b></label>
+                <input id="newUserGuid" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+
+                <label for="userDisplayName"><b>Display Name</b></label>
+                <input id="userDisplayName" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+
+                <label for="newUserLocations"><b>Locations</b></label>
+                  <select multiple data-placeholder="Select Location(s)" class="w3-select chosen-select allLocationsDropDown" id="newUserLocations"></select>
+                
+              <div class="w3-container w3-section">
+                <label for="userRole"><b>Role</b></label>
+                  <select data-placeholder="Select User Type" class="w3-select " id="userRole">
+                    <option value="manager">Manager</option>
+                    <option value="editor">Edit + view</option>
+                    <option value="viewer">View only</option>
+                  </select>
+                  </div>
+                <label for="usersFeatures"><b>Features</b></label>
+                  <select multiple data-placeholder="Select Usable Features" class="w3-select chosen-select" id="usersFeatures">
+                    <option value="farm" selected>Farm</option>
+                    <option value="healthsafety" selected>Health and Safety</option>
+                    <option value="park" selected>Park</option>
+                    <option value="misc" selected>Misc</option>
+                    <option value="landmanagement" selected>Land management units</option>
+                  </select>
+                </div>
+
+                <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+                  <button onclick="document.getElementById('userForm').style.display='none'" type="button" class="w3-btn w3-red">Cancel</button>
+                  <button class="w3-right w3-btn w3-green w3-padding" onclick="addUserDetails()">Save User's Details</button>
+                </div>
+          </div>
+        </div>
+        
+        <div id="locationForm" class="w3-modal">
+          <div class="w3-modal-content w3-card-8 w3-animate-zoom" style="max-width:600px">
+
+            <div class="w3-center"><br>
+              <span onclick="document.getElementById('locationForm').style.display='none'" class="w3-closebtn w3-hover-red w3-container w3-padding-8 w3-display-topright" title="Close Modal">&times;</span>
+            </div>
+
+              <div class="w3-container w3-section">
+                  <input id="locationGuid" type="hidden" />
+                <label for="locationName"><b>Location Name</b></label>
+                <input id="locationName" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+
+                <label><b>Location Bounds</b> - use <a target="_blank" href="http://www.latlong.net/">LatLong.net</a> to retrieve the top-left and bottom-right points around location</label>
+                <input id="locationBoundNWLat" placeholder="NW Latitude" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+                <input id="locationBoundNWLong" placeholder="NW Longitude" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+                <input id="locationBoundSELat" placeholder="SE Latitude" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+                <input id="locationBoundSELong" placeholder="SE Longitude" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+              </div>
+
+                <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+                  <button onclick="document.getElementById('locationForm').style.display='none'" type="button" class="w3-btn w3-red">Cancel</button>
+                  <button class="w3-right w3-btn w3-green w3-padding" onclick="addLocation()">Save Location</button>
+                </div>
+          </div>
+        </div>
+        
+        <div id="overlayForm" class="w3-modal">
+          <div class="w3-modal-content w3-card-8 w3-animate-zoom" style="max-width:600px">
+
+            <div class="w3-center"><br>
+              <span onclick="document.getElementById('overlayForm').style.display='none'" class="w3-closebtn w3-hover-red w3-container w3-padding-8 w3-display-topright" title="Close Modal">&times;</span>
+            </div>
+
+              <div class="w3-container w3-section">
+                  <input id="wmsOverlayGUID" type="hidden">
+                  
+                <label for="overlayName"><b>Overlay Name</b></label>
+                <input id="overlayName" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
+                  
+                <label for="overlayDefault"><b>Show overlay by default</b></label>
+                <input id="overlayDefault" class="w3-check w3-input w3-margin-bottom" type="checkbox" value="" required>
+
+                <label for="wmsOverlayURL"><b>TileLayer WMS URL</b> - <span class="w3-opacity">Will resemble 'https://{s}.tiles.mapbox.com/v4/mapid.uenxsoa/{z}/{x}/{y}.png'</span></label>
+                <input id="wmsOverlayURL" class="w3-input w3-border w3-margin-bottom" type="text" value="">
+              
+                  <br/><span>OR</span><br/><br/>
+                  
+                <label for="overlayGeoJSON"><b>GeoJSON</b></label><br />
+                <textarea rows="4" cols="50" id="overlayGeoJSON"></textarea><br /><br />
+                  
+                <label for="overlayGeoJSONstyle"><b>GeoJSON Style</b></label><br />
+                <textarea rows="4" cols="50" id="overlayGeoJSONstyle"></textarea>
+                  
+              </div>
+
+                <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+                  <button onclick="document.getElementById('overlayForm').style.display='none'" type="button" class="w3-btn w3-red">Cancel</button>
+                  <button class="w3-right w3-btn w3-green w3-padding" onclick="addOverlay()">Save Overlay</button>
+                </div>
+          </div>
+        </div>
+        <!-- End Modal Forms -->
+        
+        
+    <script>
+        var rootRef = firebase.database();
+    </script>
+    </body>
+</html>
