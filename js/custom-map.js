@@ -632,6 +632,12 @@ function userSwitch(val) {
             $('#fbName').text(data.val().name);
         }
     });
+    
+    rootRef.ref("/roles/"+uid).once('value', function(snap){
+        if (snap.val().role == 'manager'){
+            $('#topbar').append('<li class="w3-right actionButton" name="print"><a target="_blank" href="http://www.diymapper.com/diy_mapper_customer_signup_form/">Add A User</a></li>');
+        }
+    });
 }
 
 //https://github.com/jieter/leaflet-clonelayer
