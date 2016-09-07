@@ -359,16 +359,15 @@ function populateLocations(){
     
     // add option for each location
     locationsRef = rootRef.ref("/location/");
-    rolesRef = rootRef.ref("/roles/"+uid);
+    rolesRef = rootRef.ref("/roles/"+uid+"/locations/");
     rolesRef.once('value', function (snapshot) {
-        var viewList = snapshot.val().view;
-        var editList = snapshot.val().edit;
-        $.each(viewList, function(index, element){
-            locationsRef.child(index).once("value", function(loc){
-                $('#location').append('<option value='+loc.key+' '+((editList && (index in editList)) ? 'editable': '')+'>'+loc.val().name+'</option>');
+        var locList = snapshot.val()
+        $.each(locList, function(index, element){
+            locationsRef.child(element).once("value", function(loc){
+                $('#location').append('<option value='+loc.key+'>'+loc.val().name+'</option>');
                 $('#mapControls').show();
             });
-        })
+        });
     });
     
     // Wait for locations to load up, then automatically select
@@ -437,106 +436,114 @@ function addFeatureGroupsToParentGroup(){
 }
 
 //Retrieves features from db and populates the view
-function populateFeatureGrid(editable){
+function populateFeatureGrid(){
     $('#featuregrid').html(""); // clear the contents
     featureRef = rootRef.ref("/features/");
-    featureRef.on('child_added', function (featureSnapshot) {
-        // Will be called with a featureSnapshot for each child under the /features/ node
-        $('#featuregrid').append('<h3>'+featureSnapshot.val().name +'<input class=\"w3-check w3-right toplvlcheckbx\" type=\"checkbox\" checked/></h3>');
-        var div = document.createElement('div');
-        div.className = "accordion accordionDiv";
-        featureSnapshot.forEach(function(childSnapshot){
-            featureArray = childSnapshot.val();
-            if ($.isArray(featureArray)){
-                $(div).append('<h3>'+childSnapshot.key +'<input class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/></h3>');
-                var html = '<table class="featureTable"><thead><tr></tr></thead><tbody>';
-                $.each(featureArray, function(index, element){
-        //            row = document.createElement("tr");
-                    featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
-                    featureGroups[element.name].addTo(map);
-                    Feature[element.name] = element; // save symbology for this feature type
-
-                        html += '<tr>';
-                        if (editable){
-                            html += '<td title="Add '+element.description+'" onclick="addFeature(\''+element.name+'\')"';
-                        } else {
-                            html += '<td ';
-                        }
-                        var detailFn = null;
-                        if (element.family == "marker"){
-                            // Set icon's size and anchor point
-                            var iconWidth = iconSize[element.size];
-                            element.options.icon.iconSize = [iconWidth,iconWidth]; // square
-                            element.options.icon.iconAnchor = [iconWidth,iconWidth].map(function(obj){
-                                return obj / 2; // Icon Anchor is in the middle of the icon.
-                            });
-                            html +='class="clickable featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
-                            detailFn = updateCount;
-                        }else if (element.family == "polyline") {
-                            html+= 'class="clickable"><div class="linefeaturebutton"><div class="line" style="background-color:'+element.options.color+';height:'+element.options.weight+'px;"/></div';
-                            detailFn = updateLength;
-                        }else if (element.family == "polygon") {
-                            html+= 'class="clickable"><div class="polyfeaturebutton" style="background-color:'+element.options.fillColor+';border-color:'+element.options.color+'"/';
-                            detailFn = updateArea;
-                        }
-                        html += '></td><td>' + element.description;
-                        html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
-                        html += '</td><td><input featuretype="'+element.name+'" class="w3-check showLayer" type="checkbox" checked></td>';
-                        html += "</tr>";
-                        // attach detail-update handling
-                        featureGroups[element.name].on('layeradd', detailFn);
-                        featureGroups[element.name].on('layerremove', detailFn);
-                });
-                html += '</tbody></table>';
-                $(html).appendTo($(div));
-                $(div).appendTo('#featuregrid');
-                $(div).accordion(accordionOptions);
-                $(div).accordion("refresh");
+    rootRef.ref('/roles/'+uid).once('value', function(roleSnap){
+        var userFeatures = roleSnap.val().features;
+        editsEnabled = roleSnap.val().role == 'editor' || roleSnap.val().role == 'manager';
+    
+        if (editsEnabled){
+            $("#saveButtonDiv").html("<br><br><br><button class=\"w3-btn w3-light-green\"  id=\"savebutton\">Save Changes</button><br/><br>");
+            $("#savebutton").on("click", function(){
+                saveDialog.dialog("open");
+            });
+        }
+        
+        featureRef.on('child_added', function (featureSnapshot) {
+            if ($.inArray(featureSnapshot.key, userFeatures) == -1){
+                return;
             }
-        });
-        addFeatureGroupsToParentGroup();
-        
-        // add show/hide functionality to the checkboxes we added
-        $('input[type=checkbox].showLayer').change(
-        function(){
-            //event.preventDefault();
-            layer = featureGroups[$(this).attr('featuretype')];
-            if(this.checked) {
-                map.addLayer(layer);
-            } else {
-                if (map.hasLayer(layer)){
-                    map.removeLayer(layer);
+            // Will be called with a featureSnapshot for each child under the /features/ node
+            $('#featuregrid').append('<h3 class="'+featureSnapshot.key+'FeatureUI">'+featureSnapshot.val().name +'<input class=\"w3-check w3-right toplvlcheckbx\" type=\"checkbox\" checked/></h3>');
+            var div = document.createElement('div');
+            div.className = "accordion accordionDiv "+featureSnapshot.key+"FeatureUI";
+            featureSnapshot.forEach(function(childSnapshot){
+                featureArray = childSnapshot.val();
+                if ($.isArray(featureArray)){
+                    $(div).append('<h3>'+childSnapshot.key +'<input class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/></h3>');
+                    var html = '<table class="featureTable"><thead><tr></tr></thead><tbody>';
+                    $.each(featureArray, function(index, element){
+            //            row = document.createElement("tr");
+                        featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
+                        featureGroups[element.name].addTo(map);
+                        Feature[element.name] = element; // save symbology for this feature type
+
+                            html += '<tr>';
+                            if (editsEnabled) {
+                                html += '<td title="Add '+element.description+'" onclick="addFeature(\''+element.name+'\')"';
+                            } else {
+                                html += '<td ';
+                            }
+                            var detailFn = null;
+                            if (element.family == "marker"){
+                                // Set icon's size and anchor point
+                                var iconWidth = iconSize[element.size];
+                                element.options.icon.iconSize = [iconWidth,iconWidth]; // square
+                                element.options.icon.iconAnchor = [iconWidth,iconWidth].map(function(obj){
+                                    return obj / 2; // Icon Anchor is in the middle of the icon.
+                                });
+                                html +='class="clickable featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
+                                detailFn = updateCount;
+                            }else if (element.family == "polyline") {
+                                html+= 'class="clickable"><div class="linefeaturebutton"><div class="line" style="background-color:'+element.options.color+';height:'+element.options.weight+'px;"/></div';
+                                detailFn = updateLength;
+                            }else if (element.family == "polygon") {
+                                html+= 'class="clickable"><div class="polyfeaturebutton" style="background-color:'+element.options.fillColor+';border-color:'+element.options.color+'"/';
+                                detailFn = updateArea;
+                            }
+                            html += '></td><td>' + element.description;
+                            html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
+                            html += '</td><td><input featuretype="'+element.name+'" class="w3-check showLayer" type="checkbox" checked></td>';
+                            html += "</tr>";
+                            // attach detail-update handling
+                            featureGroups[element.name].on('layeradd', detailFn);
+                            featureGroups[element.name].on('layerremove', detailFn);
+                    });
+                    html += '</tbody></table>';
+                    $(html).appendTo($(div));
+                    $(div).appendTo('#featuregrid');
+                    $(div).accordion(accordionOptions);
+                    $(div).accordion("refresh");
                 }
-           }
+            });
+            addFeatureGroupsToParentGroup();
+
+            // add show/hide functionality to the checkboxes we added
+            $('input[type=checkbox].showLayer').change(
+            function(){
+                //event.preventDefault();
+                layer = featureGroups[$(this).attr('featuretype')];
+                if(this.checked) {
+                    map.addLayer(layer);
+                } else {
+                    if (map.hasLayer(layer)){
+                        map.removeLayer(layer);
+                    }
+               }
+            });
+
+
+        // Propogated checkbox selection
+        $('#featuregrid input[type="checkbox"]').click(function(e) {
+            e.stopPropagation();
         });
-        
-    
-    // Propogated checkbox selection
-    $('#featuregrid input[type="checkbox"]').click(function(e) {
-        e.stopPropagation();
-    });
-    $('#featuregrid .toplvlcheckbx').change(function(e) {
-        var checked = $(this).prop('checked');
-        $(this).parent().next().find(".midlvlcheckbx").prop('checked', checked).change();
-    });
-    $('#featuregrid .midlvlcheckbx').change(function(e) {
-        var checked = $(this).prop('checked');
-        $(this).parent().next().find('input[type="checkbox"]').prop('checked', checked).change();
-    });
-        
-        //accordionise our new feature menu grid thing
-    $('#featuregrid').accordion(accordionOptions);
-    $('#featuregrid').accordion("refresh" );
-    }, function (err) {
-      // code to handle read error
-    });
-    
-    if (editable){
-        $("#saveButtonDiv").html("<br><br><br><button class=\"w3-btn w3-light-green\"  id=\"savebutton\">Save Changes</button><br/><br>");
-        $("#savebutton").on("click", function(){
-            saveDialog.dialog("open");
+        $('#featuregrid .toplvlcheckbx').change(function(e) {
+            var checked = $(this).prop('checked');
+            $(this).parent().next().find(".midlvlcheckbx").prop('checked', checked).change();
         });
-    }
+        $('#featuregrid .midlvlcheckbx').change(function(e) {
+            var checked = $(this).prop('checked');
+            $(this).parent().next().find('input[type="checkbox"]').prop('checked', checked).change();
+        });
+
+            //accordionise our new feature menu grid thing
+        $('#featuregrid').accordion(accordionOptions);
+        $('#featuregrid').accordion("refresh" );
+        }, function (err) {
+          // code to handle read error
+        });
+    })
 }
 
 function updateArea(e){
@@ -607,7 +614,7 @@ function logout(){
 
 
 
-function userSwitch(val) {     
+function userSwitch(val) {
     uid = val; 
     
     if (val == -1) {//logout

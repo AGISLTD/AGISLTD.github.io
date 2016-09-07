@@ -26,11 +26,14 @@ function loadOverlays(overlayRef){
     $.each(newOverlays, function(index, overlay){
         if (overlay.geojsonid) { // we have a geojson overlay to add
             rootRef.ref('geojson/'+overlay.geojsonid).once('value', function(data){
-                geojsonLayer = L.geoJson(data.val(), overlay.style);
+                var geojsonLayer = L.geoJson(data.val(), overlay.style);
                 LayersControl.addOverlay(geojsonLayer, overlay.name);
+                if (overlay.default) { // Set default for the overlay
+                    map.addLayer(geojsonLayer);
+                }
             })
         } else if (overlay.tilesURL) { // we have a tile overlay to add
-            tilelayer = L.tileLayer(overlay.tilesURL, overlay.options);
+            var tilelayer = L.tileLayer(overlay.tilesURL, overlay.options);
             LayersControl.addOverlay(tilelayer, overlay.name);
             if (overlay.default) { // Set default for the overlay
                 map.addLayer(tilelayer);
@@ -81,33 +84,33 @@ function loadLocationsGeoJSON(editID){
         rootRef.ref("geojson/"+data.val()).once('value', function(json){
             geojsons = json.val();
             try {
-            $('#cover').show(); // ensures this remains shown during loading
-            L.geoJson(geojsons, {
-                onEachFeature: function (feature, layer) {
-                    layer.on('click', function(e){
-                        setEditLayer(e);
-                    });
-                    snapguides.push(layer); // add to snap-guides
-                    layer.properties = feature.properties;
-                    if (feature.properties != undefined && feature.properties.LeafType != undefined && Feature[feature.properties.LeafType]){// Skip features not in our Feature-definitions
-                        if (layer.options == undefined) { layer.options = {}; }
-                        $.extend(layer.options, Feature[feature.properties.LeafType].options); // Add symbology to the feature
-                        if (layer.feature.geometry.type == "Point") {
-                            layer.options.icon = L.icon(Feature[feature.properties.LeafType].options.icon);
-                        }
-                        if (featureGroups[feature.properties.LeafType]) { // check that the featureGroup exists
-                            featureGroups[feature.properties.LeafType].addLayer(layer);
-                        }
-                        map.addLayer(layer);
-                        addLabelsToFeature(layer, layer.properties.LeafLabel, layer.properties.details);
-                    } else {
-                        if (feature.properties && feature.properties.LeafType){
-                            console.log("GeoJSON contained unknown feature: "+feature.properties.LeafType);
+                $('#cover').show(); // ensures this remains shown during loading
+                L.geoJson(geojsons, {
+                    onEachFeature: function (feature, layer) {
+                        layer.on('click', function(e){
+                            setEditLayer(e);
+                        });
+                        layer.properties = feature.properties;
+                        if (feature.properties != undefined && feature.properties.LeafType != undefined && Feature[feature.properties.LeafType]){// Skip features not in our Feature-definitions
+                            if (layer.options == undefined) { layer.options = {}; }
+                            $.extend(layer.options, Feature[feature.properties.LeafType].options); // Add symbology to the feature
+                            if (layer.feature.geometry.type == "Point") {
+                                layer.options.icon = L.icon(Feature[feature.properties.LeafType].options.icon);
+                            }
+                            if (featureGroups[feature.properties.LeafType]) { // check that the featureGroup exists
+                                featureGroups[feature.properties.LeafType].addLayer(layer);
+                            }
+                            map.addLayer(layer);
+                            addLabelsToFeature(layer, layer.properties.LeafLabel, layer.properties.details);
+                            snapguides.push(layer); // add to snap-guides
                         } else {
-                            console.log("GeoJSON contained malformed feature: "+JSON.stringify(feature));
+                            if (feature.properties && feature.properties.LeafType){
+                                console.log("GeoJSON contained unknown feature: "+feature.properties.LeafType);
+                            } else {
+                                console.log("GeoJSON contained malformed feature: "+JSON.stringify(feature));
+                            }
                         }
                     }
-                }
                 });
             } finally {
                 $('#cover').hide();
@@ -198,9 +201,8 @@ function locationSwitch(sel, specificVersion){
     map.addLayer(labels);
 
     locationID = sel.value;
-    editsEnabled = $(sel.selectedOptions[0]).is("[editable]");
     
-    populateFeatureGrid(editsEnabled);
+    populateFeatureGrid();
     
     // Temporary/hardcoded/very-bad-way to set the banner based on location id
     if (parseInt(locationID) <= 10 || (parseInt(locationID) > 12 && parseInt(locationID) < 23)){

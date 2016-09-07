@@ -231,6 +231,7 @@ function openLocationForm(){
 function locationSelected(){
     $('#overlayTableBody').html("");
     var locID = $('#overlayLocationSelect').val();
+    rootRef.ref('/location/'+locID+'/overlays/').off('child_added');
     rootRef.ref('/location/'+locID+'/overlays/').on('child_added', function(data){
         if (data.val()){
             $('#overlayTableBody').loadTemplate(
@@ -253,9 +254,13 @@ function addOverlay() {
     var locationguid = $('#overlayLocationSelect').val()
     var name = $('#overlayName').val();
     var showByDefault = $('#overlayDefault').prop('checked');
-    var url = $('#wmsOverlayURL').val();
-    var geojsonID = $('#overlayGeoJSON').val();
-    var geojsonstyle = $('#overlayGeoJSONstyle').val();
+    var url = $('#wmsOverlayURL').val().length > 0 ? $('#wmsOverlayURL').val() : null;
+    var geojsonID = $('#overlayGeoJSON').val().length > 0 ? saveGeoJSON($('#overlayGeoJSON').val()) : null;
+    if (geojsonID == "Invalid JSON"){
+        alert(geojsonID);
+        return;
+    }
+    var geojsonstyle = $('#overlayGeoJSONstyle').val().length > 0 ? $('#overlayGeoJSONstyle').val() : null;
     var overlay = {name: name, default: showByDefault, tilesURL: url, geojsonid: geojsonID, style: geojsonstyle};
     if (newOverlay){
         rootRef.ref('/location/'+locationguid+'/overlays/').push(overlay);
@@ -267,7 +272,25 @@ function addOverlay() {
     resetOverlayForm();
 }
 
-function resetOverlayForm(){
+function deleteOverlay(button){
+    var guid = button.attributes['data-key'].value;
+    if (confirm("Delete this Overlay? This is a permanent action")){
+        var locationguid = $('#overlayLocationSelect').val()
+        rootRef.ref('/location/'+locationguid+'/overlays/'+guid).once("value", function(snap){
+            if (snap.val().geojsonid){
+                rootRef.ref('/geojson/'+snap.val().geojsonid).set(null);
+            }
+        });
+        rootRef.ref('/location/'+locationguid+'/overlays/'+guid).set(null);
+        deleteOverlayRow(guid);
+    }
+}
+
+function deleteOverlayRow(key){
+    $("#overlayTableBody tr[data-key='"+key+"']").remove()
+}
+
+function resetOverlayForm() {
     $('#overlayName').val("");
     $('#wmsOverlayDefault').prop('checked', false);
     $('#wmsOverlayURL').val("");
@@ -286,5 +309,16 @@ function openOverlayForm(){
 function capitalizeFirstLetter(string) {
     if (string){
         return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+}
+
+function saveGeoJSON(json){
+    try {
+        var obj = $.parseJSON(json);
+        var geojsonref = rootRef.ref('/geojson/').push();
+        geojsonref.set(obj);
+        return geojsonref.key;
+    } catch (error) {
+        return "Invalid JSON";
     }
 }
