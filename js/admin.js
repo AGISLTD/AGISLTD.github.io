@@ -240,7 +240,9 @@ function locationSelected(){
                     data: data.val(),
                     key: data.key
                 },
-                { append: true }
+                { append: true, complete: function(){
+                    $('.geojsonlink:not([data-key])').hide();
+                } }
             );
         } else {
             $('#overlayTableBody').html("<tr><td class='w3-opacity w3-text-grey' colspan=5>--No Overlays--</td></tr>");
@@ -321,4 +323,17 @@ function saveGeoJSON(json){
     } catch (error) {
         return "Invalid JSON";
     }
+}
+
+function downloadGeoJson(link){
+    var guid = $(link).attr("data-key");
+    rootRef.ref('/geojson/'+guid).once('value', function(snap){
+      var blob = new Blob([JSON.stringify(snap.val())]);
+      var evt = document.createEvent("HTMLEvents");
+      evt.initEvent("click");
+      $("<a>", {
+        download: "DIYMapper-overlay.geojson",
+        href: webkitURL.createObjectURL(blob)
+      }).get(0).dispatchEvent(evt);
+    });
 }
