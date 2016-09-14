@@ -254,7 +254,7 @@ function addLabelsToFeature(feature, labeltext, details){
             if (feature.options.polyType) {
                 latlng = getLatLng(feature);
                 classname = "polyLabel";
-                labelContents = '<div><p>'+labeltext+'</p><p class="size">'+L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(feature._latlngs), 'metric')+'</p></div>';
+                labelContents = '<div><p>'+labeltext+'</p><p class="size">'+(L.GeometryUtil.geodesicArea(feature._latlngs) * 0.0001).toFixed(2) + ' ha'+'</p></div>';
             }
             if (feature.options.lineType)  {
                 latlng = feature._latlngs[0];

@@ -79,8 +79,13 @@ function initialize() {
         // add title
         $('.leaflet-control .printcomponent .maptitle').remove(); 
         var disclaimer = "This map is illustrative only and all information should be independently verified on site before taking any action. Whilst due care has been taken, AGIS Ltd. give no warranty to the accuracy and completeness of any of the information on this map and accepts no liability for any error, omission or use of the information.";
-        $($('<div />', {class: "leaflet-control printcomponent maptitle" })).appendTo("#printPreview .leaflet-control-container").append($("<h1 />", { text: $('#maptitle').text() })).append($("<p />", { class: 'disclaimer', text: disclaimer }));
-       
+        $('.printcomponent.maptitle').remove();
+        $($('<div />', {class: "leaflet-control printcomponent maptitle" })).appendTo("#printPreview .leaflet-control-container").append($("<h1 />", {id: "printmaptitle", text: $('#maptitle').text() })).append($("<p />", { class: 'disclaimer', text: disclaimer }));
+        $('#printmaptitleinput').val($('#maptitle').text());
+        $('#printmaptitleinput').keyup(function() {
+          $('#printmaptitle').text($('#printmaptitleinput').val());
+        });
+        
         // add legend
         if (legendBox) { legendBox.removeFrom(printPreviewMap); }
         legendBox = L.control({position: 'topright'});
