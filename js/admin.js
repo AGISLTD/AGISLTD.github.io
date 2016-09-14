@@ -383,15 +383,6 @@ function saveGeoJSON(json){
     }
 }
 
-function downloadGeoJson(link){
-    var guid = $(link).attr("data-key");
-    rootRef.ref('/geojson/'+guid).once('value', function(snap){
-      var blob = new Blob([JSON.stringify(snap.val())]);
-      var evt = document.createEvent("HTMLEvents");
-      evt.initEvent("click");
-      $("<a>", {
-        download: "DIYMapper-overlay.geojson",
-        href: webkitURL.createObjectURL(blob)
-      }).get(0).dispatchEvent(evt);
-    });
+function downloadOverlayJSON(link){
+    downloadGeoJson($(link).attr("data-key"), "DIYMapper-Overlay.geojson");
 }

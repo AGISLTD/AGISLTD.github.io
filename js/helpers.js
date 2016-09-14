@@ -61,3 +61,21 @@ function forgotPassword(){
         $('#forgotPasswordStatus').text("Failed to reset password")
     });
 }
+
+function downloadGeoJson(jsonguid, filename){
+    rootRef.ref('/geojson/'+jsonguid).once('value', function(snap){
+      var blob = new Blob([JSON.stringify(snap.val())]);
+      var evt = document.createEvent("HTMLEvents");
+      evt.initEvent("click");
+      $("<a>", {
+        download: filename,
+        href: webkitURL.createObjectURL(blob)
+      }).get(0).dispatchEvent(evt);
+    });
+}
+
+function downloadEdit(location,editguid){
+    rootRef.ref('edit/'+location+'/'+editguid+'/geojsonid').once('value', function(snapshot){
+        downloadGeoJson(snapshot.val(), "DIYMapper-Data.geojson");
+    })
+}

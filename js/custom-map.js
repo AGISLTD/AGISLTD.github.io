@@ -363,7 +363,7 @@ function populateLocations(){
     rolesRef.once('value', function (snapshot) {
         var locList = snapshot.val()
         $.each(locList, function(index, element){
-            locationsRef.child(element).once("value", function(loc){
+            locationsRef.child(index).once("value", function(loc){
                 $('#location').append('<option value='+loc.key+'>'+loc.val().name+'</option>');
                 $('#mapControls').show();
             });
@@ -451,7 +451,7 @@ function populateFeatureGrid(){
         }
         
         featureRef.on('child_added', function (featureSnapshot) {
-            if ($.inArray(featureSnapshot.key, userFeatures) == -1){
+            if (!(userFeatures[featureSnapshot.key])){
                 return;
             }
             // Will be called with a featureSnapshot for each child under the /features/ node

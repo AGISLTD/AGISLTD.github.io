@@ -159,6 +159,7 @@ function loadEditHistory(data, currentedit, specificVersion){
             }
             html += '</td>';
         }
+        html += '<td class="download" onclick="downloadEdit(\''+locationID+'\',\''+index+'\')"><span class="w3-right">DL</span></td>';
         html += "</tr>";
     });
     $.each(users, function(index, element){
