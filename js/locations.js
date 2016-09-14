@@ -44,8 +44,8 @@ function loadOverlays(overlayRef){
 
 function extendBounds(latlngBounds, amount){
     //extend top left
-    var topLeft =[latlngBounds[0][0]-amount, latlngBounds[0][1]-amount];
-    var bottomRight = [latlngBounds[1][0]+amount, latlngBounds[1][1]+amount];
+    var topLeft =[parseFloat(latlngBounds[0][0])-amount, parseFloat(latlngBounds[0][1])-amount];
+    var bottomRight = [parseFloat(latlngBounds[1][0])+amount, parseFloat(latlngBounds[1][1])+amount];
     return [topLeft, bottomRight];
     
 }

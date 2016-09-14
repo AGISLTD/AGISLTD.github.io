@@ -1,8 +1,9 @@
 <tr data-template-bind='[{"attribute": "data-key", "value": "key"}]'>
     <td name='name' data-content="name"></td>
+    <td hidden name='logo' data-content="logo" data-template-bind='[{"attribute": "data", "value": "logo"}]'></td>
     <td name='role' data-content="roles.role"></td>
-    <td name='locations' data-template-bind='[{"attribute": "data", "value": "roles.locations"}]' data-content="roles.locations.length"></td>
-    <td name='features' data-template-bind='[{"attribute": "data", "value": "roles.features"}]' data-content="roles.features" data-format="ListifyArray"></td>
+    <td name='locations' data-template-bind='[{"attribute": "data", "value": "roles.locations", "formatter": "ExtractKeys"}]' data-content="roles.locations" data-format="KeyCount"></td>
+    <td name='features' data-template-bind='[{"attribute": "data", "value": "roles.features", "formatter": "ExtractKeys"}]' data-content="roles.features" data-format="ListifyObject"></td>
     <td>
         <button class="w3-btn w3-yellow" data-template-bind='[{"attribute": "data-key", "value": "key"}]' onclick="editUser(this)" >Edit</button>&nbsp;
         <button class="w3-btn w3-red" data-template-bind='[{"attribute": "data-key", "value": "key"}]' onclick="deleteUser(this, true)" >Delete</button>

@@ -630,12 +630,16 @@ function userSwitch(val) {
     userRef.once('value', function(data){
         if (data.val() && data.val().name){
             $('#fbName').text(data.val().name);
+            if (data.val().logo) {
+                $('#banner').html(getLogo(data.val().logo));
+            }
         }
     });
     
     rootRef.ref("/roles/"+uid).once('value', function(snap){
         if (snap.val().role == 'manager'){
-            $('#topbar').append('<li class="w3-right actionButton" name="print"><a target="_blank" href="http://www.diymapper.com/diy_mapper_customer_signup_form/">Add A User</a></li>');
+            $('#custombuttons').html("");
+            $('#custombuttons').append('<li class="w3-right actionButton"><a target="_blank" href="http://www.diymapper.com/diy_mapper_customer_signup_form/">Add A User</a></li>');
         }
     });
 }

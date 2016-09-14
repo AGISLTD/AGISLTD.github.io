@@ -35,6 +35,23 @@ function getEmail(){
     return email;
 }
 
+function getLogo(logo){
+    var content = "<img class=\"w3-left logo\" src=\"images/"
+    switch (logo){
+        case ("aucklandcouncil") :
+            content += "ac_web_app_log.png";
+            break;
+        case ("agis") :
+            content += "agis_banner_logo.png";
+            break;
+        case ("exigent") :
+            content += "exigent_logo.png";
+            break;
+    }
+    return content += "\">";
+    
+}
+
 function forgotPassword(){
     firebase.auth().sendPasswordResetEmail(getEmail()).then(function(){
         $('#forgotPasswordStatus').css({'color':'green'});

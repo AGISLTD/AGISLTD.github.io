@@ -1,10 +1,7 @@
 $(document).ready(function(){
-    openTab("Locations");
-    
-    loadLocations();
-    loadUsersTable();
     
     $('.chosen-select').chosen({width: "95%"});
+    
     $.addTemplateFormatter("ListifyArray",
         function(value, template) {
         if (value && value.length > 0){
@@ -19,7 +16,58 @@ $(document).ready(function(){
             return "Invalid bounds";
         }
     });
+    $.addTemplateFormatter("ExtractKeys",
+        function(value, template) {
+            if (value){
+                return Object.keys(value);
+            }
+    });
+    $.addTemplateFormatter("KeyCount",
+        function(value, template) {
+            if (value){
+                return Object.keys(value).length;
+            }
+    });
+    $.addTemplateFormatter("ListifyObject",
+        function(value, template) {
+            if (value){
+                return Object.keys(value).map(function(data){return capitalizeFirstLetter(data)+", "});
+            }
+    });
+    
+    logindialog = $( "#dialog-login" ).dialog({
+      autoOpen: true,
+      height: 250,
+      width: 350,
+      modal: true,
+      draggable: false,
+      resizable: false,
+      dialogClass: "no-close"
+    });
+    
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            if (logindialog){
+                logindialog.dialog("close");
+            }
+            openTab("Locations");
+
+            loadLocations();
+            loadUsersTable();
+        }
+    });
 });
+
+function userLogin() {
+    var email = $("#email").val();
+    firebase.auth().signInWithEmailAndPassword(email, $("#password").val()).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      alert("Failed to log in: "+errorMessage)
+      return;
+    });
+}
 
 function openTab(tabName) {
     var i;
@@ -51,12 +99,14 @@ function loadUsersTable(){
 
 function loadUserRow(data){
     var name = data.val().name;
+    var logo = data.val().logo;
     var key = data.key;
     rootRef.ref('/roles/'+key).once('value', function(snap){
         $('#userTableBody').loadTemplate(
             "templates/userrow.html", 
             {
                 name: name,
+                logo: logo,
                 roles: snap.val(),
                 key: key
             },
@@ -69,11 +119,10 @@ function addUserDetails() {
     var guid = $('#newUserGuid').val();
     var displayname = $('#userDisplayName').val();
     var role = $('#userRole').val();
-    var locations = $('#newUserLocations').val();
-    var features = $('#usersFeatures').val();
-//    var locations = $('#newUserLocations').val().reduce(function(map, obj) {map[obj] = true; return map}, {});
-//    var features = $('#usersFeatures').val().reduce(function(map, obj) {map[obj] = true; return map}, {});
-    rootRef.ref('/user/'+guid).set({name: displayname});
+    var logo = $('#userLogo').val();
+    var locations = $('#newUserLocations').val().reduce(function(map, obj) {map[obj] = true; return map}, {});
+    var features = $('#usersFeatures').val().reduce(function(map, obj) {map[obj] = true; return map}, {});
+    rootRef.ref('/user/'+guid).set({name: displayname, logo: logo});
     rootRef.ref('/roles/'+guid+'/role').set(role);
     rootRef.ref('/roles/'+guid+'/locations').set(locations);
     rootRef.ref('/roles/'+guid+'/features').set(features);
@@ -89,6 +138,7 @@ function editUser(button){
     $('#newUserGuid').prop('disabled', true);
     $('#userDisplayName').val(row.find('td[name="name"]').html());
     $('#userRole').val(row.find('td[name="role"]').html());
+    $('#userLogo').val(row.find('td[name="logo"]').attr("data"));
     $('#newUserLocations').val(row.find('td[name="locations"]').attr("data").split(','));
     $('#usersFeatures').val(row.find('td[name="features"]').attr("data").split(','));
     $('#newUserLocations').trigger("chosen:updated");
@@ -258,11 +308,19 @@ function addOverlay() {
     var showByDefault = $('#overlayDefault').prop('checked');
     var url = $('#wmsOverlayURL').val().length > 0 ? $('#wmsOverlayURL').val() : null;
     var geojsonID = $('#overlayGeoJSON').val().length > 0 ? saveGeoJSON($('#overlayGeoJSON').val()) : null;
-    if (geojsonID == "Invalid JSON"){
+    if (geojsonID == "Invalid JSON in GeoJSON box"){
         alert(geojsonID);
         return;
     }
-    var geojsonstyle = $('#overlayGeoJSONstyle').val().length > 0 ? $('#overlayGeoJSONstyle').val() : null;
+    var geojsonstyle = "";
+    try {
+        geojsonstyle = $('#overlayGeoJSONstyle').val().length > 0 ? JSON.parse($('#overlayGeoJSONstyle').val()) : null;
+    } catch (error) {
+        if (!(geojsonstyle)){
+            alert("Invalid style JSON");
+            return;
+        }
+    }
     var overlay = {name: name, default: showByDefault, tilesURL: url, geojsonid: geojsonID, style: geojsonstyle};
     if (newOverlay){
         rootRef.ref('/location/'+locationguid+'/overlays/').push(overlay);

@@ -7,11 +7,13 @@
         <link rel="stylesheet" href="css/site.css"/>
         <link rel="stylesheet" href="css/chosen.min.css"/>
         <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+        <link rel="stylesheet" href="/css/jquery-ui.min.css" />
         <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script>
         <script src='https://www.gstatic.com/firebasejs/3.3.0/firebase.js'></script>
         <script src="js/admin.js" type="application/javascript" ></script>
         <script src="js/lib/chosen.jquery.min.js" type="application/javascript"></script>
         <script src="js/lib/jquery.loadTemplate.min.js" type="application/javascript" ></script>
+        <script src="/js/lib/jquery-ui.min.js"></script>
         <script>
           // Initialize Firebase
           var config = {
@@ -38,6 +40,7 @@
                 <thead>
                 <tr class="w3-opacity w3-light-grey">
                     <td><b>Name</b></td>
+                    <td><b>Logo</b></td>
                     <td><b>Role</b></td>
                     <td><b># Locations</b></td>
                     <td><b>Features</b></td>
@@ -110,7 +113,16 @@
               <div class="w3-container w3-section">
                 <label for="newUserGuid"><b>User's GUID (from Firebase Auth)</b></label>
                 <input id="newUserGuid" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
-
+                  
+              <div class="w3-container w3-section">
+                <label for="userLogo"><b>Logo</b></label>
+                  <select data-placeholder="Select Logo" class="w3-select " id="userLogo">
+                    <option value="agis">AGIS</option>
+                    <option value="aucklandcouncil">Auckland Council</option>
+                    <option value="exigent">Exigent</option>
+                  </select>
+                  </div>
+                  
                 <label for="userDisplayName"><b>Display Name</b></label>
                 <input id="userDisplayName" class="w3-input w3-border w3-margin-bottom" type="text" value="" required>
 
@@ -205,6 +217,23 @@
         </div>
         <!-- End Modal Forms -->
         
+        
+    
+    <div id="dialog-login" title="Log in">
+        <div id="userLoginContainer">
+            <label for="email">Email</label><br />
+            <input type="text" id="email" style="width:90%;"><br>
+            <label for="password">Password</label><br />
+            <input type="password" id="password" style="width:90%;">
+            <br><br />
+            <button id="loginbutton" onclick="userLogin()">Login</button><br />
+            <span class="w3-right w3-small" title="An email will be sent to change your password" onclick="forgotPassword()"><a href="#">Reset your password</a></span>
+            <span class="w3-left w3-small" id="forgotPasswordStatus"></span>
+    <!--        <a href="/register.html">Sign up</a><br />-->
+    <!--        <a href="#">Forgotten Password</a>-->
+            <label class="validateTips"></label>
+        </div>
+    </div>
         
     <script>
         var rootRef = firebase.database();
