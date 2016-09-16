@@ -181,6 +181,15 @@ $(document).ready(function(){
     window.dispatchEvent(new Event('resize'));
     
     LayersControl.addTo(map);
+    
+    
+    logoBox = L.control({position: 'bottomleft'});
+    logoBox.onAdd = function (map) {
+        var container = L.DomUtil.create('div');
+        $(container).html("<img style='width:80px' src='/images/agisbadge.png'/>");
+        return container;
+    };
+    logoBox.addTo(map);
 });
 //
 //// Bind UI
@@ -293,16 +302,6 @@ function addLabelsToFeature(feature, labeltext, details){
     }
 }
 
-
-// GeoJSON save / show controls
-//var GeoJSONControl = L.control({
-//            position: 'topleft'});
-//GeoJSONControl.onAdd = function (map) {
-//    this._div = L.DomUtil.create('div', 'customC'); // Creates our div with class "customC"
-//    this._div.innerHTML = '<button id="savebutton" onclick="saveGeoJson()">Save</button>';
-//    return this._div;
-//};
-
 // Base Maps
 var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -347,7 +346,6 @@ function registerDrawControl(fGroup, type){
     if (type){
         L.drawLocal.edit.toolbar.actions.save.title = "Confirm changes";
         L.drawLocal.edit.toolbar.actions.save.text = "Confirm";
-        L.drawLocal.edit.toolbar.buttons.edit = "Edit "+type+" features";
         L.drawLocal.edit.toolbar.buttons.edit = "Edit "+type+" features";
         L.drawLocal.edit.toolbar.buttons.editDisabled = "No "+type+" features to edit";
         L.drawLocal.edit.toolbar.buttons.remove = "Remove "+type+" features";

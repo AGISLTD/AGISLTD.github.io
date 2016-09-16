@@ -135,7 +135,7 @@ function initialize() {
 		var logo = L.control({position: 'bottomright'});
 		logo.onAdd = function (map) {
 			var container = L.DomUtil.create('div', 'printcomponent');
-			$(container).html('<img src="images/Agis_web_logo_buffer.png">');
+			$(container).html($('#banner img').prop('outerHTML'));
 			return container;
 		};
 		logo.addTo(printPreviewMap);
