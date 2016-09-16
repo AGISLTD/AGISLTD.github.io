@@ -51,9 +51,9 @@ $(document).ready(function(){
                 logindialog.dialog("close");
             }
             openTab("Locations");
-
-            loadLocations();
-            loadUsersTable();
+            
+            registerLocations();
+            registerUsersTable();
         }
     });
 });
@@ -80,7 +80,8 @@ function openTab(tabName) {
 
 // USER ADMIN
 
-function loadUsersTable(){
+function registerUsersTable(){
+    rootRef.ref('/user/').off();
     $('#userTableBody').html("");
     rootRef.ref('/user/').on('child_added', function(data){
         loadUserRow(data);
@@ -208,7 +209,10 @@ function editLocation(button){
 }
 
 // Load Locations Table and Dropdown
-function loadLocations(){
+function registerLocations(){
+    rootRef.ref('/location/').off();
+    $('#locationTableBody').html("");
+    $('.allLocationsDropDown').html("");
     rootRef.ref('/location/').orderByChild("name").on('child_added', function(data){
         loadLocationRow(data);
         
