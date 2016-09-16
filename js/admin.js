@@ -183,12 +183,22 @@ function addLocation() {
     var nwBound = [$('#locationBoundNWLat').val(), $('#locationBoundNWLong').val()];
     var seBound = [$('#locationBoundSELat').val(), $('#locationBoundSELong').val()];
     var bounds = [nwBound, seBound];
-//    var locations = $('#newUserLocations').val().reduce(function(map, obj) {map[obj] = true; return map}, {});
-//    var features = $('#usersFeatures').val().reduce(function(map, obj) {map[obj] = true; return map}, {});
+    var geojsonID = $('#locationGeoJSON').val().length > 0 ? saveGeoJSON($('#locationGeoJSON').val()) : null;
+    if (geojsonID == "Invalid JSON"){
+        alert(geojsonID);
+        return;
+    }
+    var location = {name: name, bounds: bounds};
+    
     if (newLocation){
-        rootRef.ref('/location/').push({name: name, bounds: bounds});
+        guid = rootRef.ref('/location/').push(location).key;
     } else {
-        rootRef.ref('/location/'+guid).set({name: name, bounds: bounds});
+        rootRef.ref('/location/'+guid).update(location);
+    }
+    
+    if (geojsonID){
+        var newJsonEdit = saveNewEdit(geojsonID, guid); // CREATE CURRENTEDIT
+        rootRef.ref('/location/'+guid+'/currentEdit/').set(newJsonEdit);
     }
     document.getElementById('locationForm').style.display='none';
     resetLocationForm();
@@ -266,6 +276,7 @@ function deleteLocationRow(key){
 function resetLocationForm(){
     $('#locationGuid').val("");
     $('#locationName').val("");
+    $('#locationGeoJSON').val("");
     $('#locationBoundNWLat').val("");
     $('#locationBoundNWLong').val("");
     $('#locationBoundSELat').val("");
@@ -312,7 +323,7 @@ function addOverlay() {
     var showByDefault = $('#overlayDefault').prop('checked');
     var url = $('#wmsOverlayURL').val().length > 0 ? $('#wmsOverlayURL').val() : null;
     var geojsonID = $('#overlayGeoJSON').val().length > 0 ? saveGeoJSON($('#overlayGeoJSON').val()) : null;
-    if (geojsonID == "Invalid JSON in GeoJSON box"){
+    if (geojsonID == "Invalid JSON"){
         alert(geojsonID);
         return;
     }
@@ -385,6 +396,18 @@ function saveGeoJSON(json){
     } catch (error) {
         return "Invalid JSON";
     }
+}
+
+function saveNewEdit(jsonid, locationid){
+    var edit = {};
+    edit.protected = true;
+    edit.geojsonid = jsonid;
+    edit.datetime = Date.now();
+    edit.note = "AGIS Data Upload";
+    edit.user = firebase.auth().currentUser.uid;
+    var editref = rootRef.ref('/edit/'+locationid).push();
+    editref.set(edit);
+    return editref.key;
 }
 
 function downloadOverlayJSON(link){

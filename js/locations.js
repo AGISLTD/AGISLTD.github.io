@@ -142,7 +142,7 @@ function loadEditHistory(data, currentedit, specificVersion){
         } else {
             html += '<tr data=\''+index+'\'>';
         }
-        html += '<td class="details" onclick="loadEdit(\''+index+'\')"><span>'+date+'</span><br/><span data=\''+element.user+'\'></span></td>';
+        html += '<td class="details w3-hover-green" title="Click to Load this version" onclick="loadEdit(\''+index+'\')"><span>'+date+'</span><br/><span data=\''+element.user+'\'></span></td>';
         if (element.note) {
             html += '<td class="note" title="'+element.note+'"><p class="fadeouttext">'+truncate.apply(element.note, [90, true])+'</p></td>';
         } else {
@@ -150,17 +150,17 @@ function loadEditHistory(data, currentedit, specificVersion){
         }
         
         if ( users.indexOf(element.user) == -1 ) users.push(element.user);
+        html += '<td ';
         if (editsEnabled){ // only show delete/protected if user is able to edit
-            html += '<td class="delete"><span class="w3-right ';
+            html += 'class="delete"><span class="w3-right ';
             if (element.protected || index == currentedit){
-                html += 'w3-text-grey">Protected</span></td>';
+                html += 'w3-text-grey">Protected</span>';
             } else {
-                html += 'clickable w3-text-red" onclick="deleteEdit('+locationID+',\''+index+'\')"><b>Delete</b></span>';
+                html += 'clickable w3-text-red w3-hover-red w3-padding " onclick="deleteEdit(\''+locationID+'\',\''+index+'\')"><b>Delete</b></span>';
             }
-            html += '</td>';
         }
-        html += '<td class="download" onclick="downloadEdit(\''+locationID+'\',\''+index+'\')"><span class="w3-right">DL</span></td>';
-        html += "</tr>";
+        html += '<br/><br/><span class="clickable w3-hover-green w3-padding w3-right" onclick="downloadEdit(\''+locationID+'\',\''+index+'\')"><b>Download</b></span>';
+        html += "</td></tr>";
     });
     $.each(users, function(index, element){
         // Get username of each user and set it
