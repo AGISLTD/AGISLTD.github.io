@@ -205,13 +205,6 @@ function locationSwitch(sel, specificVersion){
     
     populateFeatureGrid();
     
-    // Temporary/hardcoded/very-bad-way to set the banner based on location id
-    if (parseInt(locationID) <= 10 || (parseInt(locationID) > 12 && parseInt(locationID) < 23)){
-        $('#banner').html("<img class=\"w3-left logo\" src=\"images/ac_web_app_log.png\">");
-    } else {
-        $('#banner').html("<img title='Your Logo' class=\"w3-left logo\" src=\"images/agis_banner_logo.png\">");
-    }
-    
     locRef = rootRef.ref("/location/"+locationID);
     if (specificVersion){ // loading a previous edit
         locRef.child('currentEdit').once("value", function(data) {
