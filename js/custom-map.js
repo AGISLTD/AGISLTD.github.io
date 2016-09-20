@@ -24,7 +24,7 @@ var snapguides = [];
 $(document).ready(function(){
     $.reject({  
         reject: {  
-            safari: false, // Apple Safari  
+            safari: true, // Apple Safari  
             chrome: false, // Google Chrome  
             firefox: false, // Mozilla Firefox  
             msie: true, // Microsoft Internet Explorer  
@@ -32,8 +32,8 @@ $(document).ready(function(){
             konqueror: true, // Konqueror (Linux)  
             unknown: true // Everything else  
         },
-        display: ['firefox','chrome','opera'],
-        header: 'This site does not support your browser.', // Header Text  
+        display: ['firefox','chrome'],
+        header: 'This site does not fully support your browser.', // Header Text  
         paragraph1: 'You are currently using a browser not fully supported by this website. Some functionality will likely be broken.', // Paragraph 1  
         paragraph2: 'We suggest downloading and using one of the following browsers to use this site to its full capability:',  
         closeMessage: 'Close this window to continue anyway' // Message below close window link  
