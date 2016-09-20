@@ -470,13 +470,13 @@ function populateFeatureGrid(){
                 return;
             }
             // Will be called with a featureSnapshot for each child under the /features/ node
-            $('#featuregrid').append('<h3 class="'+featureSnapshot.key+'FeatureUI">'+featureSnapshot.val().name +'<input class=\"w3-check w3-right toplvlcheckbx\" type=\"checkbox\" checked/></h3>');
+            $('#featuregrid').append('<h3 class="'+featureSnapshot.key+'FeatureUI">'+featureSnapshot.val().name +'<input id="toplvlcheckbx'+featureSnapshot.val().name+'" class=\"w3-check w3-right toplvlcheckbx\" type=\"checkbox\" checked/><label class="showLayer" for="toplvlcheckbx'+featureSnapshot.val().name+'"></label></h3>');
             var div = document.createElement('div');
             div.className = "accordion accordionDiv "+featureSnapshot.key+"FeatureUI";
             featureSnapshot.forEach(function(childSnapshot){
                 featureArray = childSnapshot.val();
                 if ($.isArray(featureArray)){
-                    $(div).append('<h3>'+childSnapshot.key +'<input class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/></h3>');
+                    $(div).append('<h3>'+childSnapshot.key +'<input id="midlvlcheckbx'+childSnapshot.key+'" class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/><label class="showLayer" for="midlvlcheckbx'+childSnapshot.key+'"></label></h3>');
                     var html = '<table class="featureTable"><thead><tr></tr></thead><tbody>';
                     $.each(featureArray, function(index, element){
             //            row = document.createElement("tr");
@@ -491,6 +491,7 @@ function populateFeatureGrid(){
                                 html += '<td ';
                             }
                             var detailFn = null;
+                            var includeshowhidelabel = true;
                             if (element.family == "marker"){
                                 // Set icon's size and anchor point
                                 var iconWidth = iconSize[element.size];
@@ -500,6 +501,7 @@ function populateFeatureGrid(){
                                 });
                                 html +='class="clickable featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
                                 detailFn = updateCount;
+                                includeshowhidelabel = false;
                             }else if (element.family == "polyline") {
                                 html+= 'class="clickable"><div class="linefeaturebutton"><div class="line" style="background-color:'+element.options.color+';height:'+element.options.weight+'px;"/></div';
                                 detailFn = updateLength;
@@ -509,8 +511,11 @@ function populateFeatureGrid(){
                             }
                             html += '></td><td>' + element.description;
                             html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
-                            html += '</td><td><input featuretype="'+element.name+'" class="w3-check showLayer" type="checkbox" checked></td>';
-                            html += "</tr>";
+                            html += '</td><td><input featuretype="'+element.name+'" id="showhide'+element.name+'" class="w3-check showLayer" type="checkbox" checked><label class="showLayer" for="showhide'+element.name+'"></label>';
+                            if (includeshowhidelabel) {
+                                html += '<input featuretype="'+element.name+'" id="showhidelabel'+element.name+'" class="w3-check showLabel" type="checkbox" checked><label class="showLabel" for="showhidelabel'+element.name+'"></label>';
+                            }    
+                            html += "</td></tr>";
                             // attach detail-update handling
                             featureGroups[element.name].on('layeradd', detailFn);
                             featureGroups[element.name].on('layerremove', detailFn);
@@ -537,10 +542,32 @@ function populateFeatureGrid(){
                     }
                }
             });
+            
+            // add show/hide functionality to the checkboxes we added
+            $('input[type=checkbox].showLabel').change(
+            function(){
+                //event.preventDefault();
+                var featuretype = featureGroups[$(this).attr('featuretype')];
+                var show = this.checked;
+                $.each(featuretype._layers, function(index, value){
+                    if (labelMarkerDic[index]){
+                        if(show) {
+                            map.addLayer(labelMarkerDic[index]);
+                        } else {
+                            if (map.hasLayer(labelMarkerDic[index])){
+                                map.removeLayer(labelMarkerDic[index]);
+                            }
+                       }
+                    }
+                });
+            });
 
 
         // Propogated checkbox selection
         $('#featuregrid input[type="checkbox"]').click(function(e) {
+            e.stopPropagation();
+        });
+        $('#featuregrid label').click(function(e) {
             e.stopPropagation();
         });
         $('#featuregrid .toplvlcheckbx').change(function(e) {

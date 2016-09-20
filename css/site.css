@@ -155,6 +155,35 @@ background-repeat: no-repeat;
     background-color: rgba(255, 255, 255, 0.8) !important;
 }
 
+#featuregrid input[type=checkbox]{
+    visibility:hidden;
+}
+#featuregrid label{
+    float: right;
+}
+
+#featuregrid label.showLayer:before{
+    content: url("/images/hidelayer.svg");
+    width: 30px;
+    position: absolute;
+}
+#featuregrid :checked+label.showLayer:before{
+    content: url("/images/showlayer.svg");
+    width: 30px;
+    position: absolute;
+}
+#featuregrid label.showLabel:before{
+    content: url("/images/showhidelabel.svg");
+    opacity: 0.15;
+    width: 30px;
+    position: absolute;
+}
+#featuregrid :checked+label.showLabel:before{
+    width: 30px;
+    opacity: 1;
+    position: absolute;
+}
+
 /* history grid */
 tr.current {
     background-color: lightyellow;
