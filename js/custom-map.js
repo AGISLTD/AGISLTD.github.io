@@ -513,7 +513,7 @@ function populateFeatureGrid(){
                             html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
                             html += '</td><td><input featuretype="'+element.name+'" id="showhide'+element.name+'" class="w3-check showLayer" type="checkbox" checked><label class="showLayer" for="showhide'+element.name+'"></label>';
                             if (includeshowhidelabel) {
-                                html += '<input featuretype="'+element.name+'" id="showhidelabel'+element.name+'" class="w3-check showLabel" type="checkbox" checked><label class="showLabel" for="showhidelabel'+element.name+'"></label>';
+                                html += '<br/><input featuretype="'+element.name+'" id="showhidelabel'+element.name+'" class="w3-check showLabel" type="checkbox" checked><label class="showLabel" for="showhidelabel'+element.name+'"></label>';
                             }    
                             html += "</td></tr>";
                             // attach detail-update handling
