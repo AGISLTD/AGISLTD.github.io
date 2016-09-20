@@ -64,13 +64,12 @@ function forgotPassword(){
 
 function downloadGeoJson(jsonguid, filename){
     rootRef.ref('/geojson/'+jsonguid).once('value', function(snap){
-      var blob = new Blob([JSON.stringify(snap.val())]);
+      var blob = new Blob([JSON.stringify(snap.val())], {type : 'application/json'});
       var evt = document.createEvent("HTMLEvents");
-      evt.initEvent("click");
       $("<a>", {
         download: filename,
-        href: webkitURL.createObjectURL(blob)
-      }).get(0).dispatchEvent(evt);
+        href: URL.createObjectURL(blob)
+      }).get(0).click();
     });
 }
 
