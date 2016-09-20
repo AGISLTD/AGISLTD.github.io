@@ -228,6 +228,7 @@ function locationSwitch(sel, specificVersion){
         setBounds(data.val());
     });
     locRef.child('name').once("value", function(data){
+        $('#banner span').remove();
         $('#banner').html($('#banner').html() + "<span id='maptitle'>"+data.val()+"</span>");
     });
     rootRef.ref("/edit/"+locationID).on("child_removed", function(data){

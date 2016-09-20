@@ -336,7 +336,7 @@ function addOverlay() {
             return;
         }
     }
-    var overlay = {name: name, default: showByDefault, tilesURL: url, geojsonid: geojsonID, style: geojsonstyle};
+    var overlay = {name: name, default: showByDefault, tilesURL: url, geojsonid: geojsonID, style: geojsonstyle, options: { maxZoom: 20 }};
     if (newOverlay){
         rootRef.ref('/location/'+locationguid+'/overlays/').push(overlay);
     } else {
