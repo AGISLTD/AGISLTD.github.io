@@ -107,7 +107,7 @@ input[type=checkbox].w3-check {
     text-transform: capitalize;
 }
 .featureTable>tbody>tr:hover {
-    background-color:beige;
+    text-decoration: underline;
 }
 .featurebutton {
 background-size: 40px 40px;
