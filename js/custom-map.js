@@ -476,7 +476,7 @@ function populateFeatureGrid(){
             featureSnapshot.forEach(function(childSnapshot){
                 featureArray = childSnapshot.val();
                 if ($.isArray(featureArray)){
-                    $(div).append('<h3>'+childSnapshot.key +'<input id="midlvlcheckbx'+childSnapshot.key+'" class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/><label class="showLayer" for="midlvlcheckbx'+childSnapshot.key+'"></label></h3>');
+                    $(div).append('<h3>'+childSnapshot.key +'<input id="midlvlcheckbx'+featureSnapshot.val().name+childSnapshot.key+'" class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/><label class="showLayer" for="midlvlcheckbx'+featureSnapshot.val().name+childSnapshot.key+'"></label></h3>');
                     var html = '<table class="featureTable"><thead><tr></tr></thead><tbody>';
                     $.each(featureArray, function(index, element){
             //            row = document.createElement("tr");
@@ -491,7 +491,6 @@ function populateFeatureGrid(){
                                 html += '<td ';
                             }
                             var detailFn = null;
-                            var includeshowhidelabel = true;
                             if (element.family == "marker"){
                                 // Set icon's size and anchor point
                                 var iconWidth = iconSize[element.size];
@@ -501,7 +500,6 @@ function populateFeatureGrid(){
                                 });
                                 html +='class="clickable featurebutton" style="background-image:url(\''+element.options.icon.iconUrl+'\')"';
                                 detailFn = updateCount;
-                                includeshowhidelabel = false;
                             }else if (element.family == "polyline") {
                                 html+= 'class="clickable"><div class="linefeaturebutton"><div class="line" style="background-color:'+element.options.color+';height:'+element.options.weight+'px;"/></div';
                                 detailFn = updateLength;
@@ -512,7 +510,7 @@ function populateFeatureGrid(){
                             html += '></td><td>' + element.description;
                             html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
                             html += '</td><td><input featuretype="'+element.name+'" id="showhide'+element.name+'" class="w3-check showLayer" type="checkbox" checked><label class="showLayer" for="showhide'+element.name+'"></label>';
-                            if (includeshowhidelabel) {
+                            if (element.family != "marker") {
                                 html += '<br/><input featuretype="'+element.name+'" id="showhidelabel'+element.name+'" class="w3-check showLabel" type="checkbox" checked><label class="showLabel" for="showhidelabel'+element.name+'"></label>';
                             }    
                             html += "</td></tr>";

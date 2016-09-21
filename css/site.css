@@ -95,6 +95,11 @@ input[type=checkbox].w3-check {
     font-style: italic;
 }
 
+#featuregrid .clickable:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
 .accordionDiv {
     padding: .7em .5em !important;
 }
@@ -163,25 +168,25 @@ background-repeat: no-repeat;
 }
 
 #featuregrid label.showLayer:before{
-    content: url("/images/hidelayer.svg");
+    background: url("/images/hidelayer.svg") center center no-repeat;
+    content: url('http://i.stack.imgur.com/Icd9n.png');
+    cursor: pointer;
     width: 30px;
     position: absolute;
 }
 #featuregrid :checked+label.showLayer:before{
-    content: url("/images/showlayer.svg");
-    width: 30px;
-    position: absolute;
+    background: url("/images/showlayer.svg") center center no-repeat;
+    content: url('http://i.stack.imgur.com/Icd9n.png');;
 }
 #featuregrid label.showLabel:before{
     content: url("/images/showhidelabel.svg");
     opacity: 0.15;
     width: 30px;
     position: absolute;
+    cursor: pointer;
 }
 #featuregrid :checked+label.showLabel:before{
-    width: 30px;
     opacity: 1;
-    position: absolute;
 }
 
 /* history grid */
