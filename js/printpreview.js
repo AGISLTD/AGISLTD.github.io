@@ -99,7 +99,10 @@ function initialize() {
         // Set each layer of underlying map to the printpreview map
         $.each(map._layers, function(index, element){
             if (element == drawnItems) { return; }
-            printPreviewMap.addLayer(cloneLayer(element));
+            clonedLayer = cloneLayer(element);
+            if (clonedLayer){
+                printPreviewMap.addLayer(clonedLayer);
+            }
         });
 
 //		setPreviewLayers(); //->

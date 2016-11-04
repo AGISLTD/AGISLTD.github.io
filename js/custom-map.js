@@ -709,7 +709,11 @@ function cloneLayer (layer) {
         return L.rectangle(layer.getBounds(), options);
     }
     if (layer instanceof L.Polygon) {
-        return L.polygon(layer.getLatLngs(), options);
+        if (layer.properties){ // Used to differentiate 'nogozone' from regular features. We don't want to clone NoGoZone polys, they're being cloned as GeoJSON already.
+            return L.polygon(layer.getLatLngs(), options);
+        } else {
+            return;
+        }
     }
     if (layer instanceof L.Polyline) {
         return L.polyline(layer.getLatLngs(), options);
