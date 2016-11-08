@@ -270,8 +270,7 @@ function getDefaultAttributes(feature){
     if (Feature[feature.properties.LeafType] && Feature[feature.properties.LeafType].defaultattributes){
         return Feature[feature.properties.LeafType].defaultattributes.map(function(key){return "diym_"+key});
     } else {
-//        return null;
-        return ["diym_default", "diym_default2"];
+       return null;
     }
 }
 
