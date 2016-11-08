@@ -200,7 +200,7 @@ function askForFeatureDetails(layer) {
     if (!layer.properties || !layer.properties.LeafType){
         return;
     }
-    var detailsPopup = L.popup();
+    var detailsPopup = L.popup({minWidth: 220, keepInView: true, closeOnClick: false });
     var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" '+getLabelPlaceholder(layer)+'/><br/><br/><span><b>Details</b></span><br/><textarea id="shapeDesc" cols="25" rows="5" '+getDetailsPlaceholder(layer)+'</textarea><br/><table id="featureAttributesList"></table><button onclick="addCustomAttributeField()">+ Add Attribute</button><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
 //    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
     detailsPopup.setContent(content);
