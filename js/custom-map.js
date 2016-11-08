@@ -33,7 +33,7 @@ $(document).ready(function(){
             unknown: true // Everything else  
         },
         display: ['firefox','chrome'],
-        header: 'This site does not fully support your browser.', // Header Text  
+        header: 'Your browser does not fully support this site.', // Header Text  
         paragraph1: 'You are currently using a browser not fully supported by this website. Some functionality will likely be broken.', // Paragraph 1  
         paragraph2: 'We suggest downloading and using one of the following browsers to use this site to its full capability:',  
         closeMessage: 'Close this window to continue anyway' // Message below close window link  
@@ -201,11 +201,40 @@ function askForFeatureDetails(layer) {
         return;
     }
     var detailsPopup = L.popup();
-    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" '+getLabelPlaceholder(layer)+'/><br/><br/><span><b>Details<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5" '+getDetailsPlaceholder(layer)+'</textarea><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
+    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" '+getLabelPlaceholder(layer)+'/><br/><br/><span><b>Details</b></span><br/><textarea id="shapeDesc" cols="25" rows="5" '+getDetailsPlaceholder(layer)+'</textarea><br/><table id="featureAttributesList"></table><button onclick="addCustomAttributeField()">+ Add Attribute</button><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
 //    var content = '<span><b>Label</b></span><br/><input id="shapeName" type="text" placeholder="eg \''+layer.properties.LeafType+'\'"/><br/><br/><input type="submit" id="okBtn" value="Save" onclick="saveFeatureDetails(\''+layer.properties.LeafType+'\','+layer._leaflet_id+')"/>';
     detailsPopup.setContent(content);
     detailsPopup.setLatLng(getLatLng(layer)); //calculated based on the e.layertype
     detailsPopup.openOn(map);
+    
+    // Add default attributes
+    defaultAttrs = getDefaultAttributes(layer);
+    alreadyAddedKeys = [];
+    $.each(getDefaultAttributes(layer), function(key, value){
+        $('#featureAttributesList').loadTemplate(
+                "templates/featureattributedefaultrow.html",
+                {
+                    key: value.substring(5),
+                    value: layer.properties[value]
+                },
+                { append: true, paged: false}
+         );
+        alreadyAddedKeys.push(value);
+    });
+    
+    // Add custom attributes
+    $.each(layer.properties, function(key, value){
+        if (key.startsWith("diym_") && ($.inArray(key, alreadyAddedKeys) == -1 )){ // diym_ prefix used for all attributes we want to be able to edit in this view
+            $('#featureAttributesList').loadTemplate(
+                "templates/featureattributerow.html",
+                {
+                    key: key.substring(5),
+                    value: value
+                },
+                { append: true, paged: false}
+            );
+        }
+    });
     $('#shapeName').focus();
     $('#shapeName').keypress(function(e){
       if(e.keyCode==13)
@@ -237,6 +266,14 @@ function getDetailsPlaceholder(feature){
         return 'placeholder="Add more information about this feature">';
     }
 }
+function getDefaultAttributes(feature){
+    if (Feature[feature.properties.LeafType] && Feature[feature.properties.LeafType].defaultattributes){
+        return Feature[feature.properties.LeafType].defaultattributes.map(function(key){return "diym_"+key});
+    } else {
+//        return null;
+        return ["diym_default", "diym_default2"];
+    }
+}
 
 // Returns 'middle' latlng for a given feature
 function getLatLng(feature) {
@@ -251,14 +288,41 @@ function getLatLng(feature) {
 // Save name/details for the current feature. 
 function saveFeatureDetails(featureType, featureID) {
     if (featureGroups[featureType]){
-        feature = featureGroups[featureType].getLayer(featureID); // retrieve the layer just created
+        feature = featureGroups[featureType].getLayer(featureID);
         var sName = document.getElementById("shapeName").value;
         var sDetails = document.getElementById("shapeDesc").value;
         feature.properties.LeafLabel = sName;
         feature.properties.details = sDetails;
         addLabelsToFeature(feature, sName, sDetails);
+        
+        // clear existing custom properties
+        $.each(feature.properties, function(key, value){
+            if (key.startsWith("diym_")){
+                delete feature.properties[key]
+            }
+        });
+        // add custom properties
+        $.each($("#featureAttributesList tr"), function(row){
+            inputs = $(this).find("input");
+            key = inputs[0].value;
+            data = inputs[1].value;
+            if (key.length > 0){
+                feature.properties["diym_"+key] = data;
+            }
+        });
     }
     map.closePopup();
+}
+
+function addCustomAttributeField(){
+    $('#featureAttributesList').loadTemplate(
+        "templates/featureattributerow.html",
+        {
+            key: "",
+            value: ""
+        },
+        { append: true, paged: false}
+    );
 }
 
 function addLabelsToFeature(feature, labeltext, details){
