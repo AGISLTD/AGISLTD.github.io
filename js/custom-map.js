@@ -822,3 +822,8 @@ function getMapZoom() {
 function getMapCentre(){
     return map.getCenter();
 }
+
+function addHeatMap(featureType, attribute){
+    var latlngs = featureGroups[featureType].getLayers().map(function(layer){return new L.latLng([layer._latlng.lat, layer._latlng.lng, parseInt(layer.properties[attribute], 10)])});
+    heatlayer = L.heatLayer(latlngs).addTo(map);
+}
