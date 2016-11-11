@@ -548,7 +548,7 @@ function populateFeatureGrid(){
                         featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
                         featureGroups[element.name].addTo(map);
                         //set customised description for the feature, if present for this location
-                        if (locationCustomDescriptions[element.name]){
+                        if (locationCustomDescriptions && locationCustomDescriptions[element.name]){
                             element.description = locationCustomDescriptions[element.name];
                         }
                         Feature[element.name] = element; // save symbology for this feature type
@@ -578,10 +578,10 @@ function populateFeatureGrid(){
                                 detailFn = updateArea;
                             }
                             html += '></td><td><span class="description">' + element.description + '</span>';
-                            html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>'
                             if (element.editable_description) {
-                                html += '<span class="featureedit" onclick="editfeaturedesc(this)">edit</span>'
+                                html += '<span class="featureedit" onclick="editfeaturedesc(this)"><img src="/images/edit.svg" style="width:20px;" /></span>'
                             }
+                            html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
                         
                             // Hardcoded Heatmap button for pest traps
                             if (element.name == 'Codling Moth Trap' || element.name == 'Leafroller Trap'){
@@ -845,9 +845,10 @@ function editfeaturedesc(span){
     desc = descNode.text();
     descNode.hide();
     $(span).hide();
-    var inpt = $('<input type="text" value="'+desc+'" />')
+    var inpt = $('<input class="editinput" type="text" value="'+desc+'" />')
     inpt.appendTo($(span.parentNode));
     btn = document.createElement('button');
+    btn.className = "saveedit";
     btn.textContent = "Save";
     $(btn).appendTo($(span.parentNode));
     btn.onclick = function(){
