@@ -20,6 +20,7 @@ var iconSize = {
     massive: 100,
 };
 var snapguides = [];
+var heatMapLayer;
 //var location = require("location");
 $(document).ready(function(){
     $.reject({  
@@ -540,7 +541,7 @@ function populateFeatureGrid(){
                 featureArray = childSnapshot.val();
                 if ($.isArray(featureArray)){
                     $(div).append('<h3>'+childSnapshot.key +'<input id="midlvlcheckbx'+featureSnapshot.val().name+childSnapshot.key+'" class=\"w3-check w3-right midlvlcheckbx\" type=\"checkbox\" checked/><label class="showLayer" for="midlvlcheckbx'+featureSnapshot.val().name+childSnapshot.key+'"></label></h3>');
-                    var html = '<table class="featureTable"><thead><tr></tr></thead><tbody>';
+                    var html = '<table class="w3-striped w3-hoverable featureTable"><thead><tr></tr></thead><tbody>';
                     $.each(featureArray, function(index, element){
             //            row = document.createElement("tr");
                         featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
@@ -572,6 +573,12 @@ function populateFeatureGrid(){
                             }
                             html += '></td><td>' + element.description;
                             html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
+                        
+                            // Hardcoded Heatmap button for pest traps
+                            if (element.name == 'Codling Moth Trap' || element.name == 'Leafroller Trap'){
+                                html += '<br/><span class="heatmapbutton" onclick="toggleHeatMap(\''+element.name+'\', \'diym_Pest Count\')">Show/Hide Heatmap</span>';
+                            }
+                                
                             html += '</td><td><input featuretype="'+element.name+'" id="showhide'+element.name+'" class="w3-check showLayer" type="checkbox" checked><label class="showLayer" for="showhide'+element.name+'"></label>';
                             if (element.family != "marker") {
                                 html += '<br/><input featuretype="'+element.name+'" id="showhidelabel'+element.name+'" class="w3-check showLabel" type="checkbox" checked><label class="showLabel" for="showhidelabel'+element.name+'"></label>';
@@ -823,7 +830,40 @@ function getMapCentre(){
     return map.getCenter();
 }
 
-function addHeatMap(featureType, attribute){
-    var latlngs = featureGroups[featureType].getLayers().map(function(layer){return new L.latLng([layer._latlng.lat, layer._latlng.lng, parseInt(layer.properties[attribute], 10)])});
-    heatlayer = L.heatLayer(latlngs).addTo(map);
+function toggleHeatMap(featureType, attribute, max = 1, radius = 25, blur = 15){
+    
+    // leaflet-heat.js
+//    if (map.hasLayer(heatMapLayer)){
+//        map.removeLayer(heatMapLayer);
+//    }
+//    var latlngs = featureGroups[featureType].getLayers().map(function(layer){return new L.latLng([layer._latlng.lat, layer._latlng.lng, parseInt(layer.properties[attribute], 10)])});
+//    heatMapLayer = L.heatLayer(latlngs, {max: max, radius: radius, blur: blur}).addTo(map);
+    
+    // leaflet-heatmap.js
+    if (map.hasLayer(heatMapLayer)){
+        map.removeLayer(heatMapLayer);
+        return;
+    }
+    heatMapLayer = new HeatmapOverlay({
+      // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+      // if scaleRadius is false it will be the constant radius used in pixels
+      "radius": 0.002,
+      "maxOpacity": .7, 
+//      // scales the radius based on map zoom
+      "scaleRadius": true, 
+//      // if set to false the heatmap uses the global maximum for colorization
+//      // if activated: uses the data maximum within the current map boundaries 
+//      //   (there will always be a red spot with useLocalExtremas true)
+//      "useLocalExtrema": true,
+      // which field name in your data represents the latitude - default "lat"
+      latField: 'lat',
+      // which field name in your data represents the longitude - default "lng"
+      lngField: 'lng',
+      // which field name in your data represents the data value - default "value"
+      valueField: 'count'
+    });
+    var latlngs = featureGroups[featureType].getLayers().map(function(layer){return {lat: layer._latlng.lat, lng: layer._latlng.lng, count: parseInt(layer.properties[attribute], 10)}});
+    heatMapLayer.addTo(map);
+    heatMapLayer.setData({max: 7, data: latlngs});
+    
 }

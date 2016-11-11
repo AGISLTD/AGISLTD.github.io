@@ -106,9 +106,13 @@ input[type=checkbox].w3-check {
 .accordionDiv h3 {
     text-transform: capitalize;
 }
-.featureTable>tbody>tr:hover {
-    text-decoration: underline;
+
+.featureTable {
+    border-collapse: collapse;
+    width:100%;
+    padding: 0 !important;
 }
+
 .featurebutton {
 background-size: 40px 40px;
 width: 50px;
@@ -162,6 +166,8 @@ background-repeat: no-repeat;
 
 #featuregrid input[type=checkbox]{
     visibility:hidden;
+    width:30px;
+    float:right;
 }
 #featuregrid label{
     float: right;
@@ -187,6 +193,15 @@ background-repeat: no-repeat;
 }
 #featuregrid :checked+label.showLabel:before{
     opacity: 1;
+}
+
+#featuregrid span.heatmapbutton {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#featuregrid span.heatmapbutton:hover {
+    font-weight:bold;
 }
 
 /* history grid */
