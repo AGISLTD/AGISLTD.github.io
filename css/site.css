@@ -94,6 +94,18 @@ input[type=checkbox].w3-check {
     font-size: small;
     font-style: italic;
 }
+#featuregrid span.featureedit {
+    padding: 5px;
+    cursor: pointer;
+}
+
+#featuregrid input.editinput {
+    max-width: 130px;
+    margin: 5px;
+}
+#featuregrid button.saveedit {
+    margin: 5px;
+}
 
 #featuregrid .clickable:hover {
     opacity: 0.7;

@@ -20,6 +20,7 @@ var iconSize = {
     massive: 100,
 };
 var snapguides = [];
+var locationCustomDescriptions = {};
 var heatMapLayer;
 //var location = require("location");
 $(document).ready(function(){
@@ -546,7 +547,12 @@ function populateFeatureGrid(){
             //            row = document.createElement("tr");
                         featureGroups[element.name] = new L.FeatureGroup(); // Create our categorised featurelayer reference
                         featureGroups[element.name].addTo(map);
+                        //set customised description for the feature, if present for this location
+                        if (locationCustomDescriptions && locationCustomDescriptions[element.name]){
+                            element.description = locationCustomDescriptions[element.name];
+                        }
                         Feature[element.name] = element; // save symbology for this feature type
+                        
 
                             html += '<tr>';
                             if (editsEnabled) {
@@ -571,7 +577,10 @@ function populateFeatureGrid(){
                                 html+= 'class="clickable"><div class="polyfeaturebutton" style="background-color:'+element.options.fillColor+';border-color:'+element.options.color+'"/';
                                 detailFn = updateArea;
                             }
-                            html += '></td><td>' + element.description;
+                            html += '></td><td><span class="description">' + element.description + '</span>';
+                            if (element.editable_description) {
+                                html += '<span class="featureedit" onclick="editfeaturedesc(this)"><img src="/images/edit.svg" style="width:20px;" /></span>'
+                            }
                             html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
                         
                             // Hardcoded Heatmap button for pest traps
@@ -828,6 +837,28 @@ function getMapZoom() {
 
 function getMapCentre(){
     return map.getCenter();
+}
+
+function editfeaturedesc(span){
+    featureName = $(span.parentNode).find("span.detail").attr('data-featuretype');
+    descNode = $(span.parentNode).find("span.description");
+    desc = descNode.text();
+    descNode.hide();
+    $(span).hide();
+    var inpt = $('<input class="editinput" type="text" value="'+desc+'" />')
+    inpt.appendTo($(span.parentNode));
+    btn = document.createElement('button');
+    btn.className = "saveedit";
+    btn.textContent = "Save";
+    $(btn).appendTo($(span.parentNode));
+    btn.onclick = function(){
+        setCustomDescription(featureName, inpt.val());
+        descNode.text(inpt.val());
+        descNode.show();
+        $(span).show();
+        inpt.remove();
+        $(this).hide();
+    }
 }
 
 function toggleHeatMap(featureType, attribute, max = 1, radius = 25, blur = 15){
