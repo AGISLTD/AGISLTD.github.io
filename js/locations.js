@@ -8,6 +8,18 @@ function clearOverlays(){
     });
 }
 
+// Loads up any customised descriptions for hort. varieties, aggregates, etc. These custom descs are location-specific
+function loadCustomDescriptions(descs){
+    locationCustomDescriptions = descs;
+}
+
+// Sets a custom description for the feature with the given name.
+function setCustomDescription(name, description){
+    Feature[name].description = description; // local change
+    locRef = rootRef.ref("/location/"+document.getElementById('location').value);
+    locRef.child('/custom_descriptions/'+name).set(description); // db change
+}
+
 //Loads the overlays which are defined in the database
 function loadOverlays(overlayRef){
     clearOverlays();
@@ -203,8 +215,6 @@ function locationSwitch(sel, specificVersion){
 
     locationID = sel.value;
     
-    populateFeatureGrid();
-    
     locRef = rootRef.ref("/location/"+locationID);
     if (specificVersion){ // loading a previous edit
         locRef.child('currentEdit').once("value", function(data) {
@@ -221,6 +231,10 @@ function locationSwitch(sel, specificVersion){
             });
         });
     }
+    locRef.child('custom_descriptions').once("value", function(data){
+        loadCustomDescriptions(data.val());
+        populateFeatureGrid();
+    });
     locRef.child('overlays').once("value", function(data){
         loadOverlays(data);
     });

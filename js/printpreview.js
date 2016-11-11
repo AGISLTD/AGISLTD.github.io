@@ -679,6 +679,7 @@ function initialize() {
         }
         features.children().remove('td:has(input)');
         features.find('span.detail').remove();
+        features.find('span.featureedit').remove();
         return $($('<div class="legend"/>').append("<h3>LEGEND</h3>")).append($('<table>').append(features));
     };
 };
