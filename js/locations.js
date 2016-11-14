@@ -219,6 +219,7 @@ function locationSwitch(sel, specificVersion){
     locationID = sel.value;
     
     locRef = rootRef.ref("/location/"+locationID);
+    // TODO - this nested callback behaviour needs fixing -  not a clean way to do things.
     locRef.child('custom_descriptions').once("value", function(data){
         loadCustomDescriptions(data.val());
         populateFeatureGrid();

@@ -578,7 +578,7 @@ function populateFeatureGrid(){
                                 detailFn = updateArea;
                             }
                             html += '></td><td><span class="description">' + element.description + '</span>';
-                            if (element.editable_description) {
+                            if (element.editable_description && editsEnabled) {
                                 html += '<span class="featureedit" onclick="editfeaturedesc(this)"><img src="/images/edit.svg" style="width:20px;" /></span>'
                             }
                             html += '<br/><span class="detail" data-featuretype="'+element.name+'"></span>';
