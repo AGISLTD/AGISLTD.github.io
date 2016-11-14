@@ -171,6 +171,9 @@ function loadEditHistory(data, currentedit, specificVersion){
                 html += 'clickable w3-text-red w3-hover-red w3-padding " onclick="deleteEdit(\''+locationID+'\',\''+index+'\')"><b>Delete</b></span>';
             }
         }
+        else {
+            html += '>';
+        }
         html += '<br/><br/><span class="clickable w3-hover-green w3-padding w3-right" onclick="downloadEdit(\''+locationID+'\',\''+index+'\')"><b>Download</b></span>';
         html += "</td></tr>";
     });
@@ -216,24 +219,24 @@ function locationSwitch(sel, specificVersion){
     locationID = sel.value;
     
     locRef = rootRef.ref("/location/"+locationID);
-    if (specificVersion){ // loading a previous edit
-        locRef.child('currentEdit').once("value", function(data) {
-            loadLocationsGeoJSON(specificVersion);
-            rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
-                    loadEditHistory(editHistory, data.val(), specificVersion);
-            });
-        });
-    } else {
-        locRef.child('currentEdit').once("value", function(data) {
-            loadLocationsGeoJSON(data.val());
-            rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
-                    loadEditHistory(editHistory, data.val());
-            });
-        });
-    }
     locRef.child('custom_descriptions').once("value", function(data){
         loadCustomDescriptions(data.val());
         populateFeatureGrid();
+        if (specificVersion){ // loading a previous edit
+            locRef.child('currentEdit').once("value", function(data) {
+                loadLocationsGeoJSON(specificVersion);
+                rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
+                        loadEditHistory(editHistory, data.val(), specificVersion);
+                });
+            });
+        } else {
+            locRef.child('currentEdit').once("value", function(data) {
+                loadLocationsGeoJSON(data.val());
+                rootRef.ref("/edit/"+locationID).orderByChild('datetime').once("value", function(editHistory){
+                        loadEditHistory(editHistory, data.val());
+                });
+            });
+        }
     });
     locRef.child('overlays').once("value", function(data){
         loadOverlays(data);
