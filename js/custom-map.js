@@ -368,14 +368,37 @@ function addLabelsToFeature(feature, labeltext, details){
 }
 
 // Base Maps
-var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    mbUrl = 'https://api.tiles.mapbox.com/v4/mapbox.light/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA',
+// var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+//         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+//         'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+
+    // mbUrl = 'https://api.tiles.mapbox.com/v4/mapbox.light/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA',
     //  linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
-    linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
-var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr, base:true, maxZoom: 20}),
-    linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography", base:true, maxZoom: 20});
+    // linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
+var mbUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}'
+var mbAttr = {
+    attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+    tileSize: 512,
+    maxZoom: 20,
+    base: true,
+    zoomOffset: -1,
+    id: 'mapbox/streets-v11',
+    accessToken: 'pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA'
+}
+var linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
+var linzAttr = {
+    attribution: 'LINZ Aerial Photography',
+    tileSize: 512,
+    maxZoom: 20,
+    base: true,
+    zoomOffset: -1,
+    id: 'mapbox/streets-v11',
+    accessToken: 'pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA'
+}
+var grayscale = L.tileLayer(mbUrl, mbAttr);
+var linz = L.tileLayer(linzUrl, linzAttr);
+// var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr, base:true, maxZoom: 20}),
+    // linz = L.tileLayer(linzUrl, {attribution: "LINZ Aerial Photography", base:true, maxZoom: 20});
 var baseLayers = {
     "Grayscale": grayscale,
     "LINZ Aerial": linz,
