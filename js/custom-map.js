@@ -385,15 +385,14 @@ var mbAttr = {
     id: 'mapbox/streets-v11',
     accessToken: 'pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA'
 }
-var linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
+// var linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
+var linzUrl = 'http://tiles‑{a‑d}.data‑cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/layer=http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/layer=95497/EPSG:3857/{z}/{x}/{y}.png/EPSG:CRS/{z}/{x}/{y}.png'
 var linzAttr = {
     attribution: 'LINZ Aerial Photography',
     tileSize: 512,
     maxZoom: 20,
     base: true,
     zoomOffset: -1,
-    id: 'mapbox/streets-v11',
-    accessToken: 'pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA'
 }
 var grayscale = L.tileLayer(mbUrl, mbAttr);
 var linz = L.tileLayer(linzUrl, linzAttr);
