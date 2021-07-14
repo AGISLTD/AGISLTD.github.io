@@ -371,7 +371,7 @@ function addLabelsToFeature(feature, labeltext, details){
 var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
         'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    mbUrl = 'https://api.tiles.mapbox.com/v4/mapbox.light/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNpcjQzNGVvcTAxZ2xmaW5yaXFpcDAxeTgifQ.h5kYi9Fdnemz2lqlE4Gykw',
+    mbUrl = 'https://api.tiles.mapbox.com/v4/mapbox.light/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA',
     //  linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=780af066229e4b63a8f9408cc13c31e8/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
     linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/set=2/EPSG:3857/{z}/{x}/{y}.png';
 var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr, base:true, maxZoom: 20}),
