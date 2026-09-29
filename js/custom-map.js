@@ -379,7 +379,7 @@ const mbAttr = {
     accessToken: 'pk.eyJ1IjoidHlsZXJncmlmZmluIiwiYSI6ImNrcjQybXA1djB1Zjgyd24zOHAzMHh3ZnEifQ.6x__kD85jDkn2hfQSXnuDA'
 }
 
-const linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/layer=95497/EPSG:3857/{z}/{x}/{y}.png'
+const linzUrl = 'http://tiles-a.data-cdn.linz.govt.nz/services;key=b9c3e5ef1b2a4f939c7b9d666f4ea57f/tiles/v4/layer=121752/EPSG:3857/{z}/{x}/{y}.png'
 const linzAttr = {
     attribution: 'LINZ Aerial Photography',
     tileSize: 512,
